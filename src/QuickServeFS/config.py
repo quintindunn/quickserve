@@ -1,14 +1,13 @@
 from pathlib import Path
 from tomllib import loads
-from typing import TYPE_CHECKING, Any, IO, get_args, get_type_hints
+from typing import Any, IO, get_args, get_type_hints
 
 import tomli_w
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from QuickServeFS.path_resolver import resolver as _resolver
+from QuickServeFS.path_resolver import Resolver
 
-if TYPE_CHECKING:
-    from QuickServeFS.path_resolver import Resolver
 
 
 class ConfigModel(BaseModel):
@@ -22,15 +21,16 @@ class DriverModel(ConfigModel):
     pass
 
 class DatabaseModel(ConfigModel):
-    pass
+    file_path: str = "database.db"
 
 class Config:
     web: WebModel | None
     driver: DriverModel | None
     database: DatabaseModel | None
+    resolver: Resolver
 
     def __init__(self, resolver: "Resolver"):
-        self._resolver: "Resolver" = resolver
+        self.resolver: "Resolver" = resolver
 
         self.web = None
         self.driver = None
@@ -40,10 +40,10 @@ class Config:
 
     @property
     def config_path(self) -> Path:
-        return self._resolver.get_path("config.toml")
+        return self.resolver.get_path("config.toml")
 
     def open_config(self, mode: str) -> "IO[Any]":
-        self._resolver.call_if_not_exist(self.config_path, self.create)
+        self.resolver.call_if_not_exist(self.config_path, self.create)
         return open(self.config_path, mode=mode)
 
     @staticmethod
