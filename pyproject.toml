@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "QuickServe"
 version = "0.0.1"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = ["tomli-w", "pydantic"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

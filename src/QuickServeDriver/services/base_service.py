@@ -12,11 +12,13 @@ class BaseService:
     cfg: "Config"
     service_name: str
     uuid: str
+    module: Path
 
-    def __init__(self, cfg: "Config", service_name: str):
+    def __init__(self, cfg: "Config", service_name: str, module: Path):
         self.cfg = cfg
         self.service_name = service_name
         self.uuid = uuid.uuid4().hex
+        self.module = module
 
     def working_directory(self) -> Path:
         dir_name = sanitize_filename(f"{self.uuid[:16]}-{self.service_name}")
@@ -24,5 +26,5 @@ class BaseService:
 
 if __name__ == '__main__':
     from QuickServeFS import config
-    service = BaseService(cfg=config, service_name="Minecraft1.8.9")
+    service = BaseService(cfg=config, service_name="Minecraft1.8.9", module=config.resolver.modules["minecraft"])
     print(service.working_directory())
