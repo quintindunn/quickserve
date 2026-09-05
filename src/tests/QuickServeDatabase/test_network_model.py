@@ -4,7 +4,7 @@ from datetime import datetime
 
 from peewee import SqliteDatabase
 
-from QuickServeDatabase.network import OccupiedPort
+from QuickServeDatabase.network import OccupiedPortModel
 
 
 class TestOccupiedPort(unittest.TestCase):
@@ -14,20 +14,20 @@ class TestOccupiedPort(unittest.TestCase):
         self.db = SqliteDatabase(":memory:")
 
         # Temporarily point the model at our test database.
-        self.db.bind([OccupiedPort])
+        self.db.bind([OccupiedPortModel])
         self.db.connect()
-        self.db.create_tables([OccupiedPort])
+        self.db.create_tables([OccupiedPortModel])
 
     def tearDown(self):
-        OccupiedPort.delete().execute()
-        self.db.drop_tables([OccupiedPort])
+        OccupiedPortModel.delete().execute()
+        self.db.drop_tables([OccupiedPortModel])
         self.db.close()
 
     def test_create_occupied_port(self):
         service_uuid = uuid.uuid4()
         created_on = datetime.now()
 
-        occupied_port = OccupiedPort.create(
+        occupied_port = OccupiedPortModel.create(
             port=8080,
             service_uuid=service_uuid,
             created_on=created_on,
@@ -41,14 +41,14 @@ class TestOccupiedPort(unittest.TestCase):
     def test_retrieve_occupied_port(self):
         service_uuid = uuid.uuid4()
 
-        OccupiedPort.create(
+        OccupiedPortModel.create(
             port=8080,
             service_uuid=service_uuid,
             created_on=datetime.now(),
         )
 
-        occupied_port = OccupiedPort.get(
-            OccupiedPort.port == 8080
+        occupied_port = OccupiedPortModel.get(
+            OccupiedPortModel.port == 8080
         )
 
         self.assertEqual(occupied_port.port, 8080)
@@ -57,26 +57,26 @@ class TestOccupiedPort(unittest.TestCase):
     def test_multiple_occupied_ports(self):
         service_uuid = uuid.uuid4()
 
-        OccupiedPort.create(
+        OccupiedPortModel.create(
             port=8080,
             service_uuid=service_uuid,
             created_on=datetime.now(),
         )
 
-        OccupiedPort.create(
+        OccupiedPortModel.create(
             port=8443,
             service_uuid=service_uuid,
             created_on=datetime.now(),
         )
 
-        ports = list(OccupiedPort.select().order_by(OccupiedPort.port))
+        ports = list(OccupiedPortModel.select().order_by(OccupiedPortModel.port))
 
         self.assertEqual(len(ports), 2)
         self.assertEqual(ports[0].port, 8080)
         self.assertEqual(ports[1].port, 8443)
 
     def test_delete_occupied_port(self):
-        occupied_port = OccupiedPort.create(
+        occupied_port = OccupiedPortModel.create(
             port=8080,
             service_uuid=uuid.uuid4(),
             created_on=datetime.now(),
@@ -85,13 +85,13 @@ class TestOccupiedPort(unittest.TestCase):
         occupied_port.delete_instance()
 
         self.assertEqual(
-            OccupiedPort.select().count(),
+            OccupiedPortModel.select().count(),
             0,
         )
 
     def test_port_cannot_be_null(self):
         with self.assertRaises(Exception):
-            OccupiedPort.create(
+            OccupiedPortModel.create(
                 port=None,
                 service_uuid=uuid.uuid4(),
                 created_on=datetime.now(),

@@ -1,9 +1,11 @@
-from peewee import DateTimeField, UUIDField, IntegerField, Model
+from peewee import DateTimeField, UUIDField, IntegerField, Model, BooleanField
 
 from QuickServeDatabase.database import db
 
-class OccupiedPort(Model):
+class OccupiedPortModel(Model):
     port = IntegerField(null=False)
+    TCP = BooleanField(default=False)
+    UDP = BooleanField(default=True)
     service_uuid = UUIDField()
     created_on = DateTimeField()
 
