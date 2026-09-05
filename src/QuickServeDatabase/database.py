@@ -15,6 +15,7 @@ def connect():
     db.connect(reuse_if_open=True)
     logger.info("Connected to database")
 
+
 def close():
     logger.info("Closing database")
     if not db.is_closed():

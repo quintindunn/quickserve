@@ -3,6 +3,7 @@ import re
 
 logger = logging.getLogger("QuickServeDriver.utils")
 
+
 def sanitize_filename(string: str) -> str:
     """
     Converts a string to a sanitized filename.
