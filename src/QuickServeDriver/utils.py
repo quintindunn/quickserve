@@ -1,5 +1,7 @@
+import logging
 import re
 
+logger = logging.getLogger("QuickServeDriver.utils")
 
 def sanitize_filename(string: str) -> str:
     """
@@ -8,5 +10,6 @@ def sanitize_filename(string: str) -> str:
     :return: a sanitize filename.
     """
     replacement_pattern = re.compile(r"[^a-zA-Z0-9-_]")
-
-    return re.sub(replacement_pattern, "_", string)[:250]
+    sanitized = re.sub(replacement_pattern, "_", string)[:250]
+    logger.debug(f"Sanitized file: {string} -> {sanitized}")
+    return sanitized

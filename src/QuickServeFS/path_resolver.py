@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 from typing import Callable, Any
 import stat
+import json
 
 from QuickServeFS.modules import Module
 
@@ -50,6 +51,7 @@ class Resolver:
             return self.root / path
 
     def _ensure_directory(self, path: PathType):
+        logger.debug(f"Ensuring directory {path.__str__()}")
         path = Path(path)
 
         if path.is_absolute():
@@ -95,7 +97,8 @@ class Resolver:
                 kwargs = dict()
             callback(*args, **kwargs)
 
-    def discover_modules(self):
+    def discover_and_load_modules(self):
+        logger.debug("Discovering modules")
         modules_path = self.get_path("modules")
         self._ensure_directory(modules_path)
 
@@ -105,7 +108,11 @@ class Resolver:
             item for item in modules_path.iterdir() if item.is_dir(follow_symlinks=True)
         ]
 
+        logger.debug(f"Discovered {len(dirs)} modules")
+
+        logger.debug("Loading modules")
         for dir_ in dirs:
+            logger.info(f"Loading {dir_}")
             module = Module(module_path=dir_, resolver=self)
             module.load_service()
 
@@ -115,4 +122,4 @@ class Resolver:
 
 
 resolver = Resolver()
-resolver.discover_modules()
+resolver.discover_and_load_modules()

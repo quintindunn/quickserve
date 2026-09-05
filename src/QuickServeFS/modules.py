@@ -1,18 +1,18 @@
 import importlib
 import sys
+import logging
 from pathlib import Path
 
 from typing import TYPE_CHECKING
-
 from types import ModuleType
+
+from QuickServeFS.exceptions import InvalidModuleError, AssetDoesntExist
 
 if TYPE_CHECKING:
     from QuickServeFS.path_resolver import Resolver
-    from sample_service import Service
 
-class InvalidModuleError(Exception): ...
+logger = logging.getLogger("QuickServerFS.Modules")
 
-class AssetDoesntExist(Exception): ...
 
 class Module:
     path: Path
@@ -35,6 +35,7 @@ class Module:
             raise exception
 
     def validate_and_load_service(self):
+        logger.debug(f"Validating module {self.path.name}")
         attr_error_map = {
             "NAME": "Missing module name",
             "VERSION": "Missing module version",
@@ -48,14 +49,15 @@ class Module:
 
         self.service = self.module.Service(module=self)
         for attr, error in attr_error_map.items():
+            logger.debug(f"{self.path.name} - Validating {attr}")
             self.raise_if_attr_not_exist(
                 attr, InvalidModuleError(f'Module: "{self.path.name}" - {error}')
             )
 
     def load_service(self):
-        print("Loading service")
-
         service_name = self.path.name
+        logger.info(f"Loading service {service_name}")
+
         modules_path = self.resolver.get_path("modules")
 
         if str(modules_path) not in sys.path:
@@ -65,7 +67,7 @@ class Module:
         self.validate_and_load_service()
 
     def get_resource_path(self, resource: str):
-        print(f"Loading {resource}")
+        logger.debug(f"Getting path for in module {self.path / resource}")
         resources = self.path / "resources"
 
         if not resources.exists() or resources.is_file():
