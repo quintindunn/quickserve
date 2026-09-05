@@ -47,9 +47,7 @@ class TestOccupiedPort(unittest.TestCase):
             created_on=datetime.now(),
         )
 
-        occupied_port = OccupiedPortModel.get(
-            OccupiedPortModel.port == 8080
-        )
+        occupied_port = OccupiedPortModel.get(OccupiedPortModel.port == 8080)
 
         self.assertEqual(occupied_port.port, 8080)
         self.assertEqual(occupied_port.service_uuid, service_uuid)

@@ -9,7 +9,6 @@ from QuickServeFS.path_resolver import resolver as _resolver
 from QuickServeFS.path_resolver import Resolver
 
 
-
 class ConfigModel(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -17,11 +16,14 @@ class ConfigModel(BaseModel):
 class WebModel(ConfigModel):
     pass
 
+
 class DriverModel(ConfigModel):
     pass
 
+
 class DatabaseModel(ConfigModel):
     file_path: str = "database.db"
+
 
 class Config:
     web: WebModel | None
@@ -83,9 +85,7 @@ class Config:
             section = data[name]
 
             if not isinstance(section, dict):
-                raise ValueError(
-                    f"Configuration section {name!r} must be a TOML table"
-                )
+                raise ValueError(f"Configuration section {name!r} must be a TOML table")
 
             try:
                 value = model.model_validate(section)

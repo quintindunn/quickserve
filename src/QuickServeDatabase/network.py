@@ -2,6 +2,7 @@ from peewee import DateTimeField, UUIDField, IntegerField, Model, BooleanField
 
 from QuickServeDatabase.database import db
 
+
 class OccupiedPortModel(Model):
     port = IntegerField(null=False)
     TCP = BooleanField(default=False)

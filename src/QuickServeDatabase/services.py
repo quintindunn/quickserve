@@ -3,6 +3,7 @@ from peewee import DateTimeField, UUIDField, IntegerField, Model, ForeignKeyFiel
 from QuickServeDatabase.database import db
 from QuickServeDatabase.network import OccupiedPortModel
 
+
 class ServiceModel(Model):
     port = ForeignKeyField(OccupiedPortModel, backref="service")
     service_uuid = UUIDField()

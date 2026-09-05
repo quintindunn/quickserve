@@ -7,6 +7,7 @@ from QuickServeDatabase.services import ServiceModel
 
 db = SqliteDatabase(config.database.file_path)
 
+
 def connect():
     db.connect(reuse_if_open=True)
 
@@ -14,5 +15,6 @@ def connect():
 def close():
     if not db.is_closed():
         db.close()
+
 
 MODELS = [OccupiedPortModel, ServiceModel]

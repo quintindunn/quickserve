@@ -6,6 +6,10 @@ import stat
 
 from QuickServeFS.modules import Module
 
+import logging
+
+logger = logging.getLogger("QuickServerFS.Resolver")
+
 PathType = str | Path | os.PathLike[str]
 
 ROOT_PATH_TABLE: dict[str, Path] = {
@@ -22,7 +26,9 @@ def _generate_root():
     elif system == "Windows":
         raise NotImplementedError(f"Windows is currently not supported!")
 
-    return ROOT_PATH_TABLE[platform.system()]
+    root_dir = ROOT_PATH_TABLE[platform.system()]
+    logger.info(f"Root directory: {root_dir}")
+    return root_dir
 
 
 class Resolver:
@@ -51,10 +57,14 @@ class Resolver:
         else:
             new = self.root / path
 
-        new.mkdir(exist_ok=True, parents=True)
+        if not new.exists():
+            new.mkdir(parents=True)
+            logger.debug(f"Making directory {self.get_path(new)}")
+
         if platform.system() != "Windows":
             mode = stat.S_IMODE(new.stat().st_mode)
             if mode != 0o755:
+                logger.debug(f"Changing permissions of {self.get_path(new)} to 755")
                 new.chmod(0o755)
         return new.absolute()
 
@@ -91,11 +101,13 @@ class Resolver:
 
         self.modules.clear()
 
-        dirs = [item for item in modules_path.iterdir() if item.is_dir(follow_symlinks=True)]
+        dirs = [
+            item for item in modules_path.iterdir() if item.is_dir(follow_symlinks=True)
+        ]
 
         for dir_ in dirs:
-            module = Module(module_path=dir_)
-            print(module)
+            module = Module(module_path=dir_, resolver=self)
+            module.load_service()
 
     @property
     def config(self):

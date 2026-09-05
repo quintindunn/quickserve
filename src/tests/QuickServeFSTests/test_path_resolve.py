@@ -120,18 +120,14 @@ class TestResolver(unittest.TestCase):
         self.resolver._ensure_directory("nested")
         self.resolver._ensure_directory("nested")
 
-        self.assertTrue(
-            (self.root / "nested").is_dir()
-        )
+        self.assertTrue((self.root / "nested").is_dir())
 
     def test_ensure_file_path_absolute(self):
         path = self.root / "nested" / "config.toml"
 
         result = self.resolver.ensure_file_path(path)
 
-        self.assertTrue(
-            (self.root / "nested").is_dir()
-        )
+        self.assertTrue((self.root / "nested").is_dir())
         self.assertEqual(
             result,
             path.absolute(),
