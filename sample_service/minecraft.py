@@ -15,7 +15,7 @@ class Service:
     module: "Module"
 
     def __init__(self, module: "Module"):
-        logger.info(f"Loading service: {self}")
+        logger.info(f"Loading service: {self.NAME}")
         self.module = module
 
         asset_path = self.module.get_resource_path("foo.txt")

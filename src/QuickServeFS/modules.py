@@ -8,23 +8,31 @@ from types import ModuleType
 
 from QuickServeFS.exceptions import InvalidModuleError, AssetDoesntExist
 
+from abc import ABC, abstractmethod
+
 if TYPE_CHECKING:
     from QuickServeFS.path_resolver import Resolver
 
 logger = logging.getLogger("QuickServerFS.Modules")
 
 
+class Service(ABC):
+    """Interface for Module Service"""
+
+    NAME: str
+    VERSION: str
+    QUICKSERVE_VERSION: str
+
+
 class Module:
     path: Path
     resolver: Resolver
-    module: ModuleType | None
-    service: object | None
+    module: ModuleType
+    service: Service
 
     def __init__(self, module_path: str | Path, resolver: "Resolver"):
         self.path = Path(module_path)
         self.resolver = resolver
-        self.module = None
-        self.service = None
 
     def raise_if_attr_not_exist(
         self, attr_name: str, exception: Exception, service: bool = True

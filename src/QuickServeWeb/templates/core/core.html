@@ -1,0 +1,35 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}QuickServe{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='core/core.css') }}">
+</head>
+<body>
+    <div class="main">
+        <div class="sidebar">
+            <div class="sub1">
+                <span>Services</span>
+                <div class="sub2">
+                    <span>Minecraft 1.8.9</span>
+                </div>
+            </div>
+            <div class="sub1">
+                <span>Modules</span>
+                {% for module in context.modules %}
+                <div class="sub2">
+                    <span>
+                        <a href="{{ url_for('modules.module', module_name=module) }}">{{ module }}</a>
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="content">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+    </div>
+</body>
+</html>

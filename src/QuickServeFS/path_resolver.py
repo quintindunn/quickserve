@@ -116,6 +116,8 @@ class Resolver:
             module = Module(module_path=dir_, resolver=self)
             module.load_service()
 
+            self.modules[module.service.NAME] = module
+
     @property
     def config(self):
         return self.root / "config.yml"

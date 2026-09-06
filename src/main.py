@@ -1,19 +1,14 @@
 import logging
 import sys
 
-from QuickServeDriver.services.base_service import BaseService
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-    from QuickServeFS import config
     from QuickServeDatabase import db, connect, MODELS
+    from QuickServeWeb import create_app
+    from QuickServeFS import config
 
     connect()
     db.create_tables(MODELS)
 
-    service = BaseService(
-        cfg=config,
-        service_name="Minecraft1.8.9",
-        module=config.resolver.modules.get("Minecraft"),
-    )
-    print(service.working_directory())
+    app = create_app(config)
+    app.run(host="0.0.0.0", port=8080, debug=True)
