@@ -1,4 +1,3 @@
-<!-- base.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,7 +18,7 @@
                 {% for module in context.modules %}
                 <div class="sub2">
                     <span>
-                        <a href="{{ url_for('modules.module', module_name=module) }}">{{ module }}</a>
+                        <a href="{{ url_for('modules.module_about', module_name=module) }}">{{ module }}</a>
                     </span>
                 </div>
                 {% endfor %}

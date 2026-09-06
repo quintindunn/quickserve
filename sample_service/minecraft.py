@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from QuickServeFS.modules import Module
 
+import jinja2
+
 logger = logging.getLogger("minecraft-vanilla")
 
 
@@ -22,3 +24,10 @@ class Service:
 
         with open(asset_path, "r") as f:
             print(f"Loaded {f.read()}")
+
+    def about(self) -> str:
+        """HTML about for the page"""
+
+        asset = self.module.get_resource_path("about.html")
+        with open(asset, "r") as f:
+            return f.read()

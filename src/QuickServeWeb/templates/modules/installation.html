@@ -1,0 +1,12 @@
+{% extends "core/core.html" %}
+
+{% block title %}
+{{ context.module_name }} Installation
+{% endblock %}
+
+{% block content %}
+<h2>{{ context.module_name }} installation!</h2>
+<div class="module">
+    {{ module_installation }}
+</div>
+{% endblock %}

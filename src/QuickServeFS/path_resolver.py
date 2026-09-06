@@ -33,7 +33,7 @@ def _generate_root():
 
 
 class Resolver:
-    modules: dict[str, Module]
+    modules: dict
 
     def __init__(self, root: PathType | None = None):
         if root is None:

@@ -23,6 +23,10 @@ class Service(ABC):
     VERSION: str
     QUICKSERVE_VERSION: str
 
+    @abstractmethod
+    def about(self) -> str:
+        """HTML about for the page"""
+
 
 class Module:
     path: Path

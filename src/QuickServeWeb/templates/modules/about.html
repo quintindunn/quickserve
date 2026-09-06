@@ -1,0 +1,14 @@
+{% extends "core/core.html" %}
+
+{% block title %}
+{{ context.module_name }} About
+{% endblock %}
+
+{% block content %}
+<div class="module">
+<h1>{{ context.module_name }} v-{{context.module_version}} - About</h1>
+    <div class="about">
+        {{ context.module_about|safe }}
+    </div>
+</div>
+{% endblock %}
