@@ -18,7 +18,7 @@ class ConfigModel(BaseModel):
 
 
 class WebModel(ConfigModel):
-    pass
+    secret_key: str = "secret-key-change-in-production"
 
 
 class DriverModel(ConfigModel):
