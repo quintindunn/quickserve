@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from QuickServeFS.modules import Module
 
-import jinja2
-
 logger = logging.getLogger("minecraft-vanilla")
 
 
