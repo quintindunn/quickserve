@@ -18,11 +18,6 @@ class Service:
         logger.info(f"Loading service: {self.NAME}")
         self.module = module
 
-        asset_path = self.module.get_resource_path("foo.txt")
-
-        with open(asset_path, "r") as f:
-            print(f"Loaded {f.read()}")
-
     def about(self) -> str:
         """HTML about for the page"""
 

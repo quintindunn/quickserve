@@ -3,6 +3,9 @@
 <head>
     <title>{% block title %}QuickServe{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='core/core.css') }}">
+    {% block head %}
+
+    {% endblock %}
 </head>
 <body>
     <div class="main">

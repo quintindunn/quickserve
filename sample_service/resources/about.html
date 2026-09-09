@@ -1,10 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "core/module.html" %}
 
-</body>
-</html>
+{% block moduletitle %}
+Test
+{% endblock %}
+
+{% block modulehead %}
+    <link rel="stylesheet" href="{{ resource(filename='about.css') }}">
+{% endblock %}
+
+{% block modulebody %}
+<div>
+    <h1>Module Body</h1>
+    <div class="test">
+        <h1>Does this work</h1>
+    </div>
+</div>
+{% endblock %}
