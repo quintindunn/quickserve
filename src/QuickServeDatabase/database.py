@@ -1,3 +1,10 @@
+"""
+PeeWee database helper functions for connecting, and disconnecting.
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 import logging
 
 from peewee import SqliteDatabase

@@ -1,3 +1,10 @@
+"""
+Initializes, and configures the flask application
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 from pathlib import Path
 
 from flask import Flask

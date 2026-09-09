@@ -1,3 +1,10 @@
+"""
+PeeWee models for deployed instances.
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 from peewee import DateTimeField, UUIDField, Model
 
 from datetime import datetime
