@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, render_template_string, url_for, send_file, request
+from flask import Blueprint, current_app, render_template_string, url_for, send_file, request, redirect
 
 from typing import TYPE_CHECKING
 
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 
 
-def _render_module_page(module_name: str):
+def _render_module_page(module_name: str, method: str):
     resolver: "Resolver" = current_app.config["resolver"]
 
     if module_name not in resolver.modules:
@@ -31,7 +31,12 @@ def _render_module_page(module_name: str):
     if hasattr(service, "AUTHORS"):
         ctx["module_authors"] = service.AUTHORS
 
-    values = service.create()
+    if not hasattr(service, method):
+        raise ValueError(f"Service {module_name} doesn't have method {method}")
+
+    method = getattr(service, method)
+
+    values = method()
 
     if isinstance(values, str):
         template = values
@@ -58,26 +63,30 @@ def _render_module_page(module_name: str):
             module_name=module_name,
         )
 
-    def action(method: str):
-        return ""
+    def action_(method: str):
+        return url_for(
+            "modules.action",
+            module_name=module_name,
+            method=method
+        )
 
     return render_template_string(
         str(template),
         context=ctx,
         resource=resource,
         link=link,
-        action=action
+        action=action_
     )
 
 
 @modules.route("/<module_name>")
 def module_about(module_name: str):
-    return _render_module_page(module_name)
+    return _render_module_page(module_name, "about")
 
 
 @modules.route("/<module_name>/create")
 def module_create(module_name: str):
-    return _render_module_page(module_name)
+    return _render_module_page(module_name, "create")
 
 
 @modules.route("/resources/<module_name>/<filename>")
@@ -94,5 +103,26 @@ def resource(module_name: str, filename: str):
 def action(module_name: str, method: str):
     resolver: "Resolver" = current_app.config["resolver"]
     module: "Module" = resolver.modules[module_name]
+    service: "Service" = module.service
 
-    print(method)
+    if not hasattr(service, method):
+        return "500", 500
+
+    method = getattr(service, method)
+
+    values = method(**request.form.to_dict())
+    code = 302
+
+    if isinstance(values, tuple) and len(values) == 2 and isinstance(values[1], int):
+        code = values[1]
+        endpoint = values[0]
+    elif isinstance(values, str):
+        endpoint = values
+    else:
+        raise ValueError(f"Invalid response from action {module_name}.{action}")
+
+    url = url_for(
+        f"modules.module_{endpoint}",
+        module_name=module_name,
+    )
+    return redirect(url, code=code)

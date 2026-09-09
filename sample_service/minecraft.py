@@ -45,3 +45,9 @@ class Service:
                     "1.12.2"
                 ]
             }
+
+    def install(self, *args, **kwargs):
+        print(kwargs)
+        logger.info(f"Installing new minecraft-vanilla instance with version {kwargs['minecraft-version']} with name {kwargs['instance-name']}")
+
+        return "about", 200

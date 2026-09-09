@@ -13,6 +13,10 @@ Test
         <h2>Minecraft Vanilla Server Generator</h2>
         <form action="{{ action('install') }}" method="POST">
             <label>
+                Instance Name
+                <input type="text" name="instance-name">
+            </label>
+            <label>
                 Version
                 <select name="minecraft-version">
                     {% for version in context.param_versions %}
@@ -20,6 +24,7 @@ Test
                     {% endfor %}
                 </select>
             </label>
+            <button type="submit">Install</button>
         </form>
     </div>
 {% endblock %}
