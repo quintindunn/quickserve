@@ -3,7 +3,6 @@ from pathlib import Path
 import os
 from typing import Callable, Any
 import stat
-import json
 
 from QuickServeFS.modules import Module
 

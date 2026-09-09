@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import lru_cache
 
 import requests
 from pydantic import BaseModel
@@ -85,6 +86,7 @@ class Downloader:
             versions={release["id"]: json_version_to_model(release) for release in manifest_json["versions"]}
         )
 
+    @lru_cache(maxsize=64)
     def get_release_manifest(self, id_: str) -> ReleaseManifest:
         release = self.version_manifest.versions[id_]
 

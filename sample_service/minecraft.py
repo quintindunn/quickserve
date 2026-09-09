@@ -6,6 +6,7 @@ from .downloader import Downloader
 
 if TYPE_CHECKING:
     from QuickServeFS.modules import Module
+    from QuickServeDriver.instance.base_instance import BaseInstance
 
 logger = logging.getLogger("minecraft-vanilla")
 
@@ -44,10 +45,19 @@ class Service:
                 "versions": self.versions
             }
 
-    def install(self, *args, **kwargs):
-        print(kwargs)
+    def install(self, base_instance, **kwargs):
+        assert "minecraft-version" in kwargs
+        assert "instance-name" in kwargs
+
+        minecraft_version = kwargs["minecraft-version"]
+        instance_name = kwargs["instance-name"]
+
         logger.info(
             f"Installing new minecraft-vanilla instance with version {kwargs['minecraft-version']} with name {kwargs['instance-name']}"
         )
+
+        jar_url = self.downloader.get_release_manifest(id_=minecraft_version).server.url
+        instance = base_instance.new_service(module=self.module, service_name=instance_name, module_name=self.NAME)
+        print(instance.working_directory())
 
         return "about", 200

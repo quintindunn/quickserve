@@ -8,6 +8,8 @@ from flask import (
     redirect,
 )
 
+from QuickServeDriver.instance.base_instance import BaseInstance
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -110,7 +112,7 @@ def action(module_name: str, method: str):
 
     method = getattr(service, method)
 
-    values = method(**request.form.to_dict())
+    values = method(BaseInstance, **request.form.to_dict())
     code = 302
 
     if isinstance(values, tuple) and len(values) == 2 and isinstance(values[1], int):

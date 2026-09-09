@@ -1,4 +1,4 @@
 from QuickServeDatabase.network import OccupiedPortModel
-from QuickServeDatabase.services import ServiceModel
+from QuickServeDatabase.instances import InstanceModel
 
-MODELS = [OccupiedPortModel, ServiceModel]
+MODELS = [OccupiedPortModel, InstanceModel]
