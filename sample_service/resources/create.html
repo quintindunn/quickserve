@@ -25,6 +25,8 @@ Test
         <label>
             Version
             <select name="minecraft-version">
+                <option value="latest-release">Latest Release</option>
+                <option value="latest-release">Latest Snapshot</option>
                 {% for version in context.param_versions %}
                     <option value="{{ version }}">{{ version }}</option>
                 {% endfor %}

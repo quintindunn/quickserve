@@ -102,6 +102,11 @@ class Downloader:
 
     @lru_cache(maxsize=64)
     def get_release_manifest(self, id_: str) -> ReleaseManifest:
+        if id_ == "latest-release":
+            id_ = self.version_manifest.latest.release
+        elif id_ == "latest-snapshot":
+            id_ = self.version_manifest.latest.snapshot
+
         release = self.version_manifest.versions[id_]
 
         url = release.release_url
@@ -126,5 +131,4 @@ class Downloader:
 
 if __name__ == "__main__":
     downloader = Downloader()
-    release = downloader.get_release_manifest("1.8.9")
-    print(release)
+    print(downloader.get_release_manifest("1.8.9"))
