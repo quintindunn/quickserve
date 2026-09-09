@@ -5,6 +5,7 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
+
 class InvalidModuleError(Exception):
     """
     Exception raised when a module fails validation

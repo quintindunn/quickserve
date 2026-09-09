@@ -83,14 +83,14 @@ class Service:
         server_dir = cwd / "server"
         self.module.resolver.ensure_directory(server_dir)
 
-        with open(server_dir / "server.jar", 'wb') as f:
+        with open(server_dir / "server.jar", "wb") as f:
             request = requests.get(jar_url, stream=True)
             request.raise_for_status()
 
             for chunk in request.iter_content(chunk_size=1024 * 1024 * 10):
                 f.write(chunk)
 
-        with open(server_dir / "eula.txt", 'w') as f:
+        with open(server_dir / "eula.txt", "w") as f:
             f.write("eula=true")
 
         return "about", 302
