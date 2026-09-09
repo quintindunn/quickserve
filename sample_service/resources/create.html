@@ -9,23 +9,45 @@ Test
 {% endblock %}
 
 {% block modulebody %}
-    <div class="create">
-        <h2>Minecraft Vanilla Server Generator</h2>
-        <form action="{{ action('install') }}" method="POST">
-            <label>
-                Instance Name
-                <input type="text" name="instance-name">
-            </label>
-            <label for="show-snapshots">Show Snapshots</label><input type="checkbox" id="show-snapshots" value="false">
-            <label>
-                Version
-                <select name="minecraft-version">
-                    {% for version in context.param_versions %}
-                        <option value="{{ version }}">{{ version }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <button type="submit">Install</button>
-        </form>
-    </div>
+<div class="create">
+    <h2>Minecraft Vanilla Server Generator</h2>
+    <form action="{{ action('install') }}" method="POST" id="install-form">
+        <label>
+            Instance Name
+            <input type="text" name="instance-name" value="MinecraftVanilla">
+        </label>
+
+        <label for="show-snapshots">
+            <input type="checkbox" id="show-snapshots" name="show-snapshots" value="true">
+            Show Snapshots
+        </label>
+
+        <label>
+            Version
+            <select name="minecraft-version">
+                {% for version in context.param_versions %}
+                    <option value="{{ version }}">{{ version }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label for="eula">
+            <input type="checkbox" id="eula" name="eula">
+            By checking the checkbox, you are indicating your agreement to the minecraft <a href="https://account.mojang.com/documents/minecraft_eula">EULA (https://account.mojang.com/documents/minecraft_eula)</a>
+        </label>
+
+        <button type="submit">Install</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("install-form").addEventListener("submit", function (event) {
+        const eula = document.getElementById("eula");
+
+        if (!eula.checked) {
+            event.preventDefault();
+            alert("You must agree to the Minecraft EULA before installing.");
+        }
+    });
+</script>
 {% endblock %}

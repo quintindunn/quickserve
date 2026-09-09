@@ -40,7 +40,7 @@ class Resolver:
 
         self.modules = dict()
         self.root: Path = Path(root)
-        self._ensure_directory(root)
+        self.ensure_directory(root)
 
     def get_path(self, path: PathType):
         path = Path(path)
@@ -49,7 +49,7 @@ class Resolver:
         else:
             return self.root / path
 
-    def _ensure_directory(self, path: PathType):
+    def ensure_directory(self, path: PathType):
         logger.debug(f"Ensuring directory {path.__str__()}")
         path = Path(path)
 
@@ -73,11 +73,11 @@ class Resolver:
         path = Path(path)
 
         if path.is_absolute():
-            self._ensure_directory(path.parent)
+            self.ensure_directory(path.parent)
             return path.absolute()
 
         path = self.root / path
-        self._ensure_directory(path.parent)
+        self.ensure_directory(path.parent)
 
         return path.absolute()
 
@@ -99,7 +99,7 @@ class Resolver:
     def discover_and_load_modules(self):
         logger.debug("Discovering modules")
         modules_path = self.get_path("modules")
-        self._ensure_directory(modules_path)
+        self.ensure_directory(modules_path)
 
         self.modules.clear()
 

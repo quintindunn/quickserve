@@ -2,6 +2,8 @@ import logging
 
 from typing import TYPE_CHECKING
 
+import requests
+
 from .downloader import Downloader
 
 if TYPE_CHECKING:
@@ -26,7 +28,9 @@ class Service:
         logger.info(f"Loading service: {self.NAME}")
         self.module = module
         self.downloader = Downloader()
-        self.versions = [version for version in self.downloader.version_manifest.versions.keys()]
+        self.versions = [
+            version for version in self.downloader.version_manifest.versions.keys()
+        ]
         self.downloader.get_release_manifest("1.8.9")
 
     def about(self) -> str:
@@ -41,11 +45,9 @@ class Service:
 
         asset = self.module.get_resource_path("create.html")
         with open(asset, "r") as f:
-            return f.read(), {
-                "versions": self.versions
-            }
+            return f.read(), {"versions": self.versions}
 
-    def install(self, base_instance, **kwargs):
+    def install(self, base_instance: "BaseInstance", **kwargs):
         assert "minecraft-version" in kwargs
         assert "instance-name" in kwargs
 
@@ -57,7 +59,16 @@ class Service:
         )
 
         jar_url = self.downloader.get_release_manifest(id_=minecraft_version).server.url
-        instance = base_instance.new_service(module=self.module, service_name=instance_name, module_name=self.NAME)
-        print(instance.working_directory())
+        instance = base_instance.new_service(
+            module=self.module, service_name=instance_name, module_name=self.NAME
+        )
+
+        with open(instance.working_directory() / "server.jar", 'wb') as f:
+            request = requests.get(jar_url, stream=True)
+            request.raise_for_status()
+
+            for chunk in request.iter_content(chunk_size=1024 * 1024 * 10):
+                f.write(chunk)
+
 
         return "about", 200

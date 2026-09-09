@@ -1,4 +1,120 @@
 .create {
+    max-width: 650px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #eee;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.create h2 {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.create form {
     display: flex;
     flex-direction: column;
+    gap: 1.25rem;
+}
+
+.create form > label:not([for="eula"]):not([for="show-snapshots"]) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.create input[type="text"],
+.create select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #151515;
+    color: #eee;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.create input[type="text"]:focus,
+.create select:focus {
+    border-color: #6ea8fe;
+    box-shadow: 0 0 0 2px rgba(110, 168, 254, 0.15);
+}
+
+.create select {
+    cursor: pointer;
+}
+
+/* Snapshot checkbox */
+.create label[for="show-snapshots"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+/* EULA */
+.create label[for="eula"] {
+    display: block;
+    padding: 1rem;
+    margin-top: 0.25rem;
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #bbb;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.create label[for="eula"] a {
+    color: #6ea8fe;
+    text-decoration: none;
+}
+
+.create label[for="eula"] a:hover {
+    text-decoration: underline;
+}
+
+.create #eula {
+    margin-top: -0.75rem;
+    align-self: flex-start;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Install button */
+.create button[type="submit"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background: #3b82f6;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.create button[type="submit"]:hover {
+    background: #2563eb;
+}
+
+.create button[type="submit"]:active {
+    transform: translateY(1px);
+}
+
+.create button[type="submit"]:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
 }
