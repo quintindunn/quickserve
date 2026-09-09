@@ -3,7 +3,7 @@ import sys
 import logging
 from pathlib import Path
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union, Tuple
 from types import ModuleType
 
 from QuickServeFS.exceptions import InvalidModuleError, AssetDoesntExist
@@ -22,10 +22,15 @@ class Service(ABC):
     NAME: str
     VERSION: str
     QUICKSERVE_VERSION: str
+    AUTHORS: dict
 
     @abstractmethod
-    def about(self) -> str:
+    def about(self) -> Tuple[str, Optional[Union[list, dict]]]:
         """HTML about for the page"""
+
+    @abstractmethod
+    def create(self) -> Tuple[str, Optional[Union[list, dict]]]:
+        """HTML create for the page"""
 
 
 class Module:

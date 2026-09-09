@@ -163,3 +163,14 @@ body {
     padding: 0 1rem;
   }
 }
+
+.pages {
+    display: flex;
+    flex-direction: row;
+    padding-top: 20px;
+}
+
+.pages > span {
+    margin-left: .25rem;
+    margin-right: .25rem;
+}

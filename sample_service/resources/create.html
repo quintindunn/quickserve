@@ -1,0 +1,25 @@
+{% extends "core/module.html" %}
+
+{% block moduletitle %}
+Test
+{% endblock %}
+
+{% block modulehead %}
+    <link rel="stylesheet" href="{{ resource(filename='create.css') }}">
+{% endblock %}
+
+{% block modulebody %}
+    <div class="create">
+        <h2>Minecraft Vanilla Server Generator</h2>
+        <form action="{{ action('install') }}" method="POST">
+            <label>
+                Version
+                <select name="minecraft-version">
+                    {% for version in context.param_versions %}
+                        <option value="{{ version }}">{{ version }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+    </div>
+{% endblock %}
