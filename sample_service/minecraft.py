@@ -1,6 +1,8 @@
 import logging
 from typing import TYPE_CHECKING
 
+import requests
+
 if TYPE_CHECKING:
     from QuickServeFS.modules import Module
 
