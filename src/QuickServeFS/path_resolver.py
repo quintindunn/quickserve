@@ -1,3 +1,11 @@
+"""
+Path helper class, os-independent. This class also holds module discovery, and loading.
+TODO: Rework module discovery/loading to make less misplaced.
+
+Author: Quintin Dunn
+Date: 09/09/20206
+"""
+
 import platform
 from pathlib import Path
 import os

@@ -1,3 +1,10 @@
+"""
+Module helper class. Resolves resources, and does the heavy lifting for module loading.
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 import importlib
 import sys
 import logging

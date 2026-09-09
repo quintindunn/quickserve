@@ -1,3 +1,10 @@
+"""
+The module blueprint for installed services
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 from flask import (
     Blueprint,
     current_app,
@@ -19,7 +26,14 @@ if TYPE_CHECKING:
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 
 
-def _render_module_page(module_name: str, method: str):
+# TODO: Add check for invalid page.
+def _render_module_page(module_name: str, page: str) -> str:
+    """
+    Helper function to render a module's pages, along with helper functions, and base context values.
+    :param module_name: The name of the module being rendered.
+    :param page: The page being rendered.
+    :return: The rendered page.
+    """
     resolver: "Resolver" = current_app.config["resolver"]
 
     if module_name not in resolver.modules:
@@ -41,12 +55,12 @@ def _render_module_page(module_name: str, method: str):
     if hasattr(service, "AUTHORS"):
         ctx["module_authors"] = service.AUTHORS
 
-    if not hasattr(service, method):
-        raise ValueError(f"Service {module_name} doesn't have method {method}")
+    if not hasattr(service, page):
+        raise ValueError(f"Service {module_name} doesn't have method {page}")
 
-    method = getattr(service, method)
+    page = getattr(service, page)
 
-    values = method()
+    values = page()
 
     if isinstance(values, str):
         template = values
@@ -83,16 +97,32 @@ def _render_module_page(module_name: str, method: str):
 
 @modules.route("/<module_name>")
 def module_about(module_name: str):
+    """
+    Route for the about page returned from Service.about.
+    :param module_name: The name of the module being rendered.
+    :return: the rendered page.
+    """
     return _render_module_page(module_name, "about")
 
 
 @modules.route("/<module_name>/create")
 def module_create(module_name: str):
+    """
+    Route for the create/installation page returned from Service.create.
+    :param module_name: The name of the module being rendered.
+    :return: The rendered page.
+    """
     return _render_module_page(module_name, "create")
 
 
 @modules.route("/resources/<module_name>/<filename>")
 def resource(module_name: str, filename: str):
+    """
+    Route for serving resources within modules.
+    :param module_name: The module that holds the resource.
+    :param filename: The filename/path for the resource being rendered.
+    :return: The resource being served.
+    """
     resolver: "Resolver" = current_app.config["resolver"]
     module: "Module" = resolver.modules[module_name]
 
@@ -103,6 +133,14 @@ def resource(module_name: str, filename: str):
 
 @modules.route("/action/<module_name>/<method>", methods=["POST"])
 def action(module_name: str, method: str):
+    """
+    Calls an action within a given module.
+
+    ** Kwargs that are in the current request are passed into the action **
+    :param module_name: The module that holds the action.
+    :param method: The action being called.
+    :return:
+    """
     resolver: "Resolver" = current_app.config["resolver"]
     module: "Module" = resolver.modules[module_name]
     service: "Service" = module.service

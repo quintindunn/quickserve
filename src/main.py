@@ -1,3 +1,10 @@
+"""
+Main entry point for quickserve
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 import logging
 import sys
 

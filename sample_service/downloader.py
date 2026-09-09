@@ -1,3 +1,10 @@
+"""
+Downloader class for Minecraft servers
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 from enum import Enum
 from functools import lru_cache
 

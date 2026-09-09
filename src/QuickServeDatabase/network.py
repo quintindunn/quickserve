@@ -1,3 +1,10 @@
+"""
+PeeWee models for network related records
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 from peewee import DateTimeField, UUIDField, IntegerField, Model, BooleanField
 
 from QuickServeDatabase.database import db

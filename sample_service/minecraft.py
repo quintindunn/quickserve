@@ -1,3 +1,10 @@
+"""
+Module main class for generating Minecraft Vanilla servers.
+
+Author: Quintin Dunn
+Date: 09/09/2026
+"""
+
 import logging
 
 from typing import TYPE_CHECKING
@@ -48,6 +55,15 @@ class Service:
             return f.read(), {"versions": self.versions}
 
     def install(self, base_instance: "BaseInstance", **kwargs):
+        """
+        Installation action
+        :param base_instance: BaseInstance class reference, used for record insertion
+        :param kwargs: Required Kwargs:
+        - minecraft-version: A valid Minecraft version, listed in Minecraft version manifest v2
+        (https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
+        - instance-name: The name of the service instance being created.
+        :return: The routing to the 'about' page, response code 302.
+        """
         assert "minecraft-version" in kwargs
         assert "instance-name" in kwargs
 
@@ -77,4 +93,4 @@ class Service:
         with open(server_dir / "eula.txt", 'w') as f:
             f.write("eula=true")
 
-        return "about", 200
+        return "about", 302
