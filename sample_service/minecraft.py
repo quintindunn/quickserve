@@ -1,7 +1,8 @@
 import logging
+
 from typing import TYPE_CHECKING
 
-import requests
+from .downloader import Downloader
 
 if TYPE_CHECKING:
     from QuickServeFS.modules import Module
@@ -18,10 +19,14 @@ class Service:
     ]
 
     module: "Module"
+    downloader: "Downloader"
 
     def __init__(self, module: "Module"):
         logger.info(f"Loading service: {self.NAME}")
         self.module = module
+        self.downloader = Downloader()
+        self.versions = [version for version in self.downloader.version_manifest.versions.keys()]
+        self.downloader.get_release_manifest("1.8.9")
 
     def about(self) -> str:
         """HTML about for the page"""
@@ -36,15 +41,7 @@ class Service:
         asset = self.module.get_resource_path("create.html")
         with open(asset, "r") as f:
             return f.read(), {
-                "versions": [
-                    "1.8.9",
-                    "1.9.0",
-                    "1.9.1",
-                    "1.10.0",
-                    "1.10.2",
-                    "1.11.1",
-                    "1.12.2",
-                ]
+                "versions": self.versions
             }
 
     def install(self, *args, **kwargs):
