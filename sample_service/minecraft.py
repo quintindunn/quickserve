@@ -11,10 +11,9 @@ class Service:
     NAME: str = "Minecraft-Vanilla"
     VERSION: str = "0.0.1"
     QUICKSERVE_VERSION: str = "0.0.1"
-    AUTHORS: list[dict] = [{
-        "name": "Quintin Dunn",
-        "github": "https://github.com/quintindunn"
-    }]
+    AUTHORS: list[dict] = [
+        {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
+    ]
 
     module: "Module"
 
@@ -42,12 +41,14 @@ class Service:
                     "1.10.0",
                     "1.10.2",
                     "1.11.1",
-                    "1.12.2"
+                    "1.12.2",
                 ]
             }
 
     def install(self, *args, **kwargs):
         print(kwargs)
-        logger.info(f"Installing new minecraft-vanilla instance with version {kwargs['minecraft-version']} with name {kwargs['instance-name']}")
+        logger.info(
+            f"Installing new minecraft-vanilla instance with version {kwargs['minecraft-version']} with name {kwargs['instance-name']}"
+        )
 
         return "about", 200

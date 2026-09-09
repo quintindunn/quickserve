@@ -1,4 +1,12 @@
-from flask import Blueprint, current_app, render_template_string, url_for, send_file, request, redirect
+from flask import (
+    Blueprint,
+    current_app,
+    render_template_string,
+    url_for,
+    send_file,
+    request,
+    redirect,
+)
 
 from typing import TYPE_CHECKING
 
@@ -64,18 +72,10 @@ def _render_module_page(module_name: str, method: str):
         )
 
     def action_(method: str):
-        return url_for(
-            "modules.action",
-            module_name=module_name,
-            method=method
-        )
+        return url_for("modules.action", module_name=module_name, method=method)
 
     return render_template_string(
-        str(template),
-        context=ctx,
-        resource=resource,
-        link=link,
-        action=action_
+        str(template), context=ctx, resource=resource, link=link, action=action_
     )
 
 
