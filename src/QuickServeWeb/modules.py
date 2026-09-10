@@ -32,7 +32,7 @@ modules.register_blueprint(instances)
 
 # TODO: Add check for invalid page.
 def _render_module_page(
-    module_name: str, page: str, instance: Union["BaseInstance", None] = None
+    module_name: str, page: str, context: dict | None
 ) -> ResponseReturnValue:
     """
     Helper function to render a module's pages, along with helper functions, and base context values.
@@ -42,6 +42,9 @@ def _render_module_page(
     :return: The rendered page.
     """
     resolver: "Resolver" = current_app.config["resolver"]
+
+    if context is None:
+        context = dict()
 
     if module_name not in resolver.modules:
         return (
@@ -82,6 +85,9 @@ def _render_module_page(
     else:
         template = "ERROR"
 
+    for key, value in context.items():
+        ctx[key] = value
+
     kwargs = {}
 
     for key, builder in registry.registered.items():
@@ -120,11 +126,9 @@ def get_instance_from_db(uuid: str) -> BaseInstance:
 @instances.route("/<uuid>/<page>")
 def module_instance(uuid: str, page: str) -> ResponseReturnValue:
     instance = get_instance_from_db(uuid=uuid)
-
-    return _render_module_page(
-        module_name=instance.module_name,
-        page=page,
-    )
+    setattr(request, "instance", instance)
+    ctx = {"instance_uuid": instance.uuid, "service_name": instance.service_name}
+    return _render_module_page(module_name=instance.module_name, page=page, context=ctx)
 
 
 @modules.route("/resources/<module_name>/<filename>")

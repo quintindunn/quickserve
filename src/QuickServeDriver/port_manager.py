@@ -6,6 +6,10 @@ if TYPE_CHECKING:
 
 from enum import Enum
 
+import logging
+
+logger = logging.getLogger("port_manager.py")
+
 
 class UsageType(Enum):
     service = "service"
@@ -30,6 +34,9 @@ class Port:
     def __contains__(self, port: int) -> bool:
         return port in self.port if isinstance(self.port, range) else port == self.port
 
+    def __str__(self):
+        return f"Port(type: {self.usage_type}, port: {self.port})"
+
 
 class PortManager:
     ports: list[Port]
@@ -39,7 +46,7 @@ class PortManager:
         self.ports = list()
         self.websocket_ports = dict()
 
-        self.last_websocket_port = config.web.websocket_port_range_start
+        self.last_websocket_port = config.web.websocket_port_range_start - 1
 
     def is_port_occupied(self, target_port: int) -> bool:
         for port in self.ports:
@@ -65,7 +72,7 @@ class PortManager:
         if str(instance.uuid) in self.websocket_ports:
             return self.websocket_ports[str(instance.uuid)]
 
-        while self.last_websocket_port + 1 > config.web.websocket_port_range_end:
+        while self.last_websocket_port + 1 < config.web.websocket_port_range_end:
             self.last_websocket_port += 1
             if not self.is_port_occupied(self.last_websocket_port):
                 return self.register_port(
@@ -74,6 +81,7 @@ class PortManager:
                     key=str(instance.uuid),
                 )
 
+        logger.warning("No websocket ports available!")
         return None
 
 
