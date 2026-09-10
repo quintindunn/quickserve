@@ -16,20 +16,24 @@ from flask import (
 )
 from flask.typing import ResponseReturnValue
 
-from QuickServeDriver.instance.base_instance import BaseInstance
+from QuickServeDriver.instance.base_instance import BaseInstance, instance_manager
 from QuickServeWeb.module_common.registry import registry
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from QuickServeFS.path_resolver import Resolver
     from QuickServeFS.modules import Service, Module
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
+instances = Blueprint("instances", __name__, url_prefix="/instance/")
+modules.register_blueprint(instances)
 
 
 # TODO: Add check for invalid page.
-def _render_module_page(module_name: str, page: str) -> ResponseReturnValue:
+def _render_module_page(
+    module_name: str, page: str, instance: Union["BaseInstance", None] = None
+) -> ResponseReturnValue:
     """
     Helper function to render a module's pages, along with helper functions, and base context values.
 
@@ -109,6 +113,20 @@ def module_page(module_name: str, page: str) -> ResponseReturnValue:
     return _render_module_page(module_name, page=page)
 
 
+def get_instance_from_db(uuid: str) -> BaseInstance:
+    return instance_manager.from_uuid(uuid)
+
+
+@instances.route("/<uuid>/<page>")
+def module_instance(uuid: str, page: str) -> ResponseReturnValue:
+    instance = get_instance_from_db(uuid=uuid)
+
+    return _render_module_page(
+        module_name=instance.module_name,
+        page=page,
+    )
+
+
 @modules.route("/resources/<module_name>/<filename>")
 def resource(module_name: str, filename: str) -> ResponseReturnValue:
     """
@@ -136,6 +154,8 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     :param method: The action being called.
     :return:
     """
+    method = f"action_{method}"
+
     resolver: "Resolver" = current_app.config["resolver"]
     module: "Module" = resolver.modules[module_name]
     service: "Service" = module.service

@@ -143,14 +143,14 @@ class Service:
 
         self.instance = instance
 
-    def about(self) -> str:
+    def about(self, *_, **__) -> str:
         """HTML about for the page"""
 
         asset = self.module.get_resource_path("about.html")
         with open(asset, "r") as f:
             return f.read()
 
-    def create(self) -> tuple[str, dict]:
+    def create(self, *_, **__) -> tuple[str, dict]:
         """HTML create for the page"""
 
         asset = self.module.get_resource_path("create.html")
