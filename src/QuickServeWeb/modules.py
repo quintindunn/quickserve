@@ -17,6 +17,7 @@ from flask import (
 from flask.typing import ResponseReturnValue
 
 from QuickServeDriver.instance.base_instance import BaseInstance
+from QuickServeWeb.module_common.registry import registry
 
 from typing import TYPE_CHECKING
 
@@ -52,7 +53,7 @@ def _render_module_page(module_name: str, page: str) -> ResponseReturnValue:
         "modules": resolver.modules,
         "module_name": service.NAME,
         "module_version": service.VERSION,
-        "module_pages": service.PAGES
+        "module_pages": service.PAGES,
     }
 
     if hasattr(service, "AUTHORS"):
@@ -77,26 +78,15 @@ def _render_module_page(module_name: str, page: str) -> ResponseReturnValue:
     else:
         template = "ERROR"
 
-    def resource_(filename: str) -> str:
-        return url_for(
-            "modules.resource",
-            module_name=module_name,
-            filename=filename,
-        )
+    kwargs = {}
 
-    def link(page: str) -> str:
-        return url_for(
-            f"modules.module_page",
-            module_name=module_name,
-            page=page
-        )
+    for key, builder in registry.registered.items():
+        print(key, builder, module_name, builder(module_name))
+        kwargs[key] = builder(module_name)
 
-    def action_(method: str) -> str:
-        return url_for("modules.action", module_name=module_name, method=method)
+    print(kwargs)
 
-    return render_template_string(
-        str(template), context=ctx, resource=resource_, link=link, action=action_
-    )
+    return render_template_string(str(template), context=ctx, **kwargs)
 
 
 @modules.route("/<module_name>")
