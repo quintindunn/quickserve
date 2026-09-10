@@ -5,7 +5,8 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-from flask import Blueprint, render_template, current_app, ResponseReturnValue
+from flask import Blueprint, render_template, current_app
+from flask.typing import ResponseReturnValue
 
 from typing import TYPE_CHECKING
 

@@ -13,8 +13,8 @@ from flask import (
     send_file,
     request,
     redirect,
-    ResponseReturnValue,
 )
+from flask.typing import ResponseReturnValue
 
 from QuickServeDriver.instance.base_instance import BaseInstance
 
@@ -52,6 +52,7 @@ def _render_module_page(module_name: str, page: str) -> ResponseReturnValue:
         "modules": resolver.modules,
         "module_name": service.NAME,
         "module_version": service.VERSION,
+        "module_pages": service.PAGES
     }
 
     if hasattr(service, "AUTHORS"):
@@ -83,10 +84,11 @@ def _render_module_page(module_name: str, page: str) -> ResponseReturnValue:
             filename=filename,
         )
 
-    def link(page_: str) -> str:
+    def link(page: str) -> str:
         return url_for(
-            f"modules.module_{page_}",
+            f"modules.module_page",
             module_name=module_name,
+            page=page
         )
 
     def action_(method: str) -> str:
@@ -108,15 +110,16 @@ def module_about(module_name: str) -> ResponseReturnValue:
     return _render_module_page(module_name, "about")
 
 
-@modules.route("/<module_name>/create")
-def module_create(module_name: str) -> ResponseReturnValue:
+@modules.route("/<module_name>/<page>")
+def module_page(module_name: str, page: str) -> ResponseReturnValue:
     """
-    Route for the create/installation page returned from Service.create.
+    Route for the custom pages registered in Service.PAGES.
 
     :param module_name: The name of the module being rendered.
+    :param page: The page to render
     :return: The rendered page.
     """
-    return _render_module_page(module_name, "create")
+    return _render_module_page(module_name, page=page)
 
 
 @modules.route("/resources/<module_name>/<filename>")

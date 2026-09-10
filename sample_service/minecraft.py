@@ -27,6 +27,7 @@ class Service:
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
+    PAGES: list[str] = ["about", "create", "start"]
 
     module: "Module"
     downloader: "Downloader"
@@ -54,7 +55,7 @@ class Service:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    def install(self, base_instance: "BaseInstance", **kwargs):
+    def action_install(self, base_instance: "BaseInstance", **kwargs):
         """
         Installation action
         :param base_instance: BaseInstance class reference, used for record insertion
@@ -94,3 +95,9 @@ class Service:
             f.write("eula=true")
 
         return "about", 302
+
+    def start(self) -> tuple[str, dict]:
+        asset = self.module.get_resource_path("start.html")
+
+        with open(asset, "r") as f:
+            return f.read(), {"versions": self.versions}

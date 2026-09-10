@@ -30,6 +30,7 @@ class Service(ABC):
     VERSION: str
     QUICKSERVE_VERSION: str
     AUTHORS: dict
+    PAGES: list[str]
 
     @abstractmethod
     def about(self) -> Union[str, Tuple[str, dict]]:
