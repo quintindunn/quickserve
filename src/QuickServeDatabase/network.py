@@ -11,6 +11,8 @@ from QuickServeDatabase.database import db
 
 
 class OccupiedPortModel(Model):
+    """Model for an occupied port by a service."""
+
     port = IntegerField(null=False)
     TCP = BooleanField(default=False)
     UDP = BooleanField(default=True)

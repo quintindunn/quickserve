@@ -14,6 +14,7 @@ logger = logging.getLogger("QuickServeDriver.utils")
 def sanitize_filename(string: str) -> str:
     """
     Converts a string to a sanitized filename.
+
     :param string: The input filename
     :return: a sanitize filename.
     """

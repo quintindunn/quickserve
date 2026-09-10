@@ -27,7 +27,13 @@ ROOT_PATH_TABLE: dict[str, Path] = {
 }
 
 
-def _generate_root():
+def _get_root() -> Path:
+    """
+    Gets the root working directory based off of OS.
+
+    :return: The path to the root directory
+    """
+
     system = platform.system()
     if system not in ("Windows", "Darwin", "Linux"):
         raise NotImplementedError(f"OS {platform.system()} is not supported!")
@@ -44,20 +50,35 @@ class Resolver:
 
     def __init__(self, root: PathType | None = None):
         if root is None:
-            root = _generate_root()
+            root = _get_root()
 
         self.modules = dict()
         self.root: Path = Path(root)
         self.ensure_directory(root)
 
-    def get_path(self, path: PathType):
+    def get_path(self, path: PathType) -> Path:
+        """
+        Gets the path to a file/directory. Starting relative paths
+        in the work directory of QuickServe.
+
+        :param path: The path to get the absolute version of.
+        :return: The absolute path.
+        """
         path = Path(path)
         if path.is_absolute():
             return path
         else:
             return self.root / path
 
-    def ensure_directory(self, path: PathType):
+    def ensure_directory(self, path: PathType) -> Path:
+        """
+        Ensures that a directory exists,
+        if it doesn't it creates the directory
+        and changes permissions where applicable.
+
+        :param path: The path to the directory.
+        :return: The absolute path to the directory.
+        """
         logger.debug(f"Ensuring directory {path.__str__()}")
         path = Path(path)
 
@@ -78,6 +99,13 @@ class Resolver:
         return new.absolute()
 
     def ensure_file_path(self, path: PathType) -> Path:
+        """
+        Ensures that the parent directory of a file exists,
+        if it doesn't it calls Resolver.ensure_directory on the directory.
+
+        :param path: The path to the file
+        :return: the absolute path of the file.
+        """
         path = Path(path)
 
         if path.is_absolute():
@@ -95,7 +123,17 @@ class Resolver:
         callback: Callable,
         args: list[Any] | None = None,
         kwargs: dict[str, Any] | None = None,
-    ):
+    ) -> None:
+        """
+        Calls a callback function if a given path doesn't exist.
+        :param path: The path that is being checked
+        :param callback: The callback function being called if the path doesn't exist.
+        :param args: The args passed into the callback.
+        :param kwargs: The kwargs passed into the callback.
+
+        :return: None
+        """
+
         path = self.get_path(path)
         if not os.path.exists(path=path):
             if args is None:
@@ -104,7 +142,13 @@ class Resolver:
                 kwargs = dict()
             callback(*args, **kwargs)
 
-    def discover_and_load_modules(self):
+    def discover_and_load_modules(self) -> None:
+        """
+        Discovers all modules in the modules directory, and creates and loads a new Module instance.
+
+        :return: None
+        """
+
         logger.debug("Discovering modules")
         modules_path = self.get_path("modules")
         self.ensure_directory(modules_path)
@@ -121,12 +165,15 @@ class Resolver:
         for dir_ in dirs:
             logger.info(f"Loading {dir_}")
             module = Module(module_path=dir_, resolver=self)
-            module.load_service()
+            module.load_module()
 
             self.modules[module.service.NAME] = module
 
     @property
-    def config(self):
+    def config_path(self) -> Path:
+        """
+        :return: The path to the config file
+        """
         return self.root / "config.yml"
 
 

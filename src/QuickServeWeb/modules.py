@@ -13,6 +13,7 @@ from flask import (
     send_file,
     request,
     redirect,
+    ResponseReturnValue,
 )
 
 from QuickServeDriver.instance.base_instance import BaseInstance
@@ -27,9 +28,10 @@ modules = Blueprint("modules", __name__, url_prefix="/module/")
 
 
 # TODO: Add check for invalid page.
-def _render_module_page(module_name: str, page: str) -> str:
+def _render_module_page(module_name: str, page: str) -> ResponseReturnValue:
     """
     Helper function to render a module's pages, along with helper functions, and base context values.
+
     :param module_name: The name of the module being rendered.
     :param page: The page being rendered.
     :return: The rendered page.
@@ -74,31 +76,32 @@ def _render_module_page(module_name: str, page: str) -> str:
     else:
         template = "ERROR"
 
-    def resource(filename: str):
+    def resource_(filename: str) -> str:
         return url_for(
             "modules.resource",
             module_name=module_name,
             filename=filename,
         )
 
-    def link(page: str):
+    def link(page_: str) -> str:
         return url_for(
-            f"modules.module_{page}",
+            f"modules.module_{page_}",
             module_name=module_name,
         )
 
-    def action_(method: str):
+    def action_(method: str) -> str:
         return url_for("modules.action", module_name=module_name, method=method)
 
     return render_template_string(
-        str(template), context=ctx, resource=resource, link=link, action=action_
+        str(template), context=ctx, resource=resource_, link=link, action=action_
     )
 
 
 @modules.route("/<module_name>")
-def module_about(module_name: str):
+def module_about(module_name: str) -> ResponseReturnValue:
     """
     Route for the about page returned from Service.about.
+
     :param module_name: The name of the module being rendered.
     :return: the rendered page.
     """
@@ -106,9 +109,10 @@ def module_about(module_name: str):
 
 
 @modules.route("/<module_name>/create")
-def module_create(module_name: str):
+def module_create(module_name: str) -> ResponseReturnValue:
     """
     Route for the create/installation page returned from Service.create.
+
     :param module_name: The name of the module being rendered.
     :return: The rendered page.
     """
@@ -116,9 +120,10 @@ def module_create(module_name: str):
 
 
 @modules.route("/resources/<module_name>/<filename>")
-def resource(module_name: str, filename: str):
+def resource(module_name: str, filename: str) -> ResponseReturnValue:
     """
     Route for serving resources within modules.
+
     :param module_name: The module that holds the resource.
     :param filename: The filename/path for the resource being rendered.
     :return: The resource being served.
@@ -132,7 +137,7 @@ def resource(module_name: str, filename: str):
 
 
 @modules.route("/action/<module_name>/<method>", methods=["POST"])
-def action(module_name: str, method: str):
+def action(module_name: str, method: str) -> ResponseReturnValue:
     """
     Calls an action within a given module.
 

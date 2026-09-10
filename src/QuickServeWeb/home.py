@@ -5,7 +5,7 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-from flask import Blueprint, render_template, current_app
+from flask import Blueprint, render_template, current_app, ResponseReturnValue
 
 from typing import TYPE_CHECKING
 
@@ -16,7 +16,7 @@ home = Blueprint("home", __name__)
 
 
 @home.route("/")
-def index():
+def index() -> ResponseReturnValue:
     resolver: "Resolver" = current_app.config["resolver"]
     ctx = {"modules": resolver.modules}
     return render_template("home/home.html", context=ctx)
