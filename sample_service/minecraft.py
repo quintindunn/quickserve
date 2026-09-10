@@ -7,7 +7,7 @@ Date: 09/09/2026
 
 import logging
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 import requests
 
@@ -18,6 +18,104 @@ if TYPE_CHECKING:
     from QuickServeDriver.instance.base_instance import BaseInstance
 
 logger = logging.getLogger("minecraft-vanilla")
+
+####################################################################
+# START TEMP LOCATION (I'm too lazy to set up a package right now) #
+####################################################################
+import asyncio
+from collections.abc import Awaitable, Callable
+
+import websockets
+from websockets.asyncio.server import ServerConnection
+
+from functools import wraps
+
+MessageHandler = Callable[[str, "SimpleController"], Awaitable[None]]
+ConnectionHandler = Callable[["SimpleController"], Awaitable[None]]
+
+
+class SimpleController:
+    def __init__(self, host: str, port: int):
+        self.host = host
+        self.port = port
+
+        self._on_message_registry: list[MessageHandler] = []
+        self._on_connect_registry: list[ConnectionHandler] = []
+        self._on_close_registry: list[ConnectionHandler] = []
+
+    def on_message(self) -> Callable[[MessageHandler], MessageHandler]:
+        def decorator(func: MessageHandler) -> MessageHandler:
+            self._on_message_registry.append(func)
+            return func
+
+        return decorator
+
+    def on_connect(self) -> Callable[[ConnectionHandler], ConnectionHandler]:
+        def decorator(func: ConnectionHandler) -> ConnectionHandler:
+            self._on_connect_registry.append(func)
+            return func
+
+        return decorator
+
+    def on_close(self) -> Callable[[ConnectionHandler], ConnectionHandler]:
+        def decorator(func: ConnectionHandler) -> ConnectionHandler:
+            self._on_close_registry.append(func)
+            return func
+
+        return decorator
+
+    async def _handle_connection(self, websocket: ServerConnection):
+        self.websocket = websocket
+
+        await self._on_connect()
+
+        try:
+            async for message in websocket:
+                await self._on_message(message)
+        finally:
+            await self._on_close()
+
+    async def _on_message(self, message: str):
+        for func in self._on_message_registry:
+            await func(message, self)
+
+    async def _on_connect(self):
+        for func in self._on_connect_registry:
+            await func(self)
+
+    async def _on_close(self):
+        for func in self._on_close_registry:
+            await func(self)
+
+    async def send_message(self, message: str):
+        await self.websocket.send(message)
+
+    async def start(self):
+        async with websockets.serve(
+            self._handle_connection,
+            self.host,
+            self.port,
+        ):
+            await asyncio.Future()
+
+
+def instance_specific(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if self.instance is None:
+            return (
+                "<!DOCTYPE HTML>"
+                "<html><head><title>404 Not Found!</title></head>"
+                "<body><h1>Page not found!</h1></body></html>"
+            )
+        return func(self, *args, **kwargs)
+
+    return wrapper
+
+
+#####################
+# END TEMP LOCATION #
+#####################
 
 
 class Service:
@@ -32,7 +130,9 @@ class Service:
     module: "Module"
     downloader: "Downloader"
 
-    def __init__(self, module: "Module"):
+    instance: Union["BaseInstance", None]
+
+    def __init__(self, module: "Module", instance: Union["BaseInstance", None] = None):
         logger.info(f"Loading service: {self.NAME}")
         self.module = module
         self.downloader = Downloader()
@@ -40,6 +140,8 @@ class Service:
             version for version in self.downloader.version_manifest.versions.keys()
         ]
         self.downloader.get_release_manifest("1.8.9")
+
+        self.instance = instance
 
     def about(self) -> str:
         """HTML about for the page"""
@@ -96,7 +198,10 @@ class Service:
 
         return "about", 302
 
+    @instance_specific
     def start(self) -> tuple[str, dict]:
+        assert self.instance
+
         asset = self.module.get_resource_path("start.html")
 
         with open(asset, "r") as f:
