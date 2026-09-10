@@ -81,10 +81,7 @@ def _render_module_page(module_name: str, page: str) -> ResponseReturnValue:
     kwargs = {}
 
     for key, builder in registry.registered.items():
-        print(key, builder, module_name, builder(module_name))
         kwargs[key] = builder(module_name)
-
-    print(kwargs)
 
     return render_template_string(str(template), context=ctx, **kwargs)
 
