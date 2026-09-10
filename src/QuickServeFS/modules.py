@@ -32,12 +32,24 @@ class Service(ABC):
     AUTHORS: dict
 
     @abstractmethod
-    def about(self) -> Tuple[str, Optional[Union[list, dict]]]:
-        """HTML about for the page"""
+    def about(self) -> Union[str, Tuple[str, dict]]:
+        """
+        Required page for the module's about page.
+        :return: Union[str, Tuple[str, dict]], where the first str is
+        always the string representation of the template, and the optional
+        dictionary is any context to be passed to the renderer.
+        **NOTE: All context passed in will be automatically prefixed with 'param_'**
+        """
 
     @abstractmethod
-    def create(self) -> Tuple[str, Optional[Union[list, dict]]]:
-        """HTML create for the page"""
+    def create(self) -> Union[str, Tuple[str, dict]]:
+        """
+        Required page for the module's create page
+        :return: Union[str, Tuple[str, dict]], where the first str is
+        always the string representation of the template, and the optional
+        dictionary is any context to be passed to the renderer.
+        **NOTE: All context passed in will be automatically prefixed with 'param_'**
+        """
 
 
 class Module:
@@ -52,13 +64,28 @@ class Module:
 
     def raise_if_attr_not_exist(
         self, attr_name: str, exception: Exception, service: bool = True
-    ):
+    ) -> None:
+        """
+        Raises an exception if an attribute doesn't exist in a service/module.
+
+        :param attr_name: The name of the attribute to check.
+        :param exception: The exception to raise if Object.<attr_name> doesn't exist.
+        :param service: If true, check if self.service.<attr_name> exists,
+        otherwise check self.module.<attr_name>
+        :return: None
+        """
         obj = self.service if service else self.module
 
         if not hasattr(obj, attr_name):
             raise exception
 
-    def validate_and_load_service(self):
+    def _validate_and_load_module(self) -> None:
+        """
+        Validates that a module has the required fields.
+
+        :return: None
+        """
+
         logger.debug(f"Validating module {self.path.name}")
         attr_error_map = {
             "NAME": "Missing module name",
@@ -78,7 +105,12 @@ class Module:
                 attr, InvalidModuleError(f'Module: "{self.path.name}" - {error}')
             )
 
-    def load_service(self):
+    def load_module(self) -> None:
+        """
+        Loads the module, and validates the module.
+
+        :return: None
+        """
         service_name = self.path.name
         logger.info(f"Loading service {service_name}")
 
@@ -88,9 +120,16 @@ class Module:
             sys.path.insert(0, str(modules_path))
 
         self.module = importlib.import_module(service_name)
-        self.validate_and_load_service()
+        self._validate_and_load_module()
 
-    def get_resource_path(self, resource: str):
+    def get_resource_path(self, resource: str) -> Path:
+        """
+        Gets a resource relative to the module.
+
+        :param resource: The path of the resource in the
+        module relative to .../resources.
+        :return: The path to the resource.
+        """
         logger.debug(f"Getting path for in module {self.path / resource}")
         resources = self.path / "resources"
 

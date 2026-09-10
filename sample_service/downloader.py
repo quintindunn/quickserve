@@ -77,6 +77,10 @@ class Downloader:
 
     @staticmethod
     def get_version_manifest() -> VersionManifest:
+        """
+        Gets and parses the version manifest (v2) from Mojang's servers.
+        :return: Parsed VersionManifest object.
+        """
         logger.info("Getting version manifest")
         request = requests.get(
             "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
@@ -86,6 +90,23 @@ class Downloader:
         manifest_json = request.json()
 
         def json_version_to_model(raw: dict) -> VersionManifestRelease:
+            """
+            Converts individual version records into VersionManifestRelease objects.
+
+            :param raw: The raw object e.g.
+            {
+                'id': '1.8.9',
+                'type': 'release',
+                'url': 'https://piston-meta.mojang.com/v1/packages/d546f1707a3f2b7d034eece5ea2e311eda875787/1.8.9.json',
+                'time': '2021-12-15T15:44:12+00:00',
+                'releaseTime': '2015-12-03T09:24:39+00:00',
+                'sha1': 'd546f1707a3f2b7d034eece5ea2e311eda875787',
+                'complianceLevel': 0
+            }
+
+            :return: parsed VersionManifestRelease object.
+            """
+
             return VersionManifestRelease(
                 id=raw["id"],
                 type=raw["type"],
@@ -109,6 +130,12 @@ class Downloader:
 
     @lru_cache(maxsize=64)
     def get_release_manifest(self, id_: str) -> ReleaseManifest:
+        """
+        Gets and parses the manifest for a specific version.
+
+        :param id_: The "id" value from the VersionManifest. e.g. "1.8.9"
+        :return: Parsed ReleaseManifest
+        """
         if id_ == "latest-release":
             id_ = self.version_manifest.latest.release
         elif id_ == "latest-snapshot":

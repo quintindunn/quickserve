@@ -13,6 +13,8 @@ from QuickServeDatabase.database import db
 
 
 class InstanceModel(Model):
+    """Model for registered instances."""
+
     service_uuid = UUIDField()
     created_on = DateTimeField(default=datetime.now)
 
