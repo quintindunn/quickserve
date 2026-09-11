@@ -1,6 +1,10 @@
+from typing import TYPE_CHECKING
+
 from functools import wraps as _wraps
 from flask import request as _request
 
+if TYPE_CHECKING:
+    from QuickServeFS.modules import Service
 
 def instance_specific(func):
     @_wraps(func)
@@ -15,3 +19,6 @@ def instance_specific(func):
         return func(self, instance, *args, **kwargs)
 
     return wrapper
+
+def simple_controller_processor(cls: "Service"):
+    return cls

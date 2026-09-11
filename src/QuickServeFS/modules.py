@@ -10,7 +10,7 @@ import sys
 import logging
 from pathlib import Path
 
-from typing import TYPE_CHECKING, Optional, Union, Tuple
+from typing import TYPE_CHECKING, Union, Tuple
 from types import ModuleType
 
 from QuickServeFS.exceptions import InvalidModuleError, AssetDoesntExist

@@ -41,12 +41,23 @@ class Port:
 class PortManager:
     ports: list[Port]
     websocket_ports: dict[str, Port]
+    websocket_ports_inverse: dict[int, str]
 
     def __init__(self):
         self.ports = list()
         self.websocket_ports = dict()
+        self.websocket_ports_inverse = dict()
 
         self.last_websocket_port = config.web.websocket_port_range_start - 1
+
+    def free(self, port_to_free: int):
+        if port_to_free in self.websocket_ports_inverse:
+            key = self.websocket_ports_inverse[port_to_free]
+            del self.websocket_ports_inverse[port_to_free]
+            del self.websocket_ports[key]
+        for port in self.ports:
+            if port.port == port_to_free:
+                self.ports.remove(port)
 
     def is_port_occupied(self, target_port: int) -> bool:
         for port in self.ports:
@@ -65,6 +76,7 @@ class PortManager:
 
         if usage_type == UsageType.websocket:
             self.websocket_ports[key] = port
+            self.websocket_ports_inverse[port.port] = key
 
         return port
 

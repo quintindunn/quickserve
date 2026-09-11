@@ -4,23 +4,23 @@ Module main class for generating Minecraft Vanilla servers.
 Author: Quintin Dunn
 Date: 09/09/2026
 """
-
+import threading
+import time
 from typing import TYPE_CHECKING
 
 import logging
 import requests
 
-from QuickServeServiceLibrary.decorators import instance_specific
-from QuickServeServiceLibrary.SimpleController import (
-    simple_controller_manager,
-    SimpleController,
-)
+from QuickServeServiceLibrary.decorators import instance_specific, simple_controller_processor
+from QuickServeServiceLibrary import SimpleControllerProcessor
+from flask import current_app
 
 from .downloader import Downloader
 
 if TYPE_CHECKING:
     from QuickServeFS.modules import Module
     from QuickServeDriver.instance.base_instance import BaseInstance
+    from QuickServeServiceLibrary.SimpleController import SimpleControllerManager
 
 logger = logging.getLogger("minecraft-vanilla")
 
@@ -101,12 +101,27 @@ class Service:
 
         return "about", 302
 
+    def delayed_20(self, instance: "BaseInstance"):
+        while True:
+            self.send_websocket_message(f"Hello, world {time.time()}", instance)
+            time.sleep(5)
+
+    def send_websocket_message(self, message: str, instance: "BaseInstance"):
+        controller = self.module.resolver.simple_controller_manager.get_controller(port=instance.websocket_port, instance=instance)
+        controller.send_all(message)
+
+
     @instance_specific
-    def start(self, instance: "BaseInstance") -> tuple[str, dict]:
-        assert instance.assigned_port != -1
-        controller: SimpleController = simple_controller_manager.get_controller(
-            port=instance.assigned_port
-        )
+    def start(self, _: "BaseInstance") -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
+
+        thread = threading.Thread(target=self.delayed_20, args=[_], daemon=True)
+        thread.start()
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
+
+    @simple_controller_processor
+    class SimpleControllerInit(SimpleControllerProcessor):
+        @staticmethod
+        def on_message(instance: "BaseInstance", message: str):
+            print(f"NEW MSG: {message}, {instance.working_directory()}")

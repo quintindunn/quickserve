@@ -11,6 +11,7 @@ from flask import Flask
 
 from QuickServeWeb.home import home
 from QuickServeWeb.modules import modules
+from QuickServeServiceLibrary.SimpleController import simple_controller_manager
 
 from typing import TYPE_CHECKING
 
@@ -39,5 +40,4 @@ def create_app(cfg: "Config"):
     app.register_blueprint(home)
     app.register_blueprint(modules)
     app.config["resolver"]: Resolver = cfg.resolver
-
     return app
