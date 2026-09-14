@@ -3,6 +3,7 @@ from markupsafe import Markup
 from QuickServe.Web.module_common.resources import get_resource
 from flask import current_app, request
 
+
 def simple_controller_builder(module_name: str) -> Callable[[], str]:
     resource: str = get_resource("simple_controller.html", mode="r")
 

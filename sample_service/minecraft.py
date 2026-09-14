@@ -4,8 +4,7 @@ Module main class for generating Minecraft Vanilla servers.
 Author: Quintin Dunn
 Date: 09/09/2026
 """
-import threading
-import time
+
 from typing import TYPE_CHECKING
 
 import logging
@@ -61,7 +60,7 @@ class Service:
     def action_install(self, instances: "InstanceService", **kwargs):
         """
         Installation action
-        :param base_instance: BaseInstance class reference, used for record insertion
+        :param instances: InstanceService reference, used for record insertion
         :param kwargs: Required Kwargs:
         - minecraft-version: A valid Minecraft version, listed in Minecraft version manifest v2
         (https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
@@ -79,7 +78,9 @@ class Service:
         )
 
         jar_url = self.downloader.get_release_manifest(id_=minecraft_version).server.url
-        instance = instances.new_service(module_name=self.NAME, service_name=instance_name)
+        instance = instances.new_service(
+            module_name=self.NAME, service_name=instance_name
+        )
 
         cwd = instance.working_directory()
         server_dir = cwd / "server"

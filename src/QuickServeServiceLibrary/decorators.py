@@ -6,6 +6,7 @@ from flask import request as _request
 if TYPE_CHECKING:
     from QuickServe.contracts import Service
 
+
 def instance_specific(func):
     @_wraps(func)
     def wrapper(self, *args, **kwargs):
@@ -19,6 +20,7 @@ def instance_specific(func):
         return func(self, instance, *args, **kwargs)
 
     return wrapper
+
 
 def simple_controller_processor(cls: "Service"):
     return cls
