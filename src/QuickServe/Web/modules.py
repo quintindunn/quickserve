@@ -16,15 +16,6 @@ from flask import (
 )
 from flask.typing import ResponseReturnValue
 
-from QuickServe.Driver.instance.base_instance import BaseInstance, instance_manager
-from QuickServe.Web.module_common.registry import registry
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from QuickServe.FileSystem.path_resolver import Resolver
-    from QuickServe.FileSystem.modules import Service, Module
-
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
 modules.register_blueprint(instances)
@@ -41,23 +32,23 @@ def _render_module_page(
     :param page: The page being rendered.
     :return: The rendered page.
     """
-    resolver: "Resolver" = current_app.config["resolver"]
+    catalog = current_app.extensions["quickserve.catalog"]
 
     if context is None:
         context = dict()
 
-    if module_name not in resolver.modules:
+    if module_name not in catalog:
         return (
             "<!DOCTYPE HTML>"
             "<html><head><title>404 Not Found!</title></head>"
             "<body><h1>Page not found!</h1></body></html>"
         )
 
-    module = resolver.modules[module_name]
-    service: "Service" = module.service
+    module = catalog.require(module_name)
+    service = module.service
 
     ctx = {
-        "modules": resolver.modules,
+        "modules": catalog.modules,
         "module_name": service.NAME,
         "module_version": service.VERSION,
         "module_pages": service.PAGES,
@@ -90,6 +81,7 @@ def _render_module_page(
 
     kwargs = {}
 
+    registry = current_app.extensions["quickserve.template_registry"]
     for key, builder in registry.registered.items():
         kwargs[key] = builder(module_name)
 
@@ -119,8 +111,8 @@ def module_page(module_name: str, page: str) -> ResponseReturnValue:
     return _render_module_page(module_name, page=page)
 
 
-def get_instance_from_db(uuid: str) -> BaseInstance:
-    return instance_manager.from_uuid(uuid)
+def get_instance_from_db(uuid: str):
+    return current_app.extensions["quickserve.instance_service"].from_uuid(uuid)
 
 
 @instances.route("/<uuid>/<page>")
@@ -140,8 +132,8 @@ def resource(module_name: str, filename: str) -> ResponseReturnValue:
     :param filename: The filename/path for the resource being rendered.
     :return: The resource being served.
     """
-    resolver: "Resolver" = current_app.config["resolver"]
-    module: "Module" = resolver.modules[module_name]
+    catalog = current_app.extensions["quickserve.catalog"]
+    module = catalog.require(module_name)
 
     file_path = module.get_resource_path(filename)
 
@@ -160,16 +152,17 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     """
     method = f"action_{method}"
 
-    resolver: "Resolver" = current_app.config["resolver"]
-    module: "Module" = resolver.modules[module_name]
-    service: "Service" = module.service
+    catalog = current_app.extensions["quickserve.catalog"]
+    module = catalog.require(module_name)
+    service = module.service
 
     if not hasattr(service, method):
         return "500", 500
 
     method = getattr(service, method)
 
-    values = method(BaseInstance, **request.form.to_dict())
+    instance_service = current_app.extensions["quickserve.instance_service"]
+    values = method(instance_service, **request.form.to_dict())
     code = 302
 
     if isinstance(values, tuple) and len(values) == 2 and isinstance(values[1], int):

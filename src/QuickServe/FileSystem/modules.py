@@ -10,58 +10,27 @@ import sys
 import logging
 from pathlib import Path
 
-from typing import TYPE_CHECKING, Union, Tuple
+from typing import TYPE_CHECKING
 from types import ModuleType
 
+from QuickServe.contracts import Service
 from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExist
 
-from abc import ABC, abstractmethod
-
 if TYPE_CHECKING:
-    from QuickServe.FileSystem.path_resolver import Resolver
+    from QuickServe.FileSystem.path_resolver import Workspace
 
 logger = logging.getLogger("QuickServerFS.Modules")
 
 
-class Service(ABC):
-    """Interface for Module Service"""
-
-    NAME: str
-    VERSION: str
-    QUICKSERVE_VERSION: str
-    AUTHORS: dict
-    PAGES: list[str]
-
-    @abstractmethod
-    def about(self) -> Union[str, Tuple[str, dict]]:
-        """
-        Required page for the module's about page.
-        :return: Union[str, Tuple[str, dict]], where the first str is
-        always the string representation of the template, and the optional
-        dictionary is any context to be passed to the renderer.
-        **NOTE: All context passed in will be automatically prefixed with 'param_'**
-        """
-
-    @abstractmethod
-    def create(self) -> Union[str, Tuple[str, dict]]:
-        """
-        Required page for the module's create page
-        :return: Union[str, Tuple[str, dict]], where the first str is
-        always the string representation of the template, and the optional
-        dictionary is any context to be passed to the renderer.
-        **NOTE: All context passed in will be automatically prefixed with 'param_'**
-        """
-
-
 class Module:
     path: Path
-    resolver: Resolver
+    workspace: "Workspace"
     module: ModuleType
     service: Service
 
-    def __init__(self, module_path: str | Path, resolver: "Resolver"):
+    def __init__(self, module_path: str | Path, workspace: "Workspace"):
         self.path = Path(module_path)
-        self.resolver = resolver
+        self.workspace = workspace
 
     def raise_if_attr_not_exist(
         self, attr_name: str, exception: Exception, service: bool = True
@@ -115,7 +84,7 @@ class Module:
         service_name = self.path.name
         logger.info(f"Loading service {service_name}")
 
-        modules_path = self.resolver.get_path("modules")
+        modules_path = self.workspace.get_path("modules")
 
         if str(modules_path) not in sys.path:
             sys.path.insert(0, str(modules_path))

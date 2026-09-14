@@ -1,6 +1,5 @@
 """
-Path helper class, os-independent. This class also holds module discovery, and loading.
-TODO: Rework module discovery/loading to make less misplaced.
+Path helper class, os-independent.
 
 Author: Quintin Dunn
 Date: 09/09/20206
@@ -11,8 +10,6 @@ from pathlib import Path
 import os
 from typing import Callable, Any
 import stat
-
-from QuickServe.FileSystem.modules import Module
 
 import logging
 
@@ -45,14 +42,21 @@ def _get_root() -> Path:
     return root_dir
 
 
-class Resolver:
-    modules: dict
+class Workspace:
+    """
+    Manages filesystem paths and directories for a QuickServe installation.
+    """
 
     def __init__(self, root: PathType | None = None):
+        """
+        Initializes the workspace and ensures its root directory exists.
+
+        :param root: The workspace root, or the platform default when omitted.
+        :return: None
+        """
         if root is None:
             root = _get_root()
 
-        self.modules = dict()
         self.root: Path = Path(root)
         self.ensure_directory(root)
 
@@ -142,40 +146,5 @@ class Resolver:
                 kwargs = dict()
             callback(*args, **kwargs)
 
-    def discover_and_load_modules(self) -> None:
-        """
-        Discovers all modules in the modules directory, and creates and loads a new Module instance.
-
-        :return: None
-        """
-
-        logger.debug("Discovering modules")
-        modules_path = self.get_path("modules")
-        self.ensure_directory(modules_path)
-
-        self.modules.clear()
-
-        dirs = [
-            item for item in modules_path.iterdir() if item.is_dir(follow_symlinks=True)
-        ]
-
-        logger.debug(f"Discovered {len(dirs)} modules")
-
-        logger.debug("Loading modules")
-        for dir_ in dirs:
-            logger.info(f"Loading {dir_}")
-            module = Module(module_path=dir_, resolver=self)
-            module.load_module()
-
-            self.modules[module.service.NAME] = module
-
-    @property
-    def config_path(self) -> Path:
-        """
-        :return: The path to the config file
-        """
-        return self.root / "config.yml"
-
-
-resolver = Resolver()
-resolver.discover_and_load_modules()
+# Maintains compatibility for callers using the Resolver name.
+Resolver = Workspace

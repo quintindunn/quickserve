@@ -1,8 +1,6 @@
-from QuickServe.FileSystem.config import config
-from typing import TYPE_CHECKING
+from uuid import UUID
 
-if TYPE_CHECKING:
-    from QuickServe.Driver.instance.base_instance import BaseInstance
+from QuickServe.contracts import WebSettings
 
 from enum import Enum
 
@@ -43,12 +41,13 @@ class PortManager:
     websocket_ports: dict[str, Port]
     websocket_ports_inverse: dict[int, str]
 
-    def __init__(self):
+    def __init__(self, settings: WebSettings):
         self.ports = list()
         self.websocket_ports = dict()
         self.websocket_ports_inverse = dict()
 
-        self.last_websocket_port = config.web.websocket_port_range_start - 1
+        self.settings = settings
+        self.last_websocket_port = settings.websocket_port_range_start - 1
 
     def free(self, port_to_free: int):
         if port_to_free in self.websocket_ports_inverse:
@@ -80,21 +79,19 @@ class PortManager:
 
         return port
 
-    def request_websocket_port(self, instance: "BaseInstance") -> Port | None:
-        if str(instance.uuid) in self.websocket_ports:
-            return self.websocket_ports[str(instance.uuid)]
+    def request_websocket_port(self, instance_id: str | UUID) -> Port | None:
+        key = str(instance_id)
+        if key in self.websocket_ports:
+            return self.websocket_ports[key]
 
-        while self.last_websocket_port + 1 < config.web.websocket_port_range_end:
+        while self.last_websocket_port + 1 < self.settings.websocket_port_range_end:
             self.last_websocket_port += 1
             if not self.is_port_occupied(self.last_websocket_port):
                 return self.register_port(
                     port=self.last_websocket_port,
                     usage_type=UsageType.websocket,
-                    key=str(instance.uuid),
+                    key=key,
                 )
 
         logger.warning("No websocket ports available!")
         return None
-
-
-port_manager = PortManager()

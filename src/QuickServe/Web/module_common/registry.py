@@ -18,6 +18,3 @@ class Registry:
 
     def register(self, key: str, value: Callable):
         self.registered[key] = value
-
-
-registry = Registry()

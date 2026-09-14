@@ -14,8 +14,7 @@ import logging
 import tomli_w
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from QuickServe.FileSystem.path_resolver import resolver as _resolver
-from QuickServe.FileSystem.path_resolver import Resolver
+from QuickServe.FileSystem.path_resolver import Workspace
 
 
 logger = logging.getLogger("FileSystem.config")
@@ -50,24 +49,24 @@ class DatabaseModel(ConfigModel):
 
 
 class Config:
-    web: WebModel | None
-    driver: DriverModel | None
-    database: DatabaseModel | None
-    resolver: Resolver
+    web: WebModel
+    driver: DriverModel
+    database: DatabaseModel
+    workspace: Workspace
 
-    def __init__(self, resolver: Resolver) -> None:
+    def __init__(self, workspace: Workspace) -> None:
         """
         Initializes the configuration manager and loads the configuration.
 
-        :param resolver: The path resolver used to locate configuration files.
+        :param workspace: The workspace used to locate configuration files.
         """
         logger.debug("Initializing configuration")
 
-        self.resolver = resolver
+        self.workspace = workspace
 
-        self.web = None
-        self.driver = None
-        self.database = None
+        self.web = WebModel()
+        self.driver = DriverModel()
+        self.database = DatabaseModel()
 
         self.read()
 
@@ -80,7 +79,7 @@ class Config:
 
         :return: The path to the configuration file.
         """
-        return self.resolver.get_path("config.toml")
+        return self.workspace.get_path("config.toml")
 
     def open_config(self, mode: str) -> IO[Any]:
         """
@@ -98,7 +97,7 @@ class Config:
         logger.debug("Opening configuration file %s with mode %r", path, mode)
 
         try:
-            self.resolver.call_if_not_exist(path, self.create)
+            self.workspace.call_if_not_exist(path, self.create)
             return open(path, mode=mode)
         except OSError:
             logger.exception("Failed to open configuration file %s", path)
@@ -325,6 +324,3 @@ class Config:
             return [Config._toml_safe(item) for item in value]
 
         return value
-
-
-config = Config(resolver=_resolver)

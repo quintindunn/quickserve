@@ -7,7 +7,7 @@ Date: 09/09/2026
 
 from peewee import DateTimeField, UUIDField, IntegerField, Model, BooleanField
 
-from QuickServe.Database.database import db
+from QuickServe.Database.database import database_proxy
 
 
 class OccupiedPortModel(Model):
@@ -20,4 +20,4 @@ class OccupiedPortModel(Model):
     created_on = DateTimeField()
 
     class Meta:
-        database = db
+        database = database_proxy

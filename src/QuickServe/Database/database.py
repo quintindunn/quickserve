@@ -6,25 +6,45 @@ Date: 09/09/2026
 """
 
 import logging
+from pathlib import Path
 
-from peewee import SqliteDatabase
-
-from QuickServe.FileSystem import config
+from peewee import DatabaseProxy, SqliteDatabase
 
 logger = logging.getLogger("Database.database")
 
-db = SqliteDatabase(config.database.file_path)
-logger.debug(f"Initialized Sqlite Database at {config.database.file_path}")
+database_proxy = DatabaseProxy()
 
 
-def connect() -> None:
+def create_database(file_path: str | Path) -> SqliteDatabase:
+    """
+    Creates an unconnected database from a file path.
+
+    :param file_path: The SQLite database file to use.
+    :return: The unconnected SQLite database.
+    """
+    database = SqliteDatabase(file_path)
+    logger.debug("Initialized SQLite database at %s", file_path)
+    return database
+
+
+def initialize(database: SqliteDatabase) -> None:
+    """
+    Binds the model proxy after settings have been loaded.
+
+    :param database: The database used by Peewee models.
+    :return: None
+    """
+    database_proxy.initialize(database)
+
+
+def connect(database: SqliteDatabase) -> None:
     """
     Connects to the database.
 
     :return: None
     """
     logger.debug("Connecting to database")
-    db.connect(reuse_if_open=True)
+    database.connect(reuse_if_open=True)
     logger.info("Connected to database")
 
 
@@ -35,8 +55,8 @@ def close() -> None:
     :return: None
     """
     logger.info("Closing database")
-    if not db.is_closed():
-        db.close()
+    if not database_proxy.is_closed():
+        database_proxy.close()
         logger.info("Database closed")
         return
     logger.info("Database already closed")

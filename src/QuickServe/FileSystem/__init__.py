@@ -1,3 +1,6 @@
-from QuickServe.FileSystem.config import config
-from QuickServe.FileSystem.path_resolver import resolver
-from QuickServe.FileSystem.modules import Module
+"""
+Filesystem utilities for QuickServe runtime data.
+
+Author: Quintin Dunn
+Date: 09/14/2026
+"""

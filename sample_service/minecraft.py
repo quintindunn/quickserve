@@ -16,8 +16,9 @@ from .downloader import Downloader
 from QuickServeServiceLibrary.decorators import instance_specific
 
 if TYPE_CHECKING:
-    from QuickServe.FileSystem import Module
-    from QuickServe.Driver import BaseInstance
+    from QuickServe.FileSystem.modules import Module
+    from QuickServe.Driver.instance.base_instance import BaseInstance
+    from QuickServe.Application.instances import InstanceService
 
 logger = logging.getLogger("minecraft-vanilla")
 
@@ -57,7 +58,7 @@ class Service:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    def action_install(self, base_instance: "BaseInstance", **kwargs):
+    def action_install(self, instances: "InstanceService", **kwargs):
         """
         Installation action
         :param base_instance: BaseInstance class reference, used for record insertion
@@ -78,13 +79,11 @@ class Service:
         )
 
         jar_url = self.downloader.get_release_manifest(id_=minecraft_version).server.url
-        instance = base_instance.new_service(
-            module=self.module, service_name=instance_name, module_name=self.NAME
-        )
+        instance = instances.new_service(module_name=self.NAME, service_name=instance_name)
 
         cwd = instance.working_directory()
         server_dir = cwd / "server"
-        self.module.resolver.ensure_directory(server_dir)
+        self.module.workspace.ensure_directory(server_dir)
 
         with open(server_dir / "server.jar", "wb") as f:
             request = requests.get(jar_url, stream=True)
@@ -104,7 +103,7 @@ class Service:
             time.sleep(5)
 
     def send_websocket_message(self, message: str, instance: "BaseInstance"):
-        controller = self.module.resolver.simple_controller_manager.get_controller(port=instance.websocket_port, instance=instance)
+        controller = self.module.workspace.simple_controller_manager.get_controller(port=instance.websocket_port, instance=instance)
         controller.send_all(message)
 
 

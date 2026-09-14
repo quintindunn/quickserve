@@ -9,7 +9,7 @@ from peewee import DateTimeField, UUIDField, Model, CharField
 
 from datetime import datetime
 
-from QuickServe.Database.database import db
+from QuickServe.Database.database import database_proxy
 
 
 class InstanceModel(Model):
@@ -21,4 +21,4 @@ class InstanceModel(Model):
     created_on = DateTimeField(default=datetime.now)
 
     class Meta:
-        database = db
+        database = database_proxy

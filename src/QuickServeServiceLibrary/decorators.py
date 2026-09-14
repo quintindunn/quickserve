@@ -4,7 +4,7 @@ from functools import wraps as _wraps
 from flask import request as _request
 
 if TYPE_CHECKING:
-    from QuickServe.FileSystem.modules import Service
+    from QuickServe.contracts import Service
 
 def instance_specific(func):
     @_wraps(func)

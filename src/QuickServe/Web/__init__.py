@@ -11,15 +11,30 @@ from flask import Flask
 
 from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
+from QuickServe.Web.module_common.registry import Registry
+from QuickServe.contracts import WebSettings
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from QuickServe.FileSystem.config import Config
-    from QuickServe.FileSystem.path_resolver import Resolver
+    from QuickServe.FileSystem.plugins import ServiceCatalog
+    from QuickServe.Application.instances import InstanceService
 
 
-def create_app(cfg: "Config"):
+def create_app(
+    settings: WebSettings,
+    catalog: "ServiceCatalog",
+    instance_service: "InstanceService",
+) -> Flask:
+    """
+    Creates a Flask application from already-constructed dependencies.
+
+    :param settings: The web settings used to configure Flask.
+    :param catalog: The catalog of loaded service plugins.
+    :param instance_service: The application service used by instance routes.
+    :return: The configured Flask application.
+    """
+
     root_dir = Path(__file__).resolve().parent
     template_dir = root_dir / "templates"
     static_dir = root_dir / "static"
@@ -28,15 +43,15 @@ def create_app(cfg: "Config"):
 
     if any(
         not hasattr(v, k)
-        for k, v in {"secret_key": cfg.web, "file_path": cfg.database}.items()
+        for k, v in {"secret_key": settings}.items()
     ):
         raise Exception("Invalid Config")
 
-    app.config["SECRET_KEY"] = cfg.web.secret_key
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite://{cfg.database.file_path}"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SECRET_KEY"] = settings.secret_key
 
     app.register_blueprint(home)
     app.register_blueprint(modules)
-    app.config["resolver"]: Resolver = cfg.resolver
+    app.extensions["quickserve.catalog"] = catalog
+    app.extensions["quickserve.instance_service"] = instance_service
+    app.extensions["quickserve.template_registry"] = Registry()
     return app
