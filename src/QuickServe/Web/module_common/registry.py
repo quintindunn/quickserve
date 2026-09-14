@@ -3,6 +3,7 @@ from typing import Callable
 from QuickServe.Web.module_common.factories.link import link_builder
 from QuickServe.Web.module_common.factories.action import action_builder
 from QuickServe.Web.module_common.factories.resource import resource_builder
+from QuickServe.Web.module_common.factories.simple_controller import simple_controller_builder
 
 
 class Registry:
@@ -11,7 +12,7 @@ class Registry:
     def __init__(self):
         self.registered = dict()
 
-        # self.register("simple_controller", simple_controller_builder)
+        self.register("simple_controller", simple_controller_builder)
         self.register("action", action_builder)
         self.register("link", link_builder)
         self.register("resource", resource_builder)

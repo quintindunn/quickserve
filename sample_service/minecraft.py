@@ -97,21 +97,9 @@ class Service:
 
         return "about", 302
 
-    def delayed_20(self, instance: "BaseInstance"):
-        while True:
-            self.send_websocket_message(f"Hello, world {time.time()}", instance)
-            time.sleep(5)
-
-    def send_websocket_message(self, message: str, instance: "BaseInstance"):
-        controller = self.module.workspace.simple_controller_manager.get_controller(port=instance.websocket_port, instance=instance)
-        controller.send_all(message)
-
-
     @instance_specific
     def start(self, _: "BaseInstance") -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
 
-        thread = threading.Thread(target=self.delayed_20, args=[_], daemon=True)
-        thread.start()
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
