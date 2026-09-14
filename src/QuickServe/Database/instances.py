@@ -9,7 +9,7 @@ from peewee import DateTimeField, UUIDField, Model, CharField
 
 from datetime import datetime
 
-from QuickServeDatabase.database import db
+from QuickServe.Database.database import db
 
 
 class InstanceModel(Model):

@@ -8,7 +8,7 @@ Date: 09/09/2026
 import logging
 import re
 
-logger = logging.getLogger("QuickServeDriver.utils")
+logger = logging.getLogger("Driver.utils")
 
 
 def sanitize_filename(string: str) -> str:

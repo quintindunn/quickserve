@@ -13,12 +13,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Union, Tuple
 from types import ModuleType
 
-from QuickServeFS.exceptions import InvalidModuleError, AssetDoesntExist
+from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExist
 
 from abc import ABC, abstractmethod
 
 if TYPE_CHECKING:
-    from QuickServeFS.path_resolver import Resolver
+    from QuickServe.FileSystem.path_resolver import Resolver
 
 logger = logging.getLogger("QuickServerFS.Modules")
 

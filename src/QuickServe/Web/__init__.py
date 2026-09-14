@@ -9,15 +9,14 @@ from pathlib import Path
 
 from flask import Flask
 
-from QuickServeWeb.home import home
-from QuickServeWeb.modules import modules
-from QuickServeServiceLibrary.SimpleController import simple_controller_manager
+from QuickServe.Web.home import home
+from QuickServe.Web.modules import modules
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from QuickServeFS.config import Config
-    from QuickServeFS.path_resolver import Resolver
+    from QuickServe.FileSystem.config import Config
+    from QuickServe.FileSystem.path_resolver import Resolver
 
 
 def create_app(cfg: "Config"):

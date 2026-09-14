@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Union
 
-from QuickServeWeb.module_common import resource_dir
-from QuickServeWeb.module_common.exceptions import ResourceDoesntExistException
+from QuickServe.Web.module_common import resource_dir
+from QuickServe.Web.module_common.exceptions import ResourceDoesntExistException
 
 
 def get_resource(resource_name: str, mode: str = "r") -> Union[str, bytes]:

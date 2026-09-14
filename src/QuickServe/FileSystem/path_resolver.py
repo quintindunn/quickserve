@@ -12,7 +12,7 @@ import os
 from typing import Callable, Any
 import stat
 
-from QuickServeFS.modules import Module
+from QuickServe.FileSystem.modules import Module
 
 import logging
 

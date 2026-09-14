@@ -10,9 +10,9 @@ import sys
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-    from QuickServeDatabase import db, connect, MODELS
-    from QuickServeWeb import create_app
-    from QuickServeFS import config
+    from QuickServe.Database import db, connect, MODELS
+    from QuickServe.Web import create_app
+    from QuickServe.FileSystem import config
 
     connect()
     db.create_tables(MODELS)

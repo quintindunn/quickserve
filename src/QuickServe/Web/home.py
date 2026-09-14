@@ -11,7 +11,7 @@ from flask.typing import ResponseReturnValue
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from QuickServeFS.path_resolver import Resolver
+    from QuickServe.FileSystem.path_resolver import Resolver
 
 home = Blueprint("home", __name__)
 

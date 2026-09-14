@@ -1,8 +1,8 @@
-from QuickServeFS.config import config
+from QuickServe.FileSystem.config import config
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from QuickServeDriver.instance.base_instance import BaseInstance
+    from QuickServe.Driver.instance.base_instance import BaseInstance
 
 from enum import Enum
 

@@ -1,5 +1,5 @@
 """
-Configuration management for QuickServeFS.
+Configuration management for FileSystem.
 
 Author: Quintin Dunn
 Date: 09/09/2026
@@ -14,11 +14,11 @@ import logging
 import tomli_w
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from QuickServeFS.path_resolver import resolver as _resolver
-from QuickServeFS.path_resolver import Resolver
+from QuickServe.FileSystem.path_resolver import resolver as _resolver
+from QuickServe.FileSystem.path_resolver import Resolver
 
 
-logger = logging.getLogger("QuickServeFS.config")
+logger = logging.getLogger("FileSystem.config")
 
 
 class ConfigModel(BaseModel):

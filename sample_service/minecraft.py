@@ -11,16 +11,13 @@ from typing import TYPE_CHECKING
 import logging
 import requests
 
-from QuickServeServiceLibrary.decorators import instance_specific, simple_controller_processor
-from QuickServeServiceLibrary import SimpleControllerProcessor
-from flask import current_app
-
 from .downloader import Downloader
 
+from QuickServeServiceLibrary.decorators import instance_specific
+
 if TYPE_CHECKING:
-    from QuickServeFS.modules import Module
-    from QuickServeDriver.instance.base_instance import BaseInstance
-    from QuickServeServiceLibrary.SimpleController import SimpleControllerManager
+    from QuickServe.FileSystem import Module
+    from QuickServe.Driver import BaseInstance
 
 logger = logging.getLogger("minecraft-vanilla")
 
@@ -119,9 +116,3 @@ class Service:
         thread.start()
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
-
-    @simple_controller_processor
-    class SimpleControllerInit(SimpleControllerProcessor):
-        @staticmethod
-        def on_message(instance: "BaseInstance", message: str):
-            print(f"NEW MSG: {message}, {instance.working_directory()}")

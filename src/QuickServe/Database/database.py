@@ -9,9 +9,9 @@ import logging
 
 from peewee import SqliteDatabase
 
-from QuickServeFS import config
+from QuickServe.FileSystem import config
 
-logger = logging.getLogger("QuickServeDatabase.database")
+logger = logging.getLogger("Database.database")
 
 db = SqliteDatabase(config.database.file_path)
 logger.debug(f"Initialized Sqlite Database at {config.database.file_path}")

@@ -16,14 +16,14 @@ from flask import (
 )
 from flask.typing import ResponseReturnValue
 
-from QuickServeDriver.instance.base_instance import BaseInstance, instance_manager
-from QuickServeWeb.module_common.registry import registry
+from QuickServe.Driver.instance.base_instance import BaseInstance, instance_manager
+from QuickServe.Web.module_common.registry import registry
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from QuickServeFS.path_resolver import Resolver
-    from QuickServeFS.modules import Service, Module
+    from QuickServe.FileSystem.path_resolver import Resolver
+    from QuickServe.FileSystem.modules import Service, Module
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
@@ -32,7 +32,7 @@ modules.register_blueprint(instances)
 
 # TODO: Add check for invalid page.
 def _render_module_page(
-    module_name: str, page: str, context: dict | None
+    module_name: str, page: str, context: dict | None = None
 ) -> ResponseReturnValue:
     """
     Helper function to render a module's pages, along with helper functions, and base context values.
