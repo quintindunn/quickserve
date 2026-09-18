@@ -111,7 +111,11 @@ class PluginLoader:
             if not path.is_dir() or path.name.startswith("."):
                 continue
             logger.info("Loading service plugin %s", path)
-            module = Module(module_path=path, workspace=self.workspace, runtime_manager=self.runtime_manager)
+            module = Module(
+                module_path=path,
+                workspace=self.workspace,
+                runtime_manager=self.runtime_manager,
+            )
             module.load_module()
             name = module.service.NAME
             if name in loaded:

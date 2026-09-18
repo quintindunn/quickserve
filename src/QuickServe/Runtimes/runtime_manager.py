@@ -88,7 +88,9 @@ class RuntimeManager:
             )
             return jre_root
 
-        jre_download_link = self.get_jre_download_link(major_version=major_version, image_type=image_type)
+        jre_download_link = self.get_jre_download_link(
+            major_version=major_version, image_type=image_type
+        )
         file_type = jre_download_link.split(".")[-1]
 
         logger.info(f"JRE Download link: {jre_download_link!r}")
@@ -273,29 +275,43 @@ class RuntimeManager:
 
         raise NotImplementedError("JRE Installer for windows not yet supported")
 
-    def get_java_executable(self, major_version: int, image_type: str, install_missing: bool = True):
-        exists = self.check_jre_exists(major_version=major_version, image_type=image_type)
+    def get_java_executable(
+        self, major_version: int, image_type: str, install_missing: bool = True
+    ):
+        exists = self.check_jre_exists(
+            major_version=major_version, image_type=image_type
+        )
         if not exists and install_missing:
             logger.info(f"{image_type.upper()} {major_version} not found. Installing.")
             self.ensure_jre(major_version=major_version, image_type=image_type)
 
         logger.info("Verifying JRE exists.")
-        exists = self.check_jre_exists(major_version=major_version, image_type=image_type)
+        exists = self.check_jre_exists(
+            major_version=major_version, image_type=image_type
+        )
         if not exists:
             raise FileNotFoundError("No Java executable found!")
 
-        root = self.workspace.get_path(self._get_jre_root(major_version=major_version, image_type=image_type))
+        root = self.workspace.get_path(
+            self._get_jre_root(major_version=major_version, image_type=image_type)
+        )
 
         operating_system = platform.system()
 
         if operating_system == "Darwin":
             return root / "bin" / "java"
         elif operating_system == "Windows":
-            raise NotImplementedError(f"Getting executable for {operating_system} is not supported yet.")
+            raise NotImplementedError(
+                f"Getting executable for {operating_system} is not supported yet."
+            )
         elif operating_system == "Linux":
-            raise NotImplementedError(f"Getting executable for {operating_system} is not supported yet.")
+            raise NotImplementedError(
+                f"Getting executable for {operating_system} is not supported yet."
+            )
         else:
-            raise NotImplementedError(f"Operating system {operating_system!r} is not supported.")
+            raise NotImplementedError(
+                f"Operating system {operating_system!r} is not supported."
+            )
 
 
 if __name__ == "__main__":

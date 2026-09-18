@@ -30,7 +30,12 @@ class Module:
     service: Service
     runtime_manager: "RuntimeManager"
 
-    def __init__(self, module_path: str | Path, workspace: "Workspace", runtime_manager: "RuntimeManager"):
+    def __init__(
+        self,
+        module_path: str | Path,
+        workspace: "Workspace",
+        runtime_manager: "RuntimeManager",
+    ):
         self.path = Path(module_path)
         self.workspace = workspace
         self.runtime_manager = runtime_manager
@@ -71,7 +76,9 @@ class Module:
             service=False,
         )
 
-        self.service = self.module.Service(module=self, runtime_manager=self.runtime_manager)
+        self.service = self.module.Service(
+            module=self, runtime_manager=self.runtime_manager
+        )
         for attr, error in attr_error_map.items():
             logger.debug(f"{self.path.name} - Validating {attr}")
             self.raise_if_attr_not_exist(

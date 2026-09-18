@@ -14,7 +14,7 @@ class MinecraftServer:
     def __init__(self, root_dir: str | Path):
         self.root_dir = Path(root_dir)
         self.jar = root_dir / "server.jar"
-        self.proc: Popen = None
+        self.proc: Popen | None = None
         self.started_at = -1
 
     def check_eula(self):
@@ -49,12 +49,20 @@ class MinecraftServer:
             logger.info("Server already running...")
             return
 
-        command = [java_executable, f"-Xmx{xmx}", f"-Xms{xms}", "-jar", "./server.jar", "nogui"]
-        logger.info(t"Starting server {command}")
-        self.proc = subprocess.Popen(command,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     stdin=subprocess.PIPE,
-                                     text=True,
-                                     cwd=self.root_dir
-                                     )
+        command = [
+            java_executable,
+            f"-Xmx{xmx}",
+            f"-Xms{xms}",
+            "-jar",
+            "./server.jar",
+            "nogui",
+        ]
+        logger.info(f"Starting server {command}")
+        self.proc = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            text=True,
+            cwd=self.root_dir,
+        )

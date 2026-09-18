@@ -102,7 +102,7 @@ class Service:
         )
 
         cwd = instance.working_directory()
-        with open(cwd / "jre-requirements", 'w') as f:
+        with open(cwd / "jre-requirements", "w") as f:
             f.write(str(java_major))
 
         server_dir = cwd / "server"
@@ -151,10 +151,12 @@ class Service:
         jre_requirements_path = instance.working_directory() / "jre-requirements"
         assert jre_requirements_path.exists()
 
-        with open(jre_requirements_path, 'r') as f:
+        with open(jre_requirements_path, "r") as f:
             jre_requirement = int(f.read())
 
-        java_executable = self.runtime_manager.get_java_executable(jre_requirement, "jre")
+        java_executable = self.runtime_manager.get_java_executable(
+            jre_requirement, "jre"
+        )
 
         if instance.uuid in self.instance_server_map:
             server = self.instance_server_map[instance.uuid]
@@ -211,7 +213,9 @@ class Service:
         server.proc.stdin.flush()
 
     @instance_specific
-    def start(self, instance: "BaseInstance", send_callback: Callable) -> tuple[str, dict]:
+    def start(
+        self, instance: "BaseInstance", send_callback: Callable
+    ) -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
         self.instance_callback_map[instance.uuid] = send_callback
 

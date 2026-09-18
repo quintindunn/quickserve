@@ -48,20 +48,32 @@ if __name__ == "__main__":
     db_connect(database=database)
     database.create_tables(models=MODELS)
 
-    catalog = PluginLoader(workspace=workspace, runtime_manager=runtime_manager).load_all()
+    catalog = PluginLoader(
+        workspace=workspace, runtime_manager=runtime_manager
+    ).load_all()
 
     port_manager = PortManager(settings=config.web)
 
     instance_service = InstanceService(
-        catalog=catalog, workspace=workspace, port_manager=port_manager, repository=PeeweeInstanceRepository()
+        catalog=catalog,
+        workspace=workspace,
+        port_manager=port_manager,
+        repository=PeeweeInstanceRepository(),
     )
 
-    websocket_server = WebsocketServer(config=config.web, instance_service=instance_service)
+    websocket_server = WebsocketServer(
+        config=config.web, instance_service=instance_service
+    )
     Thread(
         target=start_websocket,
         args=[websocket_server],
         daemon=True,
     ).start()
 
-    app = create_app(settings=config.web, catalog=catalog, instance_service=instance_service, websocket_server=websocket_server)
+    app = create_app(
+        settings=config.web,
+        catalog=catalog,
+        instance_service=instance_service,
+        websocket_server=websocket_server,
+    )
     app.run(host="0.0.0.0", port=8080, debug=True, use_reloader=False)
