@@ -39,7 +39,7 @@ async def instance_handler(
         is_authenticated=False,
         remote_host=connection.remote_address[0],
         remote_port=connection.remote_address[1],
-        connection=connection
+        connection=connection,
     )
 
     server.register_instance(instance_websocket_object)
@@ -48,11 +48,10 @@ async def instance_handler(
     instance = instance_service.from_uuid(instance_uuid)
     service: "Service" = instance.module.service
 
-
     async for message in connection:
         if not hasattr(service, "on_message"):
             break
-        service.on_message(message) # noqa
+        service.on_message(message)  # noqa
         logger.debug(
             f"New message from {connection.remote_address} - {message[:32]}{'...' if len(message) > 32 else ''}"
         )

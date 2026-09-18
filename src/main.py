@@ -4,16 +4,19 @@ Main entry point for quickserve
 Author: Quintin Dunn
 Date: 09/09/2026
 """
+
 from threading import Thread
 
 import asyncio
 import logging
 import sys
 
+
 def start_websocket(ws_server):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(ws_server.start())
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)

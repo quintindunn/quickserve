@@ -8,6 +8,7 @@ Date: 09/17/2026
 from websockets.asyncio.server import ServerConnection
 from dataclasses import dataclass
 
+
 @dataclass
 class InstanceWebsocketConnection:
     instance_uuid: str
@@ -19,8 +20,10 @@ class InstanceWebsocketConnection:
     connection: ServerConnection
 
     def __hash__(self):
-        return hash((
-        self.instance_uuid,
-        self.remote_host,
-        self.remote_port,
-    ))
+        return hash(
+            (
+                self.instance_uuid,
+                self.remote_host,
+                self.remote_port,
+            )
+        )

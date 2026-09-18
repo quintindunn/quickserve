@@ -138,9 +138,7 @@ class Service:
             self.ws_send_callback(f"Hello, world! {time.time()}\n")
 
     @instance_specific
-    def start(
-        self, _: "BaseInstance", send_callback: Callable
-    ) -> tuple[str, dict]:
+    def start(self, _: "BaseInstance", send_callback: Callable) -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
         self.ws_send_callback = send_callback
 

@@ -25,7 +25,10 @@ modules.register_blueprint(instances)
 
 # TODO: Add check for invalid page.
 def _render_module_page(
-    module_name: str, page: str, context: dict | None = None, instance_uuid: str | None = None
+    module_name: str,
+    page: str,
+    context: dict | None = None,
+    instance_uuid: str | None = None,
 ) -> ResponseReturnValue:
     """
     Helper function to render a module's pages, along with helper functions, and base context values.
@@ -49,7 +52,9 @@ def _render_module_page(
     module = catalog.require(module_name)
     service = module.service
 
-    websocket_server: "WebsocketServer" = current_app.extensions["quickserve.websocket_server"]
+    websocket_server: "WebsocketServer" = current_app.extensions[
+        "quickserve.websocket_server"
+    ]
 
     ctx = {
         "modules": catalog.modules,
@@ -57,7 +62,7 @@ def _render_module_page(
         "module_version": service.VERSION,
         "module_pages": service.PAGES,
         "websocket_host": websocket_server.host,
-        "websocket_port": websocket_server.port
+        "websocket_port": websocket_server.port,
     }
 
     if hasattr(service, "AUTHORS"):
@@ -68,9 +73,11 @@ def _render_module_page(
 
     page = getattr(service, page)
     if "instance_uuid" in context:
+
         def build_callback():
             def callback(message: str):
                 return websocket_server.send_instance(context["instance_uuid"], message)
+
             return callback
 
         values = page(send_callback=build_callback())

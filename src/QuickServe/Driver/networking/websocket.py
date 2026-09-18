@@ -32,11 +32,13 @@ server_stop_flag = asyncio.Event()
 
 stop = asyncio.Event()
 
+
 def wrap_endpoint(server, endpoint):
     def _endpoint(conn, *args, **kwargs):
         return endpoint(server, conn, *args, **kwargs)
 
     return _endpoint
+
 
 class WebsocketServer:
     """
@@ -55,7 +57,12 @@ class WebsocketServer:
         self.host = config.websocket_host
         self.port = config.websocket_port
         self.router_map = Map(
-            [Rule("/instance/<string:instance_uuid>", endpoint=wrap_endpoint(self, instance_handler))]
+            [
+                Rule(
+                    "/instance/<string:instance_uuid>",
+                    endpoint=wrap_endpoint(self, instance_handler),
+                )
+            ]
         )
         self._instance_service = instance_service
         self._stop_flag = asyncio.Event()
@@ -70,11 +77,12 @@ class WebsocketServer:
         for connection in self._connection_instances:
             if UUID(connection.instance_uuid) == instance_uuid:
                 asyncio.run_coroutine_threadsafe(
-                    connection.connection.send(message),
-                    self._loop
+                    connection.connection.send(message), self._loop
                 )
 
-    def register_instance(self, connection_instance: "InstanceWebsocketConnection") -> None:
+    def register_instance(
+        self, connection_instance: "InstanceWebsocketConnection"
+    ) -> None:
         if connection_instance in self._connection_instances:
             raise ValueError("Instance is already registered in WebsocketServer")
         self._connection_instances.add(connection_instance)
@@ -91,4 +99,3 @@ class WebsocketServer:
         async with route(self.router_map, host=self.host, port=self.port):
             logger.info(f"Started websocket server on {self.host}:{self.port}")
             await stop.wait()
-

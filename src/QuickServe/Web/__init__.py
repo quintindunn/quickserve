@@ -26,7 +26,7 @@ def create_app(
     settings: WebSettings,
     catalog: "ServiceCatalog",
     instance_service: "InstanceService",
-    websocket_server: "WebsocketServer"
+    websocket_server: "WebsocketServer",
 ) -> Flask:
     """
     Creates a Flask application from already-constructed dependencies.
