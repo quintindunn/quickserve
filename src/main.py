@@ -32,11 +32,14 @@ if __name__ == "__main__":
     from QuickServe.FileSystem.path_resolver import Workspace
     from QuickServe.FileSystem.plugins import PluginLoader
     from QuickServe.Driver.networking.websocket import WebsocketServer
+    from QuickServe.Runtimes.runtime_manager import RuntimeManager
     import logging
 
     # logging.getLogger("websockets.server").setLevel(logging.ERROR)
 
     workspace = Workspace()
+
+    runtime_manager = RuntimeManager(workspace=workspace)
 
     config = Config(workspace)
 
