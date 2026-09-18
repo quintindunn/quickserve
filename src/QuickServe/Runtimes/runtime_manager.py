@@ -50,14 +50,14 @@ class RuntimeManager:
             Path("runtimes") / "jre" / f"{major_version}-{image_type}"
         )
 
-    def check_jre_exists(self, major_version: int, component: str) -> bool:
+    def check_jre_exists(self, major_version: int, image_type: str) -> bool:
         """
         Checks if a given JRE is already installed.
         :param major_version: JRE major version
-        :param component: JRE component
+        :param image_type: JRE component
         :return: True if JRE exists, False if not.
         """
-        root = self._get_jre_root(major_version=major_version, image_type=component)
+        root = self._get_jre_root(major_version=major_version, image_type=image_type)
         if not root.exists():
             return False
         if not (root / "bin").exists():
@@ -81,7 +81,7 @@ class RuntimeManager:
         jre_root = self._get_jre_root(
             major_version=major_version, image_type=image_type
         )
-        if self.check_jre_exists(major_version=major_version, component=image_type):
+        if self.check_jre_exists(major_version=major_version, image_type=image_type):
             logger.info(f"JRE {major_version}-{image_type} exists.")
             logger.debug(
                 f"JRE root: {self._get_jre_root(major_version=major_version, image_type=image_type)!r}"
@@ -223,7 +223,8 @@ class RuntimeManager:
             / "Java"
             / "JavaVirtualMachines"
         )
-        binary_folder = step_1 / os.listdir(step_1)[0] / "Contents" / "Home" / "bin"
+        contents_folder = step_1 / os.listdir(step_1)[0] / "Contents"
+        binary_folder = contents_folder / "Home"
         logger.debug(f"Located binary folder {binary_folder}")
 
         jre_root = self._get_jre_root(
@@ -234,11 +235,12 @@ class RuntimeManager:
             shutil.rmtree(jre_root)
             os.rmdir(jre_root)
 
-        logger.info(f"Copying binary folder to {jre_root}")
-        shutil.copytree(binary_folder, jre_root / "bin")
+        logger.info(f"Copying environment")
+        shutil.copytree(binary_folder, jre_root)
 
         logger.info("Cleaning up.")
         shutil.rmtree(binary_folder)
+        shutil.rmtree(unpacked_location)
         os.remove(tmp_location)
 
     def install_jre_linux(
@@ -271,9 +273,34 @@ class RuntimeManager:
 
         raise NotImplementedError("JRE Installer for windows not yet supported")
 
+    def get_java_executable(self, major_version: int, image_type: str, install_missing: bool = True):
+        exists = self.check_jre_exists(major_version=major_version, image_type=image_type)
+        if not exists and install_missing:
+            logger.info(f"{image_type.upper()} {major_version} not found. Installing.")
+            self.ensure_jre(major_version=major_version, image_type=image_type)
+
+        logger.info("Verifying JRE exists.")
+        exists = self.check_jre_exists(major_version=major_version, image_type=image_type)
+        if not exists:
+            raise FileNotFoundError("No Java executable found!")
+
+        root = self.workspace.get_path(self._get_jre_root(major_version=major_version, image_type=image_type))
+
+        operating_system = platform.system()
+
+        if operating_system == "Darwin":
+            return root / "bin" / "java"
+        elif operating_system == "Windows":
+            raise NotImplementedError(f"Getting executable for {operating_system} is not supported yet.")
+        elif operating_system == "Linux":
+            raise NotImplementedError(f"Getting executable for {operating_system} is not supported yet.")
+        else:
+            raise NotImplementedError(f"Operating system {operating_system!r} is not supported.")
+
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     workspace_ = Workspace()
     runtime_manager = RuntimeManager(workspace=workspace_)
-    jre_location = runtime_manager.ensure_jre(8, "jre")
+    executable = runtime_manager.get_java_executable(8, "jre")
+    print(executable)
