@@ -4,6 +4,8 @@ Module main class for generating Minecraft Vanilla servers.
 Author: Quintin Dunn
 Date: 09/09/2026
 """
+
+import json
 import threading
 import time
 from typing import TYPE_CHECKING, Callable, Optional
@@ -34,6 +36,7 @@ class Service:
 
     module: "Module"
     downloader: "Downloader"
+    ws_send_callback: Callable
 
     def __init__(self, module: "Module"):
         logger.info(f"Loading service: {self.NAME}")
@@ -43,6 +46,7 @@ class Service:
             version for version in self.downloader.version_manifest.versions.keys()
         ]
         self.downloader.get_release_manifest("1.8.9")
+        self.ws_send_callback = lambda x: logger.warning("No send callback")
 
     def about(self, *_, **__) -> str:
         """HTML about for the page"""
@@ -100,20 +104,45 @@ class Service:
         return "about", 302
 
     def on_message(self, msg: str) -> None:
-        print(f"Message in service {self.NAME} - {msg}")
+        msg = json.loads(msg)
+        is_simple_controller = msg.get("isSimpleController") == True
+        if not is_simple_controller:
+            return
 
-    def loop_send(self, send_callback: Callable):
+        msg_type = msg.get("type")
+
+        if msg_type == "start":
+            self.on_start()
+        elif msg_type == "stop":
+            self.on_stop()
+        elif msg_type == "kill":
+            self.on_kill()
+        elif msg_type == "command":
+            self.on_command(msg.get("raw"))
+
+    def on_start(self):
+        threading.Thread(target=self.loop_send, daemon=True).start()
+
+    def on_kill(self):
+        print("Killing thread")
+
+    def on_stop(self):
+        print("Stopping thread")
+
+    def on_command(self, command: str):
+        print(f"New command {command!r}")
+
+    def loop_send(self):
         while True:
             time.sleep(1)
-            send_callback(f"Hello, world! {time.time()}\n")
+            self.ws_send_callback(f"Hello, world! {time.time()}\n")
 
     @instance_specific
     def start(
         self, _: "BaseInstance", send_callback: Callable
     ) -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
-
-        threading.Thread(target=self.loop_send, args=[send_callback], daemon=True).start()
+        self.ws_send_callback = send_callback
 
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}

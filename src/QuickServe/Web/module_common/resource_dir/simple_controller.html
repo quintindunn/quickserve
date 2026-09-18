@@ -257,11 +257,11 @@
             const ws = new WebSocket(ws_url)
 
             ws.onopen = (event) => {
-                console.log("Websocket open!")
                 command.addEventListener("keydown", (event) => {
                     if (event.key !== "Enter") return;
 
                     let packet = {
+                        isSimpleController: true,
                         type: "command",
                         raw: command.value + "\n"
                     };
@@ -269,15 +269,24 @@
                     command.value = "";
                     ws.send(JSON.stringify(packet));
                 })
-
-                setInterval(() => {
-                    let packet = {
-                        type: "command",
-                        raw: "start\n"
-                    };
-                    ws.send(JSON.stringify(packet));
-                }, 2000);
-
+                start.addEventListener("click", (event) => {
+                    ws.send(JSON.stringify({
+                        isSimpleController: true,
+                        type: "start",
+                    }));
+                })
+                stop.addEventListener("click", (event) => {
+                    ws.send(JSON.stringify({
+                        isSimpleController: true,
+                        type: "stop",
+                    }));
+                })
+                stop.addEventListener("click", (event) => {
+                    ws.send(JSON.stringify({
+                        isSimpleController: true,
+                        type: "kill",
+                    }));
+                })
             };
 
             ws.onmessage = (event) => {
