@@ -34,7 +34,7 @@ if __name__ == "__main__":
     from QuickServe.Driver.networking.websocket import WebsocketServer
     import logging
 
-    logging.getLogger("websockets.server").setLevel(logging.ERROR)
+    # logging.getLogger("websockets.server").setLevel(logging.ERROR)
 
     workspace = Workspace()
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class MinecraftServer:
     root_dir: Path
     jar: Path
