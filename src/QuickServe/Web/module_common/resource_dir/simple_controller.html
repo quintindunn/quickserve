@@ -1,0 +1,300 @@
+<div class="controller">
+    <style>
+        @scope {
+            .controller {
+                max-width: 900px;
+                margin: 2rem auto;
+                padding: 2rem;
+                background: #1e1e1e;
+                border: 1px solid #333;
+                border-radius: 10px;
+                color: #eee;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            }
+
+            .terminal {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            #terminal {
+                width: 100%;
+                height: 400px;
+                box-sizing: border-box;
+                resize: vertical;
+
+                padding: 1rem;
+
+                background: #111;
+                border: 1px solid #333;
+                border-radius: 6px;
+
+                color: #d4d4d4;
+                font-family: monospace;
+                font-size: 0.9rem;
+                line-height: 1.5;
+
+                outline: none;
+            }
+
+            #terminal:focus {
+                border-color: #444;
+            }
+
+            .command-row {
+                display: flex;
+                gap: 0.75rem;
+            }
+
+            #command {
+                flex: 1;
+                min-width: 0;
+
+                box-sizing: border-box;
+                padding: 0.7rem 0.8rem;
+
+                background: #151515;
+                border: 1px solid #444;
+                border-radius: 6px;
+
+                color: #eee;
+                font-family: monospace;
+                font-size: 0.95rem;
+
+                outline: none;
+                transition: border-color 0.15s, box-shadow 0.15s;
+            }
+
+            #command:focus {
+                border-color: #6ea8fe;
+                box-shadow: 0 0 0 2px rgba(110, 168, 254, 0.15);
+            }
+
+            .controls {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            button[type="button"] {
+                min-width: 70px;
+                height: 40px;
+
+                padding: 0 1rem;
+
+                border: 1px solid #444;
+                border-radius: 6px;
+
+                color: #fff;
+                font-size: 0.9rem;
+                font-weight: 600;
+
+                cursor: pointer;
+                transition:
+                    background-color 0.15s,
+                    border-color 0.15s,
+                    transform 0.1s;
+            }
+
+            button[type="button"]:hover {
+                transform: translateY(-1px);
+            }
+
+            button[type="button"]:active {
+                transform: translateY(1px);
+            }
+
+            #start {
+                background: #166534;
+                border-color: #22c55e;
+            }
+
+            #start:hover {
+                background: #15803d;
+            }
+
+            #stop {
+                background: #854d0e;
+                border-color: #eab308;
+            }
+
+            #stop:hover {
+                background: #a16207;
+            }
+
+            #kill {
+                background: #991b1b;
+                border-color: #ef4444;
+            }
+
+            #kill:hover {
+                background: #b91c1c;
+            }
+
+            #stick-bottom {
+                margin-left: 2rem;
+                background: #374151;
+                border-color: #6b7280;
+            }
+
+            #stick-bottom:hover {
+                background: #4b5563;
+            }
+
+            #stick-bottom.active {
+                background: #1d4ed8;
+                border-color: #6ea8fe;
+            }
+
+            @media (max-width: 600px) {
+                .controller {
+                    margin: 1rem;
+                    padding: 1rem;
+                }
+
+                .command-row {
+                    flex-direction: column;
+                }
+
+                .controls {
+                    width: 100%;
+                }
+
+                button[type="button"] {
+                    flex: 1;
+                }
+            }
+        }
+    </style>
+
+    <div class="terminal" id="simple-controller">
+        <textarea id="terminal" readonly></textarea>
+
+        <div class="command-row">
+            <input
+                type="text"
+                id="command"
+                placeholder="Enter a command..."
+            >
+
+            <div class="controls">
+                <button type="button" id="start">Start</button>
+                <button type="button" id="stop">Stop</button>
+                <button type="button" id="kill">Kill</button>
+                <button type="button" id="stick-bottom">Auto-Scroll</button>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="websocket-host" value="{{ context.websocket_host }}">
+    <input type="hidden" id="websocket-port" value="{{ context.websocket_port }}">
+
+    <script defer>
+        const ws_host = document.getElementById("websocket-host").value;
+        const ws_port = document.getElementById("websocket-port").value;
+        const instance_uuid = document.location.pathname.split("/module/instance/")[1].split("/")[0];
+        const ws_url = `ws://${ws_host}:${ws_port}/instance/${instance_uuid}`;
+
+        const MAX_TERMINAL_CHARS = 100_000;
+        let terminalBuffer = [];
+        let terminalLength = 0;
+
+        let controller = document.querySelector("#simple-controller");
+        let terminal = document.querySelector("#terminal");
+        let command = document.querySelector("#command");
+        let start = document.querySelector("#start");
+        let stop = document.querySelector("#stop");
+        let kill = document.querySelector("#kill");
+        let stickBottom = document.querySelector("#stick-bottom");
+
+
+        let autoScroll = true;
+
+        function scrollToBottom() {
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function isAtBottom() {
+            return terminal.scrollHeight - terminal.scrollTop <= terminal.clientHeight + 5;
+        }
+
+        terminal.addEventListener("scroll", () => {
+            autoScroll = isAtBottom();
+
+            stickBottom.classList.toggle("active", autoScroll);
+            stickBottom.textContent = autoScroll
+                ? "Following"
+                : "Auto-Scroll";
+        });
+
+        stickBottom.addEventListener("click", () => {
+            autoScroll = true;
+            scrollToBottom();
+
+            stickBottom.classList.add("active");
+            stickBottom.textContent = "Following";
+        });
+
+        function writeTerminal(text) {
+            terminalBuffer.push(text);
+            terminalLength += text.length;
+
+            while (terminalLength > MAX_TERMINAL_CHARS && terminalBuffer.length > 1) {
+                terminalLength -= terminalBuffer.shift().length;
+            }
+
+            terminal.value = terminalBuffer.join("");
+
+            if (autoScroll) {
+                scrollToBottom();
+            }
+        }
+
+        function writeLine(text) {
+            writeTerminal(text + '\n');
+        }
+
+        setTimeout(() => {
+            const ws = new WebSocket(ws_url)
+
+            ws.onopen = (event) => {
+                command.addEventListener("keydown", (event) => {
+                    if (event.key !== "Enter") return;
+
+                    let packet = {
+                        isSimpleController: true,
+                        type: "command",
+                        raw: command.value + "\n"
+                    };
+                    writeTerminal(packet.raw);
+                    command.value = "";
+                    ws.send(JSON.stringify(packet));
+                })
+                start.addEventListener("click", (event) => {
+                    ws.send(JSON.stringify({
+                        isSimpleController: true,
+                        type: "start",
+                    }));
+                })
+                stop.addEventListener("click", (event) => {
+                    ws.send(JSON.stringify({
+                        isSimpleController: true,
+                        type: "stop",
+                    }));
+                })
+                stop.addEventListener("click", (event) => {
+                    ws.send(JSON.stringify({
+                        isSimpleController: true,
+                        type: "kill",
+                    }));
+                })
+            };
+
+            ws.onmessage = (event) => {
+                writeTerminal(event.data)
+            }
+
+
+        }, 1000);
+
+    </script>
+</div>

@@ -1,0 +1,30 @@
+{% extends "core/core.html" %}
+
+{% block title %}
+    {% block moduletitle %}{% endblock %}
+{% endblock %}
+{% block head %}
+    {% block modulehead %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+    <div class="module">
+        <div>
+            <a href="{{ link(page='about') }}" style="text-decoration: underline; color: inherit"><h1>{{ context.module_name }} - V{{ context.module_version }}</h1></a>
+            {% if context.module_authors %}
+            <span>Module by {% for author in context.module_authors %}<a href="{{ author.github }}">{{ author.name }}</a>, {% endfor %}</span>
+            <div class="pages">
+                <span>|</span>
+                {% for page in context.module_pages %}
+                    <a href="{{ link(page=page) }}">{{ page }}</a>
+                    <span>|</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div>
+            {% block modulebody %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}
