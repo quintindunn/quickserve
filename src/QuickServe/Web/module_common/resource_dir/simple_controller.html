@@ -281,7 +281,7 @@
                         type: "stop",
                     }));
                 })
-                stop.addEventListener("click", (event) => {
+                kill.addEventListener("click", (event) => {
                     ws.send(JSON.stringify({
                         isSimpleController: true,
                         type: "kill",

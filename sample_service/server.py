@@ -1,6 +1,8 @@
 import logging
 import subprocess
+import time
 from pathlib import Path
+from subprocess import Popen
 
 logger = logging.getLogger(__name__)
 
@@ -12,9 +14,11 @@ class MinecraftServer:
     def __init__(self, root_dir: str | Path):
         self.root_dir = Path(root_dir)
         self.jar = root_dir / "server.jar"
-        self.proc = None
+        self.proc: Popen = None
+        self.started_at = -1
 
     def check_eula(self):
+        assert (self.root_dir / "eula.txt").exists()
         with open(self.root_dir / "eula.txt") as f:
             lines = f.readlines()
         for line in lines:
@@ -26,7 +30,8 @@ class MinecraftServer:
     def is_running(self):
         if self.proc is None:
             return False
-        return not self.proc.returncode is None
+        poll = self.proc.poll()
+        return poll is None
 
     def validate(self):
         assert self.root_dir.exists()
@@ -34,6 +39,12 @@ class MinecraftServer:
         assert self.check_eula()
 
     def start(self, java_executable: Path, xmx: str = "4G", xms: str = "4G"):
+        call_time = time.time()
+        if (call_time - self.started_at) < 5:
+            logger.info("Server might already be starting.")
+            return
+
+        self.started_at = call_time
         if self.is_running:
             logger.info("Server already running...")
             return

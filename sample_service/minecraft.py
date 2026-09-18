@@ -6,11 +6,14 @@ Date: 09/09/2026
 """
 
 import json
+import os
+import signal
 import threading
-import time
-from typing import TYPE_CHECKING, Callable, Optional
-
 import logging
+
+from typing import TYPE_CHECKING, Callable
+from uuid import UUID
+
 import requests
 
 from .downloader import Downloader
@@ -41,7 +44,8 @@ class Service:
     downloader: "Downloader"
     ws_send_callback: Callable
 
-    instance_server_map: dict[str, MinecraftServer]
+    instance_server_map: dict[UUID, MinecraftServer]
+    instance_callback_map: dict[UUID, Callable]
 
     def __init__(self, module: "Module", runtime_manager: "RuntimeManager"):
         logger.info(f"Loading service: {self.NAME}")
@@ -51,9 +55,9 @@ class Service:
             version for version in self.downloader.version_manifest.versions.keys()
         ]
         self.downloader.get_release_manifest("1.8.9")
-        self.ws_send_callback = lambda x: logger.warning("No send callback")
         self.runtime_manager = runtime_manager
         self.instance_server_map = dict()
+        self.instance_callback_map = dict()
 
     def about(self, *_, **__) -> str:
         """HTML about for the page"""
@@ -124,8 +128,12 @@ class Service:
 
         msg_type = msg.get("type")
 
+        server = self.instance_server_map.get(instance.uuid)
+
         if msg_type == "start":
             self.on_start(instance=instance)
+        elif (server is None) or (not server.is_running):
+            return
         elif msg_type == "stop":
             self.on_stop(instance=instance)
         elif msg_type == "kill":
@@ -134,6 +142,11 @@ class Service:
             self.on_command(instance=instance, command=msg.get("raw"))
 
     def on_start(self, instance: "BaseInstance"):
+        server = self.instance_server_map.get(instance.uuid)
+        if server is not None and server.is_running:
+            logger.info("Server already running. ")
+            return
+
         # Get Java Requirements
         jre_requirements_path = instance.working_directory() / "jre-requirements"
         assert jre_requirements_path.exists()
@@ -143,29 +156,46 @@ class Service:
 
         java_executable = self.runtime_manager.get_java_executable(jre_requirement, "jre")
 
-        if str(instance.uuid) in self.instance_server_map:
-            server = self.instance_server_map[str(instance.uuid)]
+        if instance.uuid in self.instance_server_map:
+            server = self.instance_server_map[instance.uuid]
             if not server.is_running:
                 server.start(java_executable=java_executable)
                 return
 
         server = MinecraftServer(instance.working_directory() / "server")
-        self.instance_server_map[str(instance.uuid)] = server
+        self.instance_server_map[instance.uuid] = server
         server.start(java_executable=java_executable)
 
-        def proc_read():
-            for line in iter(server.proc.stdout.readline, ""):
-                print(line)
-                self.ws_send_callback(line)
+        callback = self.instance_callback_map.get(instance.uuid)
+        if callback is None:
+            logger.warning("No callback!")
+            return
 
-        threading.Thread(target=proc_read, daemon=True).start()
+        def stdout_read():
+            for line in iter(server.proc.stdout.readline, ""):
+                callback(line)
+
+        def stderr_read():
+            for line in iter(server.proc.stderr.readline, ""):
+                callback(line)
+
+        def proc_read():
+            threading.Thread(target=stdout_read, daemon=True).start()
+            threading.Thread(target=stderr_read, daemon=True).start()
+
+        proc_read()
 
     def on_kill(self, instance: "BaseInstance"):
-        print("Killing thread")
+        logger.info("Killing server")
+        server = self.instance_server_map.get(instance.uuid)
+        if server.is_running:
+            logger.info(f"Killing process with PID {server.proc.pid}")
+            os.kill(server.proc.pid, signal.SIGKILL)
+            print(server.proc.returncode)
 
     def on_stop(self, instance: "BaseInstance"):
-        print("Stopping server")
-        server = self.instance_server_map.get(str(instance.uuid))
+        logger.info("Stopping server")
+        server = self.instance_server_map.get(instance.uuid)
         if server is None or not server.is_running:
             return
 
@@ -173,22 +203,17 @@ class Service:
         server.proc.stdin.flush()
 
     def on_command(self, instance: "BaseInstance", command: str):
-        server = self.instance_server_map.get(str(instance.uuid))
+        server = self.instance_server_map.get(instance.uuid)
         if server is None or not server.is_running:
             return
 
         server.proc.stdin.write(command)
         server.proc.stdin.flush()
 
-    def loop_send(self):
-        while True:
-            time.sleep(1)
-            self.ws_send_callback(f"Hello, world! {time.time()}\n")
-
     @instance_specific
-    def start(self, _: "BaseInstance", send_callback: Callable) -> tuple[str, dict]:
+    def start(self, instance: "BaseInstance", send_callback: Callable) -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
-        self.ws_send_callback = send_callback
+        self.instance_callback_map[instance.uuid] = send_callback
 
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
