@@ -1,3 +1,10 @@
+"""
+Manager for different runtime environments
+
+Author: Quintin Dunn
+Date: 09/18/2026
+"""
+
 import os
 import platform
 import shutil
@@ -16,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 JRE_API_ROOT = "https://api.adoptium.net/"
 
-JRE_ARCH_MAP = {"64bit": "x64"}
+JRE_ARCH_MAP = {"64bit": "x64", "32bit": "x32"}
 
 JRE_OS_MAP = {
     "Windows": "windows",
@@ -37,6 +44,7 @@ class RuntimeManager:
         :param image_type: JRE component
         :return:
         """
+
         return self.workspace.get_path(
             Path("runtimes") / "jre" / f"{major_version}-{image_type}"
         )
@@ -48,10 +56,58 @@ class RuntimeManager:
         :param component: JRE component
         :return: True if JRE exists, False if not.
         """
-        # TODO: Add validation JRE is installed correctly
-        return self._get_jre_root(
-            major_version=major_version, image_type=component
-        ).exists()
+        root = self._get_jre_root(major_version=major_version, image_type=component)
+        if not root.exists():
+            return False
+        if not (root / "bin").exists():
+            return False
+        try:
+            next((root / "bin").glob("java"))
+        except StopIteration:
+            return False
+
+        return True
+
+    def ensure_jre(self, major_version: int, image_type: str) -> Path:
+        """
+        Ensures a JRE exists, if it doesn't, installs it.
+        :param major_version: JRE major version
+        :param image_type: JRE component
+        :return: The path to JRE root.
+        """
+
+        logger.info(f"Checking if JRE for {major_version}-{image_type} exists.")
+        jre_root = self._get_jre_root(
+            major_version=major_version, image_type=image_type
+        )
+        if self.check_jre_exists(major_version=major_version, component=image_type):
+            logger.info(f"JRE {major_version}-{image_type} exists.")
+            logger.debug(
+                f"JRE root: {self._get_jre_root(major_version=major_version, image_type=image_type)!r}"
+            )
+            return jre_root
+
+        jre_download_link = self.get_jre_download_link(8, "jre")
+        file_type = jre_download_link.split(".")[-1]
+
+        logger.info(f"JRE Download link: {jre_download_link!r}")
+
+        tmp_dir = self.workspace.ensure_directory("tmp")
+        file_name = f"{uuid.uuid4()}-JRE.{file_type}"
+        with open(tmp_dir / file_name, "wb") as f:
+            logger.info("Downloading JRE.")
+            request = requests.get(jre_download_link, stream=True)
+
+            for chunk in request.iter_content(chunk_size=1024 * 1024 * 10):  # 10mb
+                f.write(chunk)
+
+        self.install_jre(
+            tmp_location=tmp_dir / file_name,
+            major_version=major_version,
+            image_type=image_type,
+        )
+
+        return jre_root
 
     def get_jre_download_link(
         self,
@@ -124,13 +180,13 @@ class RuntimeManager:
 
     def install_jre_macos(
         self, tmp_location: Path, major_version: int, image_type: str
-    ):
+    ) -> None:
         """
         Installs a JRE to the /opt/quickserve/runtimes/jre/x-x directory.
-        :param tmp_location: The location of the .pkg file from adoptium
+        :param tmp_location: The location of the .pkg file from Adoptium
         :param major_version: The major version of the JRE
         :param image_type: The image type, same as the one used to download in RuntimeManager.ensure_jre
-        :return:
+        :return: None
         """
         logger.info(
             f"Install JRE {major_version}-{image_type} for Macos from {tmp_location}."
@@ -178,7 +234,7 @@ class RuntimeManager:
             os.rmdir(jre_root)
 
         logger.info(f"Copying binary folder to {jre_root}")
-        shutil.copytree(binary_folder, jre_root)
+        shutil.copytree(binary_folder, jre_root / "bin")
 
         logger.info("Cleaning up.")
         shutil.rmtree(binary_folder)
@@ -186,58 +242,37 @@ class RuntimeManager:
 
     def install_jre_linux(
         self, tmp_location: Path, major_version: int, image_type: str
-    ):
+    ) -> None:
+        """
+        NOT IMPLEMENTED
+
+        Installs the JRE for linux to <QUICKSERVE_ROOT>/runtimes/jre/x-x/
+        :param tmp_location: The location of the .pkg file from Adoptium
+        :param major_version: The major version of the JRE
+        :param image_type: The image type, same as the one used to download in RuntimeManager.ensure_jre
+        :return: None
+        """
+
         raise NotImplementedError("JRE Installer for linux not supported")
 
     def install_jre_windows(
         self, tmp_location: Path, major_version: int, image_type: str
-    ):
+    ) -> None:
+        """
+        NOT IMPLEMENTED
+
+        Installs the JRE for windows to <QUICKSERVE_ROOT>/runtimes/jre/x-x/
+        :param tmp_location: The location of the .pkg file from Adoptium
+        :param major_version: The major version of the JRE
+        :param image_type: The image type, same as the one used to download in RuntimeManager.ensure_jre
+        :return: None
+        """
+
         raise NotImplementedError("JRE Installer for windows not supported")
-
-    def ensure_jre(self, major_version: int, image_type: str) -> Path:
-        """
-        Ensures a JRE exists, if it doesn't, installs it.
-        :param major_version: JRE major version
-        :param image_type: JRE component
-        :return: The path to JRE root.
-        """
-
-        logger.info(f"Checking if JRE for {major_version}-{image_type} exists.")
-        jre_root = self._get_jre_root(
-            major_version=major_version, image_type=image_type
-        )
-        if self.check_jre_exists(major_version=major_version, component=image_type):
-            logger.info(f"JRE {major_version}-{image_type} exists.")
-            logger.debug(
-                f"JRE root: {self._get_jre_root(major_version=major_version, image_type=image_type)!r}"
-            )
-            return jre_root
-
-        jre_download_link = self.get_jre_download_link(8, "jre")
-        file_type = jre_download_link.split(".")[-1]
-
-        logger.info(f"JRE Download link: {jre_download_link!r}")
-
-        tmp_dir = self.workspace.ensure_directory("tmp")
-        file_name = f"{uuid.uuid4()}-JRE.{file_type}"
-        with open(tmp_dir / file_name, "wb") as f:
-            logger.info("Downloading JRE.")
-            request = requests.get(jre_download_link, stream=True)
-
-            for chunk in request.iter_content(chunk_size=1024 * 1024 * 10):  # 10mb
-                f.write(chunk)
-
-        self.install_jre(
-            tmp_location=tmp_dir / file_name,
-            major_version=major_version,
-            image_type=image_type,
-        )
-
-        return jre_root
 
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-    workspace_ = Workspace("/opt/quickserve")
+    workspace_ = Workspace()
     runtime_manager = RuntimeManager(workspace=workspace_)
     jre_location = runtime_manager.ensure_jre(8, "jre")
