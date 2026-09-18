@@ -18,6 +18,7 @@ from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExis
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.path_resolver import Workspace
+from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
 logger = logging.getLogger("QuickServerFS.Modules")
 
@@ -27,10 +28,12 @@ class Module:
     workspace: "Workspace"
     module: ModuleType
     service: Service
+    runtime_manager: "RuntimeManager"
 
-    def __init__(self, module_path: str | Path, workspace: "Workspace"):
+    def __init__(self, module_path: str | Path, workspace: "Workspace", runtime_manager: "RuntimeManager"):
         self.path = Path(module_path)
         self.workspace = workspace
+        self.runtime_manager = runtime_manager
 
     def raise_if_attr_not_exist(
         self, attr_name: str, exception: Exception, service: bool = True
@@ -68,7 +71,7 @@ class Module:
             service=False,
         )
 
-        self.service = self.module.Service(module=self)
+        self.service = self.module.Service(module=self, runtime_manager=self.runtime_manager)
         for attr, error in attr_error_map.items():
             logger.debug(f"{self.path.name} - Validating {attr}")
             self.raise_if_attr_not_exist(

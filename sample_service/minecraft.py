@@ -14,6 +14,7 @@ import logging
 import requests
 
 from .downloader import Downloader
+from .server import MinecraftServer
 
 from QuickServeServiceLibrary.decorators import instance_specific
 
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import Module
     from QuickServe.Driver.instance.base_instance import BaseInstance
     from QuickServe.Application.instances import InstanceService
+    from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
 logger = logging.getLogger("minecraft-vanilla")
 
@@ -35,10 +37,13 @@ class Service:
     PAGES: list[str] = ["about", "create", "start"]
 
     module: "Module"
+    runtime_manager: "RuntimeManager"
     downloader: "Downloader"
     ws_send_callback: Callable
 
-    def __init__(self, module: "Module"):
+    instance_server_map: dict[str, MinecraftServer]
+
+    def __init__(self, module: "Module", runtime_manager: "RuntimeManager"):
         logger.info(f"Loading service: {self.NAME}")
         self.module = module
         self.downloader = Downloader()
@@ -47,6 +52,8 @@ class Service:
         ]
         self.downloader.get_release_manifest("1.8.9")
         self.ws_send_callback = lambda x: logger.warning("No send callback")
+        self.runtime_manager = runtime_manager
+        self.instance_server_map = dict()
 
     def about(self, *_, **__) -> str:
         """HTML about for the page"""
@@ -82,12 +89,18 @@ class Service:
             f"Installing new minecraft-vanilla instance with version {kwargs['minecraft-version']} with name {kwargs['instance-name']}"
         )
 
-        jar_url = self.downloader.get_release_manifest(id_=minecraft_version).server.url
+        manifest = self.downloader.get_release_manifest(id_=minecraft_version)
+        jar_url = manifest.server.url
+        java_major = manifest.java.major_version
+
         instance = instances.new_service(
             module_name=self.NAME, service_name=instance_name
         )
 
         cwd = instance.working_directory()
+        with open(cwd / "jre-requirements", 'w') as f:
+            f.write(str(java_major))
+
         server_dir = cwd / "server"
         self.module.workspace.ensure_directory(server_dir)
 
@@ -103,7 +116,7 @@ class Service:
 
         return "about", 302
 
-    def on_message(self, msg: str) -> None:
+    def on_message(self, msg: str, instance: "BaseInstance") -> None:
         msg = json.loads(msg)
         is_simple_controller = msg.get("isSimpleController") == True
         if not is_simple_controller:
@@ -112,25 +125,60 @@ class Service:
         msg_type = msg.get("type")
 
         if msg_type == "start":
-            self.on_start()
+            self.on_start(instance=instance)
         elif msg_type == "stop":
-            self.on_stop()
+            self.on_stop(instance=instance)
         elif msg_type == "kill":
-            self.on_kill()
+            self.on_kill(instance=instance)
         elif msg_type == "command":
-            self.on_command(msg.get("raw"))
+            self.on_command(instance=instance, command=msg.get("raw"))
 
-    def on_start(self):
-        threading.Thread(target=self.loop_send, daemon=True).start()
+    def on_start(self, instance: "BaseInstance"):
+        # Get Java Requirements
+        jre_requirements_path = instance.working_directory() / "jre-requirements"
+        assert jre_requirements_path.exists()
 
-    def on_kill(self):
+        with open(jre_requirements_path, 'r') as f:
+            jre_requirement = int(f.read())
+
+        java_executable = self.runtime_manager.get_java_executable(jre_requirement, "jre")
+
+        if str(instance.uuid) in self.instance_server_map:
+            server = self.instance_server_map[str(instance.uuid)]
+            if not server.is_running:
+                server.start(java_executable=java_executable)
+                return
+
+        server = MinecraftServer(instance.working_directory() / "server")
+        self.instance_server_map[str(instance.uuid)] = server
+        server.start(java_executable=java_executable)
+
+        def proc_read():
+            for line in iter(server.proc.stdout.readline, ""):
+                print(line)
+                self.ws_send_callback(line)
+
+        threading.Thread(target=proc_read, daemon=True).start()
+
+    def on_kill(self, instance: "BaseInstance"):
         print("Killing thread")
 
-    def on_stop(self):
-        print("Stopping thread")
+    def on_stop(self, instance: "BaseInstance"):
+        print("Stopping server")
+        server = self.instance_server_map.get(str(instance.uuid))
+        if server is None or not server.is_running:
+            return
 
-    def on_command(self, command: str):
-        print(f"New command {command!r}")
+        server.proc.stdin.write("stop\n")
+        server.proc.stdin.flush()
+
+    def on_command(self, instance: "BaseInstance", command: str):
+        server = self.instance_server_map.get(str(instance.uuid))
+        if server is None or not server.is_running:
+            return
+
+        server.proc.stdin.write(command)
+        server.proc.stdin.flush()
 
     def loop_send(self):
         while True:

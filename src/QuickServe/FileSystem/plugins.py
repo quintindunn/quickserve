@@ -12,6 +12,7 @@ from pathlib import Path
 
 from QuickServe.FileSystem.modules import Module
 from QuickServe.FileSystem.path_resolver import Workspace
+from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
 logger = logging.getLogger("QuickServe.plugins")
 
@@ -86,14 +87,16 @@ class PluginLoader:
     Loads and validates service packages from the workspace modules directory.
     """
 
-    def __init__(self, workspace: Workspace) -> None:
+    def __init__(self, workspace: Workspace, runtime_manager: "RuntimeManager") -> None:
         """
         Initializes the plugin loader.
 
         :param workspace: The workspace containing the modules directory.
+        :param runtime_manager: The server runtime manager.
         :return: None
         """
         self.workspace = workspace
+        self.runtime_manager = runtime_manager
 
     def load_all(self) -> ServiceCatalog:
         """
@@ -108,7 +111,7 @@ class PluginLoader:
             if not path.is_dir() or path.name.startswith("."):
                 continue
             logger.info("Loading service plugin %s", path)
-            module = Module(module_path=path, workspace=self.workspace)
+            module = Module(module_path=path, workspace=self.workspace, runtime_manager=self.runtime_manager)
             module.load_module()
             name = module.service.NAME
             if name in loaded:

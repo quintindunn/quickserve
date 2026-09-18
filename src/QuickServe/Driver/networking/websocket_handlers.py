@@ -51,7 +51,7 @@ async def instance_handler(
     async for message in connection:
         if not hasattr(service, "on_message"):
             break
-        service.on_message(message)  # noqa
+        service.on_message(message, instance)  # noqa
         logger.debug(
             f"New message from {connection.remote_address} - {message[:32]}{'...' if len(message) > 32 else ''}"
         )

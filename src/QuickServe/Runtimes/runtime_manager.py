@@ -88,7 +88,7 @@ class RuntimeManager:
             )
             return jre_root
 
-        jre_download_link = self.get_jre_download_link(8, "jre")
+        jre_download_link = self.get_jre_download_link(major_version=major_version, image_type=image_type)
         file_type = jre_download_link.split(".")[-1]
 
         logger.info(f"JRE Download link: {jre_download_link!r}")
