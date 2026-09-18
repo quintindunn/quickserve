@@ -11,13 +11,14 @@ import shutil
 import subprocess
 import sys
 import uuid
+import logging
+
 from pathlib import Path
 
 import requests
 
 from QuickServe.FileSystem.path_resolver import Workspace
 
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -253,7 +254,7 @@ class RuntimeManager:
         :return: None
         """
 
-        raise NotImplementedError("JRE Installer for linux not supported")
+        raise NotImplementedError("JRE Installer for linux not yet supported")
 
     def install_jre_windows(
         self, tmp_location: Path, major_version: int, image_type: str
@@ -268,7 +269,7 @@ class RuntimeManager:
         :return: None
         """
 
-        raise NotImplementedError("JRE Installer for windows not supported")
+        raise NotImplementedError("JRE Installer for windows not yet supported")
 
 
 if __name__ == "__main__":
