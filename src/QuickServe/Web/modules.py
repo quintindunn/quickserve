@@ -16,6 +16,8 @@ from flask import (
 )
 from flask.typing import ResponseReturnValue
 
+from QuickServe.Driver.networking.websocket import WebsocketServer
+
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
 modules.register_blueprint(instances)
@@ -23,7 +25,7 @@ modules.register_blueprint(instances)
 
 # TODO: Add check for invalid page.
 def _render_module_page(
-    module_name: str, page: str, context: dict | None = None
+    module_name: str, page: str, context: dict | None = None, instance_uuid: str | None = None
 ) -> ResponseReturnValue:
     """
     Helper function to render a module's pages, along with helper functions, and base context values.
@@ -40,18 +42,22 @@ def _render_module_page(
     if module_name not in catalog:
         return (
             "<!DOCTYPE HTML>"
-            "<html><head><title>404 Not Found!</title></head>"
+            "<html><head><title>RMP 404 Not Found!</title></head>"
             "<body><h1>Page not found!</h1></body></html>"
         )
 
     module = catalog.require(module_name)
     service = module.service
 
+    websocket_server: "WebsocketServer" = current_app.extensions["quickserve.websocket_server"]
+
     ctx = {
         "modules": catalog.modules,
         "module_name": service.NAME,
         "module_version": service.VERSION,
         "module_pages": service.PAGES,
+        "websocket_host": websocket_server.host,
+        "websocket_port": websocket_server.port
     }
 
     if hasattr(service, "AUTHORS"):
@@ -61,8 +67,15 @@ def _render_module_page(
         raise ValueError(f"Service {module_name} doesn't have method {page}")
 
     page = getattr(service, page)
+    if "instance_uuid" in context:
+        def build_callback():
+            def callback(message: str):
+                return websocket_server.send_instance(context["instance_uuid"], message)
+            return callback
 
-    values = page()
+        values = page(send_callback=build_callback())
+    else:
+        values = page()
 
     if isinstance(values, str):
         template = values

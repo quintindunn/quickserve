@@ -97,16 +97,12 @@ class InstanceService:
         :return: The constructed instance.
         :raises RuntimeError: If no websocket ports are available.
         """
-        port = self.port_manager.request_websocket_port(identifier)
-        if port is None:
-            raise RuntimeError("No websocket ports available")
         instance = BaseInstance(
             module=module,
             service_name=service_name,
             module_name=module_name,
             uuid=identifier,
             workspace=self.workspace,
-            assigned_port=port.port,
         )
         self._instances[str(identifier)] = instance
         return instance

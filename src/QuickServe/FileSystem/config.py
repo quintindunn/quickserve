@@ -34,8 +34,8 @@ class WebModel(ConfigModel):
     """Configuration model for the web service."""
 
     secret_key: str = "secret-key-change-in-production"
-    websocket_port_range_start: int = 36227
-    websocket_port_range_end: int = 36427
+    websocket_port: int = 5000
+    websocket_host: str = "0.0.0.0"
 
 
 class DriverModel(ConfigModel):

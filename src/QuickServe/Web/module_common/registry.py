@@ -1,3 +1,4 @@
+import typing
 from typing import Callable
 
 from QuickServe.Web.module_common.factories.link import link_builder
@@ -7,14 +8,17 @@ from QuickServe.Web.module_common.factories.simple_controller import (
     simple_controller_builder,
 )
 
+if typing.TYPE_CHECKING:
+    from QuickServe.Driver.networking.websocket import WebsocketServer
 
 class Registry:
     registered: dict[str, Callable]
 
-    def __init__(self):
+    def __init__(self, websocket_server: "WebsocketServer"):
         self.registered = dict()
+        self.websocket_server = websocket_server
 
-        self.register("simple_controller", simple_controller_builder)
+        self.register("simple_controller", lambda module_name: simple_controller_builder(module_name, websocket_server))
         self.register("action", action_builder)
         self.register("link", link_builder)
         self.register("resource", resource_builder)

@@ -19,12 +19,14 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from QuickServe.FileSystem.plugins import ServiceCatalog
     from QuickServe.Application.instances import InstanceService
+    from QuickServe.Driver.networking.websocket import WebsocketServer
 
 
 def create_app(
     settings: WebSettings,
     catalog: "ServiceCatalog",
     instance_service: "InstanceService",
+    websocket_server: "WebsocketServer"
 ) -> Flask:
     """
     Creates a Flask application from already-constructed dependencies.
@@ -50,5 +52,6 @@ def create_app(
     app.register_blueprint(modules)
     app.extensions["quickserve.catalog"] = catalog
     app.extensions["quickserve.instance_service"] = instance_service
-    app.extensions["quickserve.template_registry"] = Registry()
+    app.extensions["quickserve.websocket_server"] = websocket_server
+    app.extensions["quickserve.template_registry"] = Registry(websocket_server)
     return app

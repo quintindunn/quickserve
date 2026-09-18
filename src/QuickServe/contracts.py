@@ -35,8 +35,8 @@ class WebSettings(Protocol):
     """
 
     secret_key: str
-    websocket_port_range_start: int
-    websocket_port_range_end: int
+    websocket_port: int
+    websocket_host: str
 
 
 @dataclass(frozen=True, slots=True)

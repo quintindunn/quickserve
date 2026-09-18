@@ -25,16 +25,6 @@ class BaseInstance:
     uuid: UUID
     module_name: str
     workspace: "Workspace"
-    assigned_port: int
-
-    @property
-    def websocket_port(self) -> int:
-        """
-        Gets the websocket port assigned to this instance.
-
-        :return: The assigned websocket port.
-        """
-        return self.assigned_port
 
     def working_directory(self) -> Path:
         """

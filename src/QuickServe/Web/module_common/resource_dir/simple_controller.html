@@ -185,8 +185,15 @@
             </div>
         </div>
     </div>
+    <input type="hidden" id="websocket-host" value="{{ context.websocket_host }}">
+    <input type="hidden" id="websocket-port" value="{{ context.websocket_port }}">
 
     <script defer>
+        const ws_host = document.getElementById("websocket-host").value;
+        const ws_port = document.getElementById("websocket-port").value;
+        const instance_uuid = document.location.pathname.split("/module/instance/")[1].split("/")[0];
+        const ws_url = `ws://${ws_host}:${ws_port}/instance/${instance_uuid}`;
+
         const MAX_TERMINAL_CHARS = 100_000;
         let terminalBuffer = [];
         let terminalLength = 0;
@@ -246,8 +253,39 @@
             writeTerminal(text + '\n');
         }
 
-        setInterval(() => {
-            writeLine(`Hello, world ${new Date().toISOString()} ${terminalLength}`)
-        }, 1);
+        setTimeout(() => {
+            const ws = new WebSocket(ws_url)
+
+            ws.onopen = (event) => {
+                console.log("Websocket open!")
+                command.addEventListener("keydown", (event) => {
+                    if (event.key !== "Enter") return;
+
+                    let packet = {
+                        type: "command",
+                        raw: command.value + "\n"
+                    };
+                    writeTerminal(packet.raw);
+                    command.value = "";
+                    ws.send(JSON.stringify(packet));
+                })
+
+                setInterval(() => {
+                    let packet = {
+                        type: "command",
+                        raw: "start\n"
+                    };
+                    ws.send(JSON.stringify(packet));
+                }, 2000);
+
+            };
+
+            ws.onmessage = (event) => {
+                writeTerminal(event.data)
+            }
+
+
+        }, 1000);
+
     </script>
 </div>

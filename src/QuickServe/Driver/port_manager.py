@@ -1,4 +1,9 @@
-from uuid import UUID
+"""
+Manages ports used by QuickServe, and QuickServe Services.
+
+Author: Quintin Dunn
+Date: 09/17/2026
+"""
 
 from QuickServe.contracts import WebSettings
 
@@ -38,22 +43,13 @@ class Port:
 
 class PortManager:
     ports: list[Port]
-    websocket_ports: dict[str, Port]
-    websocket_ports_inverse: dict[int, str]
 
     def __init__(self, settings: WebSettings):
         self.ports = list()
-        self.websocket_ports = dict()
-        self.websocket_ports_inverse = dict()
 
         self.settings = settings
-        self.last_websocket_port = settings.websocket_port_range_start - 1
 
     def free(self, port_to_free: int):
-        if port_to_free in self.websocket_ports_inverse:
-            key = self.websocket_ports_inverse[port_to_free]
-            del self.websocket_ports_inverse[port_to_free]
-            del self.websocket_ports[key]
         for port in self.ports:
             if port.port == port_to_free:
                 self.ports.remove(port)
@@ -73,25 +69,4 @@ class PortManager:
         port = Port(usage_type=usage_type, port=port)
         self.ports.append(port)
 
-        if usage_type == UsageType.websocket:
-            self.websocket_ports[key] = port
-            self.websocket_ports_inverse[port.port] = key
-
         return port
-
-    def request_websocket_port(self, instance_id: str | UUID) -> Port | None:
-        key = str(instance_id)
-        if key in self.websocket_ports:
-            return self.websocket_ports[key]
-
-        while self.last_websocket_port + 1 < self.settings.websocket_port_range_end:
-            self.last_websocket_port += 1
-            if not self.is_port_occupied(self.last_websocket_port):
-                return self.register_port(
-                    port=self.last_websocket_port,
-                    usage_type=UsageType.websocket,
-                    key=key,
-                )
-
-        logger.warning("No websocket ports available!")
-        return None

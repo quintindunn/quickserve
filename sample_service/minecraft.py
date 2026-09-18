@@ -4,8 +4,9 @@ Module main class for generating Minecraft Vanilla servers.
 Author: Quintin Dunn
 Date: 09/09/2026
 """
-
-from typing import TYPE_CHECKING
+import threading
+import time
+from typing import TYPE_CHECKING, Callable, Optional
 
 import logging
 import requests
@@ -98,9 +99,21 @@ class Service:
 
         return "about", 302
 
+    def on_message(self, msg: str) -> None:
+        print(f"Message in service {self.NAME} - {msg}")
+
+    def loop_send(self, send_callback: Callable):
+        while True:
+            time.sleep(1)
+            send_callback(f"Hello, world! {time.time()}\n")
+
     @instance_specific
-    def start(self, _: "BaseInstance") -> tuple[str, dict]:
+    def start(
+        self, _: "BaseInstance", send_callback: Callable
+    ) -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
+
+        threading.Thread(target=self.loop_send, args=[send_callback], daemon=True).start()
 
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
