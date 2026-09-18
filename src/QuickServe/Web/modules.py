@@ -28,7 +28,6 @@ def _render_module_page(
     module_name: str,
     page: str,
     context: dict | None = None,
-    instance_uuid: str | None = None,
 ) -> ResponseReturnValue:
     """
     Helper function to render a module's pages, along with helper functions, and base context values.
