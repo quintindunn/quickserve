@@ -4,9 +4,8 @@ from typing import Callable
 from QuickServe.Web.module_common.factories.link import link_builder
 from QuickServe.Web.module_common.factories.action import action_builder
 from QuickServe.Web.module_common.factories.resource import resource_builder
-from QuickServe.Web.module_common.factories.simple_controller import (
-    simple_controller_builder,
-)
+from QuickServe.Web.module_common.factories.simple_controller import simple_controller_builder
+from QuickServe.Web.module_common.factories.simple_fs import simple_filesystem_builder
 
 if typing.TYPE_CHECKING:
     from QuickServe.Driver.networking.websocket import WebsocketServer
@@ -24,6 +23,9 @@ class Registry:
             lambda module_name: simple_controller_builder(
                 module_name, websocket_server
             ),
+        )
+        self.register(
+            "simple_filesystem", lambda module_name: simple_filesystem_builder(module_name=module_name)
         )
         self.register("action", action_builder)
         self.register("link", link_builder)

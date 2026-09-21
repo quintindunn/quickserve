@@ -37,7 +37,7 @@ class Service:
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
-    PAGES: list[str] = ["about", "create", "start"]
+    PAGES: list[str] = ["about", "create", "start", "filesystem"]
 
     module: "Module"
     runtime_manager: "RuntimeManager"
@@ -221,3 +221,10 @@ class Service:
 
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
+
+    @instance_specific
+    def filesystem(self, instance: "BaseInstance", *args, **kwargs):
+        asset = self.module.get_resource_path("filesystem.html")
+
+        with open(asset, "r") as f:
+            return f.read(), dict()
