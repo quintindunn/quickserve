@@ -101,8 +101,12 @@ def _render_module_page(
     kwargs = {}
 
     registry = current_app.extensions["quickserve.template_registry"]
-    for key, builder in registry.registered.items():
-        kwargs[key] = builder(module_name)
+    if "instance_uuid" in context:
+        for key, builder in registry.registered.items():
+            kwargs[key] = builder(module_name, context["instance_uuid"])
+    else:
+        for key, builder in registry.registered.items():
+            kwargs[key] = builder(module_name)
 
     return render_template_string(str(template), context=ctx, **kwargs)
 

@@ -7,7 +7,7 @@ from flask import current_app, request
 
 
 def simple_controller_builder(
-    module_name: str, websocket_server: "WebsocketServer"
+    module_name: str, websocket_server: "WebsocketServer", _: str | None = None
 ) -> Callable[[], str]:
     resource: str = get_resource("simple_controller.html", mode="r")
 
