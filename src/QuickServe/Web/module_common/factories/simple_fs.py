@@ -11,6 +11,9 @@ def simple_filesystem_builder(
 ) -> Callable[[], str]:
     resource: str = get_resource("simple_filesystem.html", mode="r")
 
+    def format_date(dt: datetime.datetime):
+        return dt.strftime("%m/%d/%Y %I:%M:%S%p")
+
     def simple_filesystem():
         assert hasattr(request, "instance")
 
@@ -18,23 +21,26 @@ def simple_filesystem_builder(
         files = [
             {
                 "filename": "foo.txt",
-                "modified": datetime.datetime.now().isoformat()
+                "modified": format_date(datetime.datetime.now()),
+                "size": "124.2kb"
             },
             {
                 "filename": "bar.txt",
-                "modified": datetime.datetime.now().isoformat()
+                "modified": format_date(datetime.datetime.now()),
+                "size": "23.2kb"
             },
             {
                 "filename": "foobar.txt",
-                "modified": datetime.datetime.now().isoformat()
+                "modified": format_date(datetime.datetime.now()),
+                "size": "11.1kb"
             }
         ]
 
         template = current_app.jinja_env.from_string(resource)
         context = {
             "module_name": module_name,
-            "files": files
-
+            "files": files,
+            "root_directory": "/",
         }
         return Markup(template.render(context=context))
 

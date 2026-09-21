@@ -1,9 +1,43 @@
 <div id="filesystem-block">
     <style>
         @scope {
-            background-color: red;
+            .file-list {
+                background-color: #1e1e1e;
+                padding: 2vh 2vw;
+            }
+            .file-list > ul {
+                list-style-type: none;
+            }
+            .file-list-heading {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+            .fs-item {
+                display: grid;
+                grid-template-rows: 1fr;
+                grid-template-columns: 2fr 2fr 1fr;
+                height: 1.4rem;
+            }
         }
-    </style>
 
-    <h1>TEST</h1>
+    </style>
+    <div style="margin-bottom: 25px"></div>
+    <div class="file-list">
+        <span class="file-list-heading">
+            Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
+        </span>
+        <ul>
+            {% for file in context.files %}
+            <li>
+                <div class="fs-item">
+                    <span>{{ file.filename }}</span>
+                    <span>{{ file.modified }}</span>
+                    <span>{{ file.size }}</span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+    </div>
+
 </div>
