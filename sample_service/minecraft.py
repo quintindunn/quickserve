@@ -118,7 +118,7 @@ class Service:
         with open(server_dir / "eula.txt", "w") as f:
             f.write("eula=true")
 
-        return "about", 302
+        return "start", 302, instance
 
     def on_message(self, msg: str, instance: "BaseInstance") -> None:
         msg = json.loads(msg)
