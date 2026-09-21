@@ -17,6 +17,8 @@ from flask import (
 from flask.typing import ResponseReturnValue
 
 from QuickServe.Driver.networking.websocket import WebsocketServer
+from QuickServe.Driver.instance.base_instance import BaseInstance
+from QuickServe.contracts import Service
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
@@ -101,8 +103,12 @@ def _render_module_page(
     kwargs = {}
 
     registry = current_app.extensions["quickserve.template_registry"]
-    for key, builder in registry.registered.items():
-        kwargs[key] = builder(module_name)
+    if "instance_uuid" in context:
+        for key, builder in registry.registered.items():
+            kwargs[key] = builder(module_name, context["instance_uuid"])
+    else:
+        for key, builder in registry.registered.items():
+            kwargs[key] = builder(module_name)
 
     return render_template_string(str(template), context=ctx, **kwargs)
 
@@ -173,7 +179,7 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
 
     catalog = current_app.extensions["quickserve.catalog"]
     module = catalog.require(module_name)
-    service = module.service
+    service: "Service" = module.service
 
     if not hasattr(service, method):
         return "500", 500
@@ -184,16 +190,20 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     values = method(instance_service, **request.form.to_dict())
     code = 302
 
-    if isinstance(values, tuple) and len(values) == 2 and isinstance(values[1], int):
+    instance = None
+    if isinstance(values, tuple) and len(values) >= 2 and isinstance(values[1], int):
         code = values[1]
         endpoint = values[0]
+        if len(values) >= 3:
+            instance = values[2]
+            assert isinstance(instance, BaseInstance)
     elif isinstance(values, str):
         endpoint = values
     else:
         raise ValueError(f"Invalid response from action {module_name}.{action}")
 
-    url = url_for(
-        f"modules.module_{endpoint}",
-        module_name=module_name,
-    )
+    if instance is not None:
+        url = url_for("modules.instances.module_instance", uuid=instance.uuid, page=endpoint)
+    else:
+        url = url_for("modules.module_page", module_name=service.NAME, page=endpoint)
     return redirect(url, code=code)
