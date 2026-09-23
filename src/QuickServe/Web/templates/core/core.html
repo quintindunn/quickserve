@@ -13,12 +13,14 @@
             <div class="sub1">
                 <span>Services</span>
                 <div class="sub2">
-                    <span>Minecraft 1.8.9</span>
+                    {% for service in services %}
+                        <div class="service-entry"><a href="{{ service.url }}">{{ service.name}}</a></div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="sub1">
                 <span>Modules</span>
-                {% for module in context.modules %}
+                {% for module in modules %}
                 <div class="sub2">
                     <span>
                         <a href="{{ url_for('modules.module_about', module_name=module) }}">{{ module }}</a>

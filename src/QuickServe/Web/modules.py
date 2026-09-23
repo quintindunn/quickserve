@@ -58,7 +58,6 @@ def _render_module_page(
     ]
 
     ctx = {
-        "modules": catalog.modules,
         "module_name": service.NAME,
         "module_version": service.VERSION,
         "module_pages": service.PAGES,
@@ -203,7 +202,9 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
         raise ValueError(f"Invalid response from action {module_name}.{action}")
 
     if instance is not None:
-        url = url_for("modules.instances.module_instance", uuid=instance.uuid, page=endpoint)
+        url = url_for(
+            "modules.instances.module_instance", uuid=instance.uuid, page=endpoint
+        )
     else:
         url = url_for("modules.module_page", module_name=service.NAME, page=endpoint)
     return redirect(url, code=code)
