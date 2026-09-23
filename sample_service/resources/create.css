@@ -22,7 +22,7 @@
     gap: 1.25rem;
 }
 
-.create form > label:not([for="eula"]):not([for="show-snapshots"]) {
+.create form > label:not([for="eula"]):not([for="only-releases"]) {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -54,7 +54,7 @@
 }
 
 /* Snapshot checkbox */
-.create label[for="show-snapshots"] {
+.create label[for="only-releases"] {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
