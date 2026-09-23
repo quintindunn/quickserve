@@ -58,7 +58,6 @@ def _render_module_page(
     ]
 
     ctx = {
-        "modules": catalog.modules,
         "module_name": service.NAME,
         "module_version": service.VERSION,
         "module_pages": service.PAGES,
