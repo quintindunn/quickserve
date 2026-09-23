@@ -166,17 +166,10 @@
             }
         }
     </style>
-
     <div class="terminal" id="simple-controller">
         <textarea id="terminal" readonly></textarea>
-
         <div class="command-row">
-            <input
-                type="text"
-                id="command"
-                placeholder="Enter a command..."
-            >
-
+            <input type="text" id="command" placeholder="Enter a command...">
             <div class="controls">
                 <button type="button" id="start">Start</button>
                 <button type="button" id="stop">Stop</button>
@@ -185,9 +178,12 @@
             </div>
         </div>
     </div>
-    <input type="hidden" id="websocket-host" value="{{ context.websocket_host }}">
-    <input type="hidden" id="websocket-port" value="{{ context.websocket_port }}">
-
+    <input type="hidden"
+           id="websocket-host"
+           value="{{ context.websocket_host }}">
+    <input type="hidden"
+           id="websocket-port"
+           value="{{ context.websocket_port }}">
     <script defer>
         const ws_host = document.getElementById("websocket-host").value;
         const ws_port = document.getElementById("websocket-port").value;
