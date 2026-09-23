@@ -16,7 +16,7 @@ from uuid import UUID
 
 import requests
 
-from .downloader import Downloader
+from .downloader import Downloader, VersionManifestReleaseTypeEnum
 from .server import MinecraftServer
 
 from QuickServeServiceLibrary.decorators import instance_specific
@@ -52,7 +52,7 @@ class Service:
         self.module = module
         self.downloader = Downloader()
         self.versions = [
-            version for version in self.downloader.version_manifest.versions.keys()
+            {"is_release": version.type == VersionManifestReleaseTypeEnum.release, "id": id_} for id_, version in self.downloader.version_manifest.versions.items()
         ]
         self.downloader.get_release_manifest("1.8.9")
         self.runtime_manager = runtime_manager

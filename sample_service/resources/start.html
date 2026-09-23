@@ -1,15 +1,10 @@
 {% extends "core/module.html" %}
-
 {% block moduletitle %}
-Test
+    Test
 {% endblock %}
-
 {% block modulehead %}
     <link rel="stylesheet" href="{{ resource(filename='start.css') }}">
 {% endblock %}
-
 {% block modulebody %}
-<div>
-    {{ simple_controller() }}
-</div>
+    <div>{{ simple_controller() }}</div>
 {% endblock %}

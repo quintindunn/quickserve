@@ -1,48 +1,56 @@
 {% extends "core/module.html" %}
-
 {% block moduletitle %}
-Test
+    Test
 {% endblock %}
-
 {% block modulehead %}
     <link rel="stylesheet" href="{{ resource(filename='create.css') }}">
 {% endblock %}
-
 {% block modulebody %}
-<div class="create">
-    <h2>Minecraft Vanilla Server Generator</h2>
-    <form action="{{ action('install') }}" method="POST" id="install-form">
-        <label>
-            Instance Name
-            <input type="text" name="instance-name" value="MinecraftVanilla">
-        </label>
+    <div class="create">
+        <h2>Minecraft Vanilla Server Generator</h2>
+        <form action="{{ action("install") }}" method="post" id="install-form">
+            <label>
+                Instance Name
+                <input type="text" name="instance-name" value="MinecraftVanilla">
+            </label>
+            <label for="only-releases">
+                <input type="checkbox" id="only-releases" name="only-releases" checked>
+                Only Show Releases
+            </label>
+            <label>
+                Version
+                <select name="minecraft-version" id="minecraft-version">
+                    <option value="latest-release">Latest Release</option>
+                    <option value="latest-snapshot">Latest Snapshot</option>
+                    {% for version in context.param_versions %}
+                        <option value="{{ version.id }}"
+                                data-is-release="{{ version.is_release | lower }}">{{ version.id }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <script defer>
+            const checkbox = document.getElementById("only-releases");
+            const select = document.getElementById("minecraft-version");
 
-        <label for="show-snapshots">
-            <input type="checkbox" id="show-snapshots" name="show-snapshots" value="true">
-            Show Snapshots
-        </label>
+            function updateVersions() {
+                for (const option of select.options) {
+                    if (option.dataset.isRelease !== undefined) {
+                        option.hidden = checkbox.checked && option.dataset.isRelease !== "true";
+                    }
+                }
+            }
 
-        <label>
-            Version
-            <select name="minecraft-version">
-                <option value="latest-release">Latest Release</option>
-                <option value="latest-release">Latest Snapshot</option>
-                {% for version in context.param_versions %}
-                    <option value="{{ version }}">{{ version }}</option>
-                {% endfor %}
-            </select>
-        </label>
-
-        <label for="eula">
-            <input type="checkbox" id="eula" name="eula">
-            By checking the checkbox, you are indicating your agreement to the minecraft <a href="https://account.mojang.com/documents/minecraft_eula">EULA (https://account.mojang.com/documents/minecraft_eula)</a>
-        </label>
-
-        <button type="submit">Install</button>
-    </form>
-</div>
-
-<script>
+            checkbox.addEventListener("change", updateVersions);
+            updateVersions();
+            </script>
+            <label for="eula">
+                <input type="checkbox" id="eula" name="eula">
+                By checking the checkbox, you are indicating your agreement to the minecraft <a href="https://account.mojang.com/documents/minecraft_eula">EULA (https://account.mojang.com/documents/minecraft_eula)</a>
+            </label>
+            <button type="submit">Install</button>
+        </form>
+    </div>
+    <script>
     document.getElementById("install-form").addEventListener("submit", function (event) {
         const eula = document.getElementById("eula");
 
@@ -51,5 +59,5 @@ Test
             alert("You must agree to the Minecraft EULA before installing.");
         }
     });
-</script>
+    </script>
 {% endblock %}
