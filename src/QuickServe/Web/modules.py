@@ -202,7 +202,9 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
         raise ValueError(f"Invalid response from action {module_name}.{action}")
 
     if instance is not None:
-        url = url_for("modules.instances.module_instance", uuid=instance.uuid, page=endpoint)
+        url = url_for(
+            "modules.instances.module_instance", uuid=instance.uuid, page=endpoint
+        )
     else:
         url = url_for("modules.module_page", module_name=service.NAME, page=endpoint)
     return redirect(url, code=code)

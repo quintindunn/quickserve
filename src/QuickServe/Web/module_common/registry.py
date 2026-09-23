@@ -20,7 +20,7 @@ class Registry:
 
         self.register(
             "simple_controller",
-            lambda module_name, _ = None: simple_controller_builder(
+            lambda module_name, _=None: simple_controller_builder(
                 module_name, websocket_server
             ),
         )
