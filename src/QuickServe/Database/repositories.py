@@ -40,6 +40,15 @@ class PeeweeInstanceRepository:
         model = InstanceModel.get(InstanceModel.service_uuid == identifier)
         return self._record(model)
 
+    def load_all(self) -> list[InstanceRecord]:
+        """
+        Gets all instances from the database.
+
+        :return: List of all instance records.
+        """
+        models = InstanceModel.select()
+        return [self._record(model) for model in models]
+
     @staticmethod
     def _record(model: InstanceModel) -> InstanceRecord:
         """

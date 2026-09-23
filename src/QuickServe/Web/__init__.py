@@ -8,6 +8,7 @@ Date: 09/09/2026
 from pathlib import Path
 
 from flask import Flask
+from flask import url_for
 
 from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
@@ -54,4 +55,18 @@ def create_app(
     app.extensions["quickserve.instance_service"] = instance_service
     app.extensions["quickserve.websocket_server"] = websocket_server
     app.extensions["quickserve.template_registry"] = Registry(websocket_server)
+
+    @app.context_processor
+    def global_context():
+        # catalog = current_app.extensions["quickserve.catalog"]
+        # instance_service = current_app.extensions["quickserve.instance_service"]
+        ctx = {"modules": catalog.modules, "services": list()}
+        for instance in instance_service.load_all():
+            ctx["services"].append({
+                "uuid": instance.uuid,
+                "name": instance.service_name,
+                "url": url_for("modules.instances.module_instance", uuid=instance.uuid, page="about")
+            })
+        return ctx
+
     return app

@@ -7,7 +7,7 @@ Date: 09/14/2026
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Generator
 from uuid import UUID, uuid4
 
 from QuickServe.contracts import InstanceRecord, InstanceRepository
@@ -83,6 +83,13 @@ class InstanceService:
         return self._build(
             module, record.service_name, record.module_name, record.service_uuid
         )
+
+    def load_all(self) -> Generator[BaseInstance, Any, None]:
+        for record in self.repository.load_all():
+            module = self.catalog.require(record.module_name)
+            yield self._build(
+                module, record.service_name, record.module_name, record.service_uuid
+            )
 
     def _build(
         self, module, service_name: str, module_name: str, identifier: UUID
