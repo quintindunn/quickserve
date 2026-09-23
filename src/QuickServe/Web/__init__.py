@@ -62,11 +62,17 @@ def create_app(
         # instance_service = current_app.extensions["quickserve.instance_service"]
         ctx = {"modules": catalog.modules, "services": list()}
         for instance in instance_service.load_all():
-            ctx["services"].append({
-                "uuid": instance.uuid,
-                "name": instance.service_name,
-                "url": url_for("modules.instances.module_instance", uuid=instance.uuid, page="about")
-            })
+            ctx["services"].append(
+                {
+                    "uuid": instance.uuid,
+                    "name": instance.service_name,
+                    "url": url_for(
+                        "modules.instances.module_instance",
+                        uuid=instance.uuid,
+                        page="about",
+                    ),
+                }
+            )
         return ctx
 
     return app
