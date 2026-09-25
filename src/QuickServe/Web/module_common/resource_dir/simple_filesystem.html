@@ -12,7 +12,7 @@
                 font-size: 1.5rem;
                 font-weight: bold;
             }
-            .fs-item {
+            .fs-item > a{
                 display: grid;
                 grid-template-rows: 1fr;
                 grid-template-columns: 2fr 2fr 1fr;
@@ -30,9 +30,18 @@
             {% for file in context.files %}
             <li>
                 <div class="fs-item">
-                    <span>{{ file.filename }}</span>
-                    <span>{{ file.modified }}</span>
-                    <span>{{ file.size }}</span>
+                    <a href="
+                    {% if file.isFile %}
+                        ?file={{ file.filename }}
+                    {% else %}
+                        ?directory={{ file.filename }}
+                    {% endif %}
+                    ">
+                        <span>{{ file.filename }}</span>
+                        <span>{{ file.modified }}</span>
+                        <span>{{ file.size }}</span>
+                    </a>
+
                 </div>
             </li>
             {% endfor %}
