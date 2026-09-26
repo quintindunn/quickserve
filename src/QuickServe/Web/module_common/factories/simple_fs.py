@@ -24,9 +24,7 @@ def validate_path(instance_root: Path, requested_path: Path) -> bool:
     return True
 
 
-def simple_filesystem_builder(
-    module_name: str
-) -> Callable[[], str]:
+def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
     resource: str = str(get_resource("simple_filesystem.html", mode="r"))
 
     def format_date(dt: datetime.datetime):
@@ -45,14 +43,18 @@ def simple_filesystem_builder(
         is_valid = validate_path(instance.working_directory(), working_dir)
         for file in os.listdir(working_dir) if is_valid else []:
             file_path = working_dir / file
-            files.append({
-                "filename": file,
-                "cwd": directory.lstrip(".") + "/",
-                "modified": format_date(datetime.datetime.fromtimestamp(os.path.getmtime(file_path))),
-                "size": f"{os.stat(file_path).st_size / 1000:.1f}kb",
-                "isFile": os.path.isfile(file_path),
-                "isDir": os.path.isdir(file_path)
-            })
+            files.append(
+                {
+                    "filename": file,
+                    "cwd": directory.lstrip(".") + "/",
+                    "modified": format_date(
+                        datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+                    ),
+                    "size": f"{os.stat(file_path).st_size / 1000:.1f}kb",
+                    "isFile": os.path.isfile(file_path),
+                    "isDir": os.path.isdir(file_path),
+                }
+            )
 
         template = current_app.jinja_env.from_string(resource)
         context = {

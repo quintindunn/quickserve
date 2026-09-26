@@ -52,7 +52,11 @@ class Service:
         self.module = module
         self.downloader = Downloader()
         self.versions = [
-            {"is_release": version.type == VersionManifestReleaseTypeEnum.release, "id": id_} for id_, version in self.downloader.version_manifest.versions.items()
+            {
+                "is_release": version.type == VersionManifestReleaseTypeEnum.release,
+                "id": id_,
+            }
+            for id_, version in self.downloader.version_manifest.versions.items()
         ]
         self.downloader.get_release_manifest("1.8.9")
         self.runtime_manager = runtime_manager
