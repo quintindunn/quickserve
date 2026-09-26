@@ -43,14 +43,24 @@
             Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
         </span>
         <ul>
+            <li>
+                <div class="fs-item">
+                    <a href="?directory=./{{ context.parent_folder }}">
+                        <span class="fs-name">
+                            <img src="{{ url_for('static', filename='common/folder-svgrepo-com.svg') }}">
+                            ..
+                        </span>
+                    </a>
+                </div>
+            </li>
             {% for file in context.files %}
             <li>
                 <div class="fs-item">
                     <a href="
                     {% if file.isFile %}
-                        ?file={{ file.filename }}
+                        ?file=.{{ file.cwd }}{{ file.filename }}
                     {% else %}
-                        ?directory={{ file.filename }}
+                        ?directory=.{{ file.cwd }}{{ file.filename }}
                     {% endif %}
                     ">
                         <span class="fs-name">

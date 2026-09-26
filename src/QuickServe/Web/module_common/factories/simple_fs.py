@@ -39,13 +39,15 @@ def simple_filesystem_builder(
 
         files = []
 
-        working_dir = instance.working_directory() / root.lstrip("/")
+        directory = request.args.get("directory") or ""
+        working_dir = instance.working_directory() / root.lstrip("/") / directory
 
         is_valid = validate_path(instance.working_directory(), working_dir)
         for file in os.listdir(working_dir) if is_valid else []:
             file_path = working_dir / file
             files.append({
                 "filename": file,
+                "cwd": directory.lstrip(".") + "/",
                 "modified": format_date(datetime.datetime.fromtimestamp(os.path.getmtime(file_path))),
                 "size": f"{os.stat(file_path).st_size / 1000:.1f}kb",
                 "isFile": os.path.isfile(file_path),
@@ -56,8 +58,10 @@ def simple_filesystem_builder(
         context = {
             "module_name": module_name,
             "files": files,
+            "parent_folder": (Path(directory)).parent,
             "root_directory": "/",
         }
+        print(context["parent_folder"])
         return Markup(template.render(context=context))
 
     return simple_filesystem
