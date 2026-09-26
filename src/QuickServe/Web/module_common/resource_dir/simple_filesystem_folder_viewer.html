@@ -96,7 +96,7 @@
 
             function fs_edit(btn) {
                 const filepath = fs_btn_get_filepath(btn)
-                console.log(`fs_edit ${filepath}`)
+                window.location = `?file=${filepath}`;
             }
 
             function fs_delete(btn) {
@@ -145,10 +145,6 @@
 
                     URL.revokeObjectURL(download_url);
                 });
-            }
-
-            function edit(btn) {
-
             }
         </script>
     </div>
