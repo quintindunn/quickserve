@@ -76,7 +76,9 @@
                         <span>{{ file.modified }}</span>
                         <span>{{ file.size }}</span>
                     </a>
-                        <span><button type="button" onclick="alert('{{ file.filename }}')">Edit</button> | <button type="button" onclick="alert('{{ file.filename }}')">Delete</button> | <button type="button" onclick="alert('{{ file.filename }}')">Rename</button></span>
+                        {% if file.isFile %}
+                            <span><button type="button" onclick="alert('{{ file.filename }}')">Edit</button> | <button type="button" onclick="alert('{{ file.filename }}')">Delete</button> | <button type="button" onclick="alert('{{ file.filename }}')">Rename</button></span>
+                        {% endif %}
                 </div>
             </li>
             {% endfor %}
