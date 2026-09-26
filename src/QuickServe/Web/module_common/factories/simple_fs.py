@@ -19,6 +19,7 @@ def is_child(instance_root: Path, requested_path: Path) -> bool:
     requested_path = requested_path.resolve()
     return requested_path.is_relative_to(instance_root.resolve())
 
+
 def redirect(url: str) -> str:
     return Markup(f"""
         <script>
@@ -28,8 +29,12 @@ def redirect(url: str) -> str:
 
 
 def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
-    resource_folder: str = str(get_resource("simple_filesystem_folder_viewer.html", mode="r"))
-    resource_file: str = str(get_resource("simple_filesystem_file_viewer.html", mode="r"))
+    resource_folder: str = str(
+        get_resource("simple_filesystem_folder_viewer.html", mode="r")
+    )
+    resource_file: str = str(
+        get_resource("simple_filesystem_file_viewer.html", mode="r")
+    )
 
     def format_date(dt: datetime.datetime):
         return dt.strftime("%m/%d/%Y %I:%M:%S%p")
@@ -38,7 +43,9 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
         directory = request.args.get("directory") or ""
         working_dir = instance.working_directory() / root.lstrip("/") / directory
 
-        is_valid = is_child(instance.working_directory() / root.lstrip("/"), working_dir)
+        is_valid = is_child(
+            instance.working_directory() / root.lstrip("/"), working_dir
+        )
 
         if is_valid:
             listed_folders = []
@@ -82,7 +89,10 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
     def render_file(root: str, instance: "BaseInstance"):
         file = instance.working_directory() / root.lstrip("/") / request.args["file"]
 
-        if not is_child(instance_root=instance.working_directory() / root.lstrip("/"), requested_path=file):
+        if not is_child(
+            instance_root=instance.working_directory() / root.lstrip("/"),
+            requested_path=file,
+        ):
             return redirect("/")
 
         try:
@@ -96,17 +106,15 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
             "content": file_contents,
             "readOnly": request.args.get("edit") is None,
             "instance": instance,
-            "filepath": request.args["file"]
+            "filepath": request.args["file"],
         }
         template = current_app.jinja_env.from_string(resource_file)
         return Markup(template.render(context=context))
-
 
     def simple_filesystem(root: str = "/"):
         assert hasattr(request, "instance")
 
         instance: "BaseInstance" = getattr(request, "instance")
-
 
         file = request.args.get("file")
 

@@ -4,6 +4,7 @@ The module blueprint for installed services
 Author: Quintin Dunn
 Date: 09/09/2026
 """
+
 import base64
 import os.path
 
@@ -231,7 +232,9 @@ def instance_save_file(uuid: str):
 
     filepath = str(filepath)
 
-    instance_service: "InstanceService" = current_app.extensions["quickserve.instance_service"]
+    instance_service: "InstanceService" = current_app.extensions[
+        "quickserve.instance_service"
+    ]
 
     instance = instance_service.from_uuid(uuid)
 
@@ -243,10 +246,14 @@ def instance_save_file(uuid: str):
 
     file = (working_dir / (filepath.rstrip("/"))).resolve()
 
-    if not file.is_relative_to(working_dir) or not os.path.exists(file) or not os.path.isfile(file):
+    if (
+        not file.is_relative_to(working_dir)
+        or not os.path.exists(file)
+        or not os.path.isfile(file)
+    ):
         return {"error": "File not found!"}, 400
 
-    with open(file, 'wb') as f:
+    with open(file, "wb") as f:
         f.write(base64.b64decode(content))
 
     return "ok", 200
