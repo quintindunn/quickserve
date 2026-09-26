@@ -257,3 +257,37 @@ def instance_save_file(uuid: str):
         f.write(base64.b64decode(content))
 
     return "ok", 200
+
+
+@instance_static.route("/<uuid>/downloadfile/", methods=["POST"])
+def instance_download_file(uuid: str):
+    data = request.get_json()
+    filepath = data.get("filepath")
+
+    if not filepath:
+        return {"error": "Missing filepath"}, 400
+
+    filepath = str(filepath)
+
+    instance_service: "InstanceService" = current_app.extensions[
+        "quickserve.instance_service"
+    ]
+
+    instance = instance_service.from_uuid(uuid)
+
+    fs_root = ""
+    if hasattr(instance.module.service, "FS_ROOT"):
+        fs_root = getattr(instance.module.service, "FS_ROOT")
+
+    working_dir = (instance.working_directory() / fs_root).resolve()
+
+    file = (working_dir / (filepath.rstrip("/"))).resolve()
+
+    if (
+        not file.is_relative_to(working_dir)
+        or not os.path.exists(file)
+        or not os.path.isfile(file)
+    ):
+        return {"error": "File not found!"}, 400
+
+    return send_file(file)

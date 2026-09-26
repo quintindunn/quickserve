@@ -15,7 +15,7 @@
             .fs-item {
                 display: grid;
                 grid-template-rows: 1fr;
-                grid-template-columns: 5fr 1fr;
+                grid-template-columns: 5fr 2fr;
             }
             .fs-item > a {
                 display: grid;
@@ -77,13 +77,80 @@
                         <span>{{ file.size }}</span>
                     </a>
                         {% if file.isFile %}
-                            <span><button type="button" onclick="alert('{{ file.filename }}')">Edit</button> | <button type="button" onclick="alert('{{ file.filename }}')">Delete</button> | <button type="button" onclick="alert('{{ file.filename }}')">Rename</button></span>
+                            <input type="hidden" name="filename" value="{{ file.filename }}">
+                            <input type="hidden" name="cwd" value="{{ file.cwd }}">
+                            <span><button type="button" onclick="fs_edit(this)">Edit</button> | <button type="button" onclick="fs_delete(this)">Delete</button> | <button type="button" onclick="fs_rename(this)">Rename</button> | <button type="button" onclick="fs_download(this)">Download</button></span>
                         {% endif %}
                 </div>
             </li>
             {% endfor %}
         </ul>
+        <script>
+            function fs_btn_get_filepath(btn) {
+                const container = btn.parentElement.parentElement;
+                const cwd = container.querySelector('input[name="cwd"]').value;
+                const filename = container.querySelector('input[name="filename"]').value;
 
+                return `.${ cwd }${ filename }`
+            }
+
+            function fs_edit(btn) {
+                const filepath = fs_btn_get_filepath(btn)
+                console.log(`fs_edit ${filepath}`)
+            }
+
+            function fs_delete(btn) {
+                const filepath = fs_btn_get_filepath(btn)
+                console.log(`fs_delete ${filepath}`)
+            }
+
+            function fs_rename(btn) {
+                const filepath = fs_btn_get_filepath(btn)
+                console.log(`fs_rename ${filepath}`)
+            }
+
+            function fs_download(btn) {
+                const filepath = fs_btn_get_filepath(btn)
+                const url = {{ url_for("modules.instancestatic.instance_download_file", uuid=context.instance.uuid) | tojson }}
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        filepath: filepath,
+                    })
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.blob();
+                    }
+
+                    return response.text().then(text => {
+                        alert(text);
+                    });
+                })
+                .then(blob => {
+                    if (!blob) return;
+
+                    const download_url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+
+                    a.href = download_url;
+                    a.download = filepath.split("/").pop();
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+
+                    URL.revokeObjectURL(download_url);
+                });
+            }
+
+            function edit(btn) {
+
+            }
+        </script>
     </div>
 
 </div>
