@@ -4,7 +4,6 @@ Manager for different runtime environments
 Author: Quintin Dunn
 Date: 09/18/2026
 """
-
 import os
 import platform
 import shutil
@@ -155,7 +154,12 @@ class RuntimeManager:
         )
         request.raise_for_status()
 
-        binary_link = request.json()[0]["binaries"][0]["installer"]["link"]
+        if operating_system == "mac":
+            binary_link: str = request.json()[0]["binaries"][0]["installer"]["link"]
+        elif operating_system == "linux":
+            binary_link: str = request.json()[0]["binaries"][0]["package"]["link"]
+        else:
+            raise NotImplementedError(f"Support for {operating_system} not implemented")
 
         return binary_link
 
@@ -249,16 +253,35 @@ class RuntimeManager:
         self, tmp_location: Path, major_version: int, image_type: str
     ) -> None:
         """
-        NOT IMPLEMENTED
-
         Installs the JRE for linux to <QUICKSERVE_ROOT>/runtimes/jre/x-x/
         :param tmp_location: The location of the .pkg file from Adoptium
         :param major_version: The major version of the JRE
         :param image_type: The image type, same as the one used to download in RuntimeManager.ensure_jre
         :return: None
         """
+        import tarfile
 
-        raise NotImplementedError("JRE Installer for linux not yet supported")
+        unpacked_location = self.workspace.get_path(f"tmp/{uuid.uuid4()}")
+        with tarfile.open(tmp_location, "r:gz") as tar:
+            tar.extractall(unpacked_location)
+
+        binary_folder = unpacked_location / os.listdir(unpacked_location)[0]
+
+        jre_root = self._get_jre_root(
+            major_version=major_version, image_type=image_type
+        )
+        if jre_root.exists():
+            logger.info("Found pre-existing installation, uninstalling.")
+            shutil.rmtree(jre_root)
+            os.rmdir(jre_root)
+
+        logger.info(f"Copying environment")
+        shutil.copytree(binary_folder, jre_root)
+
+        logger.info("Cleaning up.")
+        shutil.rmtree(binary_folder)
+        shutil.rmtree(unpacked_location)
+        os.remove(tmp_location)
 
     def install_jre_windows(
         self, tmp_location: Path, major_version: int, image_type: str
@@ -305,9 +328,7 @@ class RuntimeManager:
                 f"Getting executable for {operating_system} is not supported yet."
             )
         elif operating_system == "Linux":
-            raise NotImplementedError(
-                f"Getting executable for {operating_system} is not supported yet."
-            )
+            return root / "bin" / "java"
         else:
             raise NotImplementedError(
                 f"Operating system {operating_system!r} is not supported."
