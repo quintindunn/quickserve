@@ -12,11 +12,27 @@
                 font-size: 1.5rem;
                 font-weight: bold;
             }
-            .fs-item > a{
+            .fs-item {
+                display: grid;
+                grid-template-rows: 1fr;
+                grid-template-columns: 5fr 1fr;
+            }
+            .fs-item > a {
                 display: grid;
                 grid-template-rows: 1fr;
                 grid-template-columns: 2fr 2fr 1fr;
                 height: 1.4rem;
+            }
+
+            .fs-name {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+            .fs-name > img {
+                width: 1.2rem;
+                height: 1.2rem;
             }
         }
 
@@ -37,11 +53,20 @@
                         ?directory={{ file.filename }}
                     {% endif %}
                     ">
-                        <span>{{ file.filename }}</span>
+                        <span class="fs-name">
+                            <img src="
+                                {% if file.isFile %}
+                                    {{ url_for('static', filename='common/file-code-svgrepo-com.svg') }}
+                                {% else %}
+                                    {{ url_for('static', filename='common/folder-svgrepo-com.svg') }}
+                                {% endif %}
+                            ">
+                            {{ file.filename }}
+                        </span>
                         <span>{{ file.modified }}</span>
                         <span>{{ file.size }}</span>
                     </a>
-
+                        <span><button onclick="alert('{{ file.filename }}')">Edit</button> | <button onclick="alert('{{ file.filename }}')">Delete</button></span>
                 </div>
             </li>
             {% endfor %}
