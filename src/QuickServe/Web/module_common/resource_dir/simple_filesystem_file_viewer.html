@@ -1,0 +1,51 @@
+<div id="filesystem-block">
+    <style>
+        @scope {
+            .file-viewer {
+                background-color: #1e1e1e;
+                padding: 2vh 2vw;
+            }
+
+            .file-heading {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+
+            .code-editor {
+                width: 100%;
+                height: 70vh;
+                margin-top: 15px;
+            }
+        }
+    </style>
+
+    <div style="margin-bottom: 25px"></div>
+
+    <div class="file-viewer">
+        <div class="file-heading">
+            {{ context.filename }}
+        </div>
+
+        <div id="code-editor" class="code-editor"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ext-modelist.min.js"></script>
+    <script>
+        const filename = {{ context.filename | tojson }};
+        const content = {{ context.content | tojson }};
+
+        const editor = ace.edit("code-editor");
+
+        editor.setValue(content, -1);
+        editor.setTheme("ace/theme/monokai");
+        {% if context.readOnly %}
+            editor.setReadOnly(true);
+        {% endif %}
+
+        const modelist = ace.require("ace/ext/modelist");
+        const mode = modelist.getModeForPath(filename);
+
+        editor.session.setMode(mode.mode || "ace/mode/python");
+    </script>
+</div>

@@ -1,14 +1,14 @@
 <div id="filesystem-block">
     <style>
         @scope {
-            .file-list {
+            .file-viewer {
                 background-color: #1e1e1e;
                 padding: 2vh 2vw;
             }
-            .file-list > ul {
+            .file-viewer > ul {
                 list-style-type: none;
             }
-            .file-list-heading {
+            .file-heading {
                 font-size: 1.5rem;
                 font-weight: bold;
             }
@@ -38,8 +38,8 @@
 
     </style>
     <div style="margin-bottom: 25px"></div>
-    <div class="file-list">
-        <span class="file-list-heading">
+    <div class="file-viewer">
+        <span class="file-heading">
             Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
         </span>
         <ul>

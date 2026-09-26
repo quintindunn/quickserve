@@ -9,7 +9,7 @@ from QuickServe.Web.module_common.resources import get_resource
 from flask import current_app, request
 
 
-def validate_path(instance_root: Path, requested_path: Path) -> bool:
+def is_child(instance_root: Path, requested_path: Path) -> bool:
     """
     Checks if the requested path should be visible to the client.
     :param instance_root: The root of the instance that is being requested's working dir.
@@ -17,30 +17,21 @@ def validate_path(instance_root: Path, requested_path: Path) -> bool:
     :return: True if they should have access, otherwise False.
     """
     requested_path = requested_path.resolve()
-
-    if not requested_path.is_relative_to(instance_root):
-        return False
-
-    return True
+    return requested_path.is_relative_to(instance_root)
 
 
 def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
-    resource: str = str(get_resource("simple_filesystem.html", mode="r"))
+    resource_folder: str = str(get_resource("simple_filesystem_folder_viewer.html", mode="r"))
+    resource_file: str = str(get_resource("simple_filesystem_file_viewer.html", mode="r"))
 
     def format_date(dt: datetime.datetime):
         return dt.strftime("%m/%d/%Y %I:%M:%S%p")
 
-    def simple_filesystem(root: str = "/"):
-        assert hasattr(request, "instance")
-
-        instance: "BaseInstance" = getattr(request, "instance")
-
-        files = []
-
+    def render_folder(root: str, instance: "BaseInstance"):
         directory = request.args.get("directory") or ""
         working_dir = instance.working_directory() / root.lstrip("/") / directory
 
-        is_valid = validate_path(instance.working_directory(), working_dir)
+        is_valid = is_child(instance.working_directory() / root.lstrip("/"), working_dir)
 
         if is_valid:
             listed_folders = []
@@ -56,6 +47,7 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
         else:
             listed_folders = []
 
+        files = []
         for file in listed_folders:
             file_path = working_dir / file
             files.append(
@@ -71,14 +63,48 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
                 }
             )
 
-        template = current_app.jinja_env.from_string(resource)
         context = {
             "module_name": module_name,
             "files": files,
             "parent_folder": (Path(directory)).parent,
             "root_directory": "/",
         }
-        print(context["parent_folder"])
+        template = current_app.jinja_env.from_string(resource_folder)
         return Markup(template.render(context=context))
+
+    def render_file(root: str, instance: "BaseInstance"):
+        file = instance.working_directory() / root.lstrip("/") / request.args["file"]
+
+        if not is_child(instance_root=instance.working_directory() / root.lstrip("/"), requested_path=file):
+            return "404 File not found!"
+
+        with open(file, "r") as f:
+            file_contents = f.read()
+
+        context = {
+            "filename": file.name,
+            "content": file_contents,
+            "language": file.suffix.lower()[1:],
+            "readOnly": request.args.get("edit") is None
+        }
+        print(context)
+        template = current_app.jinja_env.from_string(resource_file)
+        return Markup(template.render(context=context))
+
+
+    def simple_filesystem(root: str = "/"):
+        assert hasattr(request, "instance")
+
+        instance: "BaseInstance" = getattr(request, "instance")
+
+
+        file = request.args.get("file")
+
+        if file is None:
+            return render_folder(root=root, instance=instance)
+        else:
+            return render_file(root=root, instance=instance)
+
+
 
     return simple_filesystem
