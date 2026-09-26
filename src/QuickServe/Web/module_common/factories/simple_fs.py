@@ -17,7 +17,14 @@ def is_child(instance_root: Path, requested_path: Path) -> bool:
     :return: True if they should have access, otherwise False.
     """
     requested_path = requested_path.resolve()
-    return requested_path.is_relative_to(instance_root)
+    return requested_path.is_relative_to(instance_root.resolve())
+
+def redirect(url: str) -> str:
+    return Markup(f"""
+        <script>
+            window.location = `{url}`;
+        </script>
+    """)
 
 
 def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
@@ -76,18 +83,21 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
         file = instance.working_directory() / root.lstrip("/") / request.args["file"]
 
         if not is_child(instance_root=instance.working_directory() / root.lstrip("/"), requested_path=file):
-            return "404 File not found!"
+            return redirect("/")
 
-        with open(file, "r") as f:
-            file_contents = f.read()
+        try:
+            with open(file, "r") as f:
+                file_contents = f.read()
+        except UnicodeDecodeError:
+            raise NotImplementedError("Downloading files not implemented!")
 
         context = {
             "filename": file.name,
             "content": file_contents,
             "language": file.suffix.lower()[1:],
-            "readOnly": request.args.get("edit") is None
+            "readOnly": request.args.get("edit") is None,
+            "instance": instance
         }
-        print(context)
         template = current_app.jinja_env.from_string(resource_file)
         return Markup(template.render(context=context))
 
@@ -104,7 +114,5 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
             return render_folder(root=root, instance=instance)
         else:
             return render_file(root=root, instance=instance)
-
-
 
     return simple_filesystem

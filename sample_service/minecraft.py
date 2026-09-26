@@ -38,6 +38,7 @@ class Service:
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
     PAGES: list[str] = ["about", "create", "start", "filesystem"]
+    FS_ROOT: str = "server"
 
     module: "Module"
     runtime_manager: "RuntimeManager"

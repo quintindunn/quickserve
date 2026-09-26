@@ -4,6 +4,8 @@ The module blueprint for installed services
 Author: Quintin Dunn
 Date: 09/09/2026
 """
+import base64
+import os.path
 
 from flask import (
     Blueprint,
@@ -19,10 +21,16 @@ from flask.typing import ResponseReturnValue
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.contracts import Service
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from QuickServe.Application.instances import InstanceService
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
+instance_static = Blueprint("instancestatic", __name__, url_prefix="/instancestatic/")
 modules.register_blueprint(instances)
+modules.register_blueprint(instance_static)
 
 
 # TODO: Add check for invalid page.
@@ -208,3 +216,37 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     else:
         url = url_for("modules.module_page", module_name=service.NAME, page=endpoint)
     return redirect(url, code=code)
+
+
+@instance_static.route("/<uuid>/savefile/", methods=["POST"])
+def instance_save_file(uuid: str):
+    data = request.get_json()
+    filepath = data.get("filepath")
+    content = data.get("content")
+
+    if not filepath:
+        return {"error": "Missing filepath"}, 400
+    if not content:
+        return {"error": "Missing content"}, 400
+
+    filepath = str(filepath)
+
+    instance_service: "InstanceService" = current_app.extensions["quickserve.instance_service"]
+
+    instance = instance_service.from_uuid(uuid)
+
+    fs_root = ""
+    if hasattr(instance.module.service, "FS_ROOT"):
+        fs_root = getattr(instance.module.service, "FS_ROOT")
+
+    working_dir = (instance.working_directory() / fs_root).resolve()
+
+    file = (working_dir / (filepath.rstrip("/"))).resolve()
+
+    if not file.is_relative_to(working_dir) or not os.path.exists(file) or not os.path.isfile(file):
+        return {"error": "File not found!"}, 400
+
+    with open(file, 'wb') as f:
+        f.write(base64.b64decode(content))
+
+    return "ll"
