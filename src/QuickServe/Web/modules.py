@@ -22,6 +22,9 @@ from flask.typing import ResponseReturnValue
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.contracts import Service
+
+from pathlib import Path
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -219,6 +222,22 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     return redirect(url, code=code)
 
 
+def _get_file(instance: BaseInstance, filepath: str) -> Path | None:
+    fs_root = getattr(instance.module.service, "FS_ROOT", "")
+    working_dir = (instance.working_directory() / fs_root).resolve()
+    file = (working_dir / filepath.rstrip("/")).resolve()
+
+    if (
+        not file.is_relative_to(working_dir)
+        or not file.exists()
+        or not file.is_file()
+    ):
+        return None
+
+    return file
+
+
+
 @instance_static.route("/<uuid>/savefile/", methods=["POST"])
 def instance_save_file(uuid: str):
     data = request.get_json()
@@ -230,27 +249,13 @@ def instance_save_file(uuid: str):
     if not content:
         return {"error": "Missing content"}, 400
 
-    filepath = str(filepath)
-
     instance_service: "InstanceService" = current_app.extensions[
         "quickserve.instance_service"
     ]
-
     instance = instance_service.from_uuid(uuid)
 
-    fs_root = ""
-    if hasattr(instance.module.service, "FS_ROOT"):
-        fs_root = getattr(instance.module.service, "FS_ROOT")
-
-    working_dir = (instance.working_directory() / fs_root).resolve()
-
-    file = (working_dir / (filepath.rstrip("/"))).resolve()
-
-    if (
-        not file.is_relative_to(working_dir)
-        or not os.path.exists(file)
-        or not os.path.isfile(file)
-    ):
+    file = _get_file(instance, str(filepath))
+    if file is None:
         return {"error": "File not found!"}, 400
 
     with open(file, "wb") as f:
@@ -267,27 +272,34 @@ def instance_download_file(uuid: str):
     if not filepath:
         return {"error": "Missing filepath"}, 400
 
-    filepath = str(filepath)
+    instance_service: "InstanceService" = current_app.extensions[
+        "quickserve.instance_service"
+    ]
+    instance = instance_service.from_uuid(uuid)
+
+    file = _get_file(instance, str(filepath))
+    if file is None:
+        return {"error": "File not found!"}, 400
+
+    return send_file(file)
+
+
+@instance_static.route("/<uuid>/deletefile/", methods=["POST"])
+def instance_delete_file(uuid: str):
+    data = request.get_json()
+    filepath = data.get("filepath")
+
+    if not filepath:
+        return {"error": "Missing filepath"}, 400
 
     instance_service: "InstanceService" = current_app.extensions[
         "quickserve.instance_service"
     ]
-
     instance = instance_service.from_uuid(uuid)
 
-    fs_root = ""
-    if hasattr(instance.module.service, "FS_ROOT"):
-        fs_root = getattr(instance.module.service, "FS_ROOT")
-
-    working_dir = (instance.working_directory() / fs_root).resolve()
-
-    file = (working_dir / (filepath.rstrip("/"))).resolve()
-
-    if (
-        not file.is_relative_to(working_dir)
-        or not os.path.exists(file)
-        or not os.path.isfile(file)
-    ):
+    file = _get_file(instance, str(filepath))
+    if file is None:
         return {"error": "File not found!"}, 400
 
-    return send_file(file)
+    os.remove(file)
+    return "ok", 200

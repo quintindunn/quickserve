@@ -17,6 +17,11 @@
                 grid-template-rows: 1fr;
                 grid-template-columns: 5fr 2fr;
             }
+
+            .fs-item:hover {
+                background-color: #252525;
+            }
+
             .fs-item > a {
                 display: grid;
                 grid-template-rows: 1fr;
@@ -101,7 +106,26 @@
 
             function fs_delete(btn) {
                 const filepath = fs_btn_get_filepath(btn)
-                console.log(`fs_delete ${filepath}`)
+                const url = {{ url_for("modules.instancestatic.instance_delete_file", uuid=context.instance.uuid) | tojson }}
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        filepath: filepath,
+                    })
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        window.location.reload();
+                    }
+
+                    return response.text().then(text => {
+                        alert(text);
+                    });
+                })
             }
 
             function fs_rename(btn) {
