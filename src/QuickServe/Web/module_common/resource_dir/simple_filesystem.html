@@ -47,7 +47,7 @@
                 <div class="fs-item">
                     <a href="?directory=./{{ context.parent_folder }}">
                         <span class="fs-name">
-                            <img src="{{ url_for('static', filename='common/folder-svgrepo-com.svg') }}">
+                            <img src="{{ url_for('static', filename='common/folder-svgrepo-com.svg') }}" alt="Folder">
                             ..
                         </span>
                     </a>
@@ -70,13 +70,13 @@
                                 {% else %}
                                     {{ url_for('static', filename='common/folder-svgrepo-com.svg') }}
                                 {% endif %}
-                            ">
+                            " alt="{% if file.isFile %}File{% else %}Folder{% endif %}">
                             {{ file.filename }}
                         </span>
                         <span>{{ file.modified }}</span>
                         <span>{{ file.size }}</span>
                     </a>
-                        <span><button onclick="alert('{{ file.filename }}')">Edit</button> | <button onclick="alert('{{ file.filename }}')">Delete</button></span>
+                        <span><button type="button" onclick="alert('{{ file.filename }}')">Edit</button> | <button type="button" onclick="alert('{{ file.filename }}')">Delete</button> | <button type="button" onclick="alert('{{ file.filename }}')">Rename</button></span>
                 </div>
             </li>
             {% endfor %}
