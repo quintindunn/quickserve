@@ -82,7 +82,7 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
             "files": files,
             "parent_folder": (Path(directory)).parent,
             "root_directory": "/",
-            "instance": instance
+            "instance": instance,
         }
         template = current_app.jinja_env.from_string(resource_folder)
         return Markup(template.render(context=context))

@@ -41,7 +41,7 @@
                     <button type="button" id="save">Save</button>
                     <button type="button" id="cancel">Cancel</button>
                 {% else %}
-                    <button id="editButton" type="button">Edit</button>
+                    <button type="button" id="editButton" >Edit</button>
                     <script>
                     document.getElementById('editButton').addEventListener('click', () => {
                       const url = new URL(window.location);
@@ -51,7 +51,7 @@
                     });
                     </script>
                 {% endif %}
-                    <button type="button">Download</button>
+                    <button type="button" id="download">Download</button>
             </span>
         </div>
 
@@ -123,10 +123,50 @@
                     }
                 });
             })
+
         {% endif %}
 
         const modelist = ace.require("ace/ext/modelist");
         const mode = modelist.getModeForPath(filename);
         editor.session.setMode(mode.mode);
+
+        const download_button = document.getElementById("download");
+        download_button.addEventListener("click", () => {
+            const url = {{ url_for("modules.instancestatic.instance_download_file", uuid=context.instance.uuid) | tojson }};
+            const filepath = {{ context.filepath | tojson }}
+
+            fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        filepath: filepath,
+                    })
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.blob();
+                    }
+
+                    return response.text().then(text => {
+                        alert(text);
+                    });
+                })
+                .then(blob => {
+                    if (!blob) return;
+
+                    const download_url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+
+                    a.href = download_url;
+                    a.download = filepath.split("/").pop();
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+
+                    URL.revokeObjectURL(download_url);
+                });
+        })
     </script>
 </div>
