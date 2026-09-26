@@ -25,7 +25,7 @@ class Registry:
             ),
         )
         self.register(
-            "simple_filesystem", lambda module_name, _: simple_filesystem_builder(module_name=module_name)
+            "simple_filesystem", lambda module_name, _=None: simple_filesystem_builder(module_name=module_name)
         )
         self.register("action", action_builder)
         self.register("link", link_builder)
