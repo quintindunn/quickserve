@@ -41,7 +41,22 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
         working_dir = instance.working_directory() / root.lstrip("/") / directory
 
         is_valid = validate_path(instance.working_directory(), working_dir)
-        for file in os.listdir(working_dir) if is_valid else []:
+
+        if is_valid:
+            listed_folders = []
+            listed_files = []
+
+            for file in os.listdir(working_dir):
+                if os.path.isfile(working_dir / file):
+                    listed_files.append(file)
+                else:
+                    listed_folders.append(file)
+
+            listed_folders.extend(listed_files)
+        else:
+            listed_folders = []
+
+        for file in listed_folders:
             file_path = working_dir / file
             files.append(
                 {
