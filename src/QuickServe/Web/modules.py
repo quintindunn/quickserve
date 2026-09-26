@@ -249,4 +249,4 @@ def instance_save_file(uuid: str):
     with open(file, 'wb') as f:
         f.write(base64.b64decode(content))
 
-    return "ll"
+    return "ok", 200

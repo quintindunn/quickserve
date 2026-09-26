@@ -19,6 +19,10 @@
                 cursor: pointer;
             }
 
+            .file-controls > button {
+                margin-left: 10px;
+            }
+
             .code-editor {
                 width: 100%;
                 height: 70vh;
@@ -35,7 +39,7 @@
             <span class="file-controls">
                 {% if not context.readOnly %}
                     <button type="button" id="save">Save</button>
-                    <button type="button" id="cancel" onclick="window.location.reload()">Cancel</button>
+                    <button type="button" id="cancel">Cancel</button>
                 {% else %}
                     <button id="editButton" type="button">Edit</button>
                     <script>
@@ -67,13 +71,57 @@
         {% if context.readOnly %}
             editor.setReadOnly(true);
         {% else %}
+            function base64Encode(str) {
+              const bytes = new TextEncoder().encode(str);
+              const binString = String.fromCodePoint(...bytes);
+              return btoa(binString);
+            }
+
+            let unsaved_changes = false;
+            editor.session.on("change", () => {
+                unsaved_changes = true;
+            });
+
+            window.addEventListener("beforeunload", (event) => {
+                if (unsaved_changes) {
+                    event.preventDefault();
+                    event.returnValue = "";
+                }
+            });
+
             const save_button = document.getElementById("save");
             const cancel_button = document.getElementById("cancel");
+
+            cancel_button.addEventListener("click", () => {
+                unsaved_changes = false;
+                window.location.reload();
+            });
+
             save_button.addEventListener("click", () => {
                 save_button.disabled = true;
                 cancel_button.disabled = true;
-                const content = editor.getValue();
-                const url = {{ url_for("modules.instances.save_file", uuid=instance.uuid, page="download_file", path=context.file_path) }}
+                const url = {{ url_for("modules.instancestatic.instance_save_file", uuid=context.instance.uuid) | tojson }}
+                const content = base64Encode(editor.getValue());
+                const filepath = {{ context.filepath | tojson }}
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        filepath: filepath,
+                        content: content
+                    })
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        unsaved_changes = false;
+                        window.location.reload();
+                    } else {
+                        return response.text().then(text => alert(text));
+                    }
+                });
             })
         {% endif %}
 
