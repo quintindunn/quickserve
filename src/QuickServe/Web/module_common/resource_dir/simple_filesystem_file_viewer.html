@@ -28,12 +28,17 @@
                 height: 70vh;
                 margin-top: 15px;
             }
+
+            .back-btn {
+                margin-left: 10px;
+            }
         }
     </style>
     <div style="margin-bottom: 25px"></div>
     <div class="file-viewer">
         <div class="file-heading">
             <span>{{ context.filename }}</span>
+            <button type="button" class="back-btn" onclick="window.location = '?directory={{ context.parent }}'">Back</button>
             <span class="file-controls">
                 {% if not context.readOnly %}
                     <button type="button" id="save">Save</button>
