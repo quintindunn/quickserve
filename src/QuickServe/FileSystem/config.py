@@ -33,8 +33,11 @@ class WebModel(ConfigModel):
     """Configuration model for the web service."""
 
     secret_key: str = "secret-key-change-in-production"
-    websocket_port: int = 5000
+    website_host: str = "0.0.0.0"
+    website_port: int = 8080
     websocket_host: str = "0.0.0.0"
+    websocket_port: int = 5000
+    website_debug: bool = False
 
 
 class DriverModel(ConfigModel):

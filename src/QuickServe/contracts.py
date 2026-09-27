@@ -37,6 +37,9 @@ class WebSettings(Protocol):
     secret_key: str
     websocket_port: int
     websocket_host: str
+    website_host: str
+    website_port: int
+    website_debug: bool
 
 
 @dataclass(frozen=True, slots=True)
