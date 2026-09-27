@@ -6,6 +6,7 @@ Date: 09/09/2026
 """
 
 import base64
+import logging
 import os.path
 import shutil
 
@@ -36,6 +37,8 @@ instances = Blueprint("instances", __name__, url_prefix="/instance/")
 instance_static = Blueprint("instancestatic", __name__, url_prefix="/instancestatic/")
 modules.register_blueprint(instances)
 modules.register_blueprint(instance_static)
+
+logger = logging.getLogger(__name__)
 
 
 # TODO: Add check for invalid page.
@@ -271,12 +274,17 @@ def instance_save_file(uuid: str):
     if not content:
         return {"error": "Missing content"}, 400
 
-    file = _get_path(_get_instance(uuid), str(filepath), must_be_file=True)
+    instance = _get_instance(uuid)
+    file = _get_path(instance, str(filepath), must_be_file=True)
+
     if file is None:
+        logger.warning(f"Save file failed: uuid={uuid} filepath={filepath}")
         return {"error": "File not found!"}, 400
 
     with open(file, "wb") as f:
         f.write(base64.b64decode(content))
+
+    logger.info(f"File saved: uuid={uuid} filepath={file}")
 
     return "ok", 200
 
@@ -289,9 +297,14 @@ def instance_download_file(uuid: str):
     if not filepath:
         return {"error": "Missing filepath"}, 400
 
-    file = _get_path(_get_instance(uuid), str(filepath), must_be_file=True)
+    instance = _get_instance(uuid)
+    file = _get_path(instance, str(filepath), must_be_file=True)
+
     if file is None:
+        logger.warning(f"Download file failed: uuid={uuid} filepath={filepath}")
         return {"error": "File not found!"}, 400
+
+    logger.info(f"File downloaded: uuid={uuid} filepath={file}")
 
     return send_file(file)
 
@@ -309,14 +322,19 @@ def instance_delete_path(uuid: str):
     file = _get_path(instance, str(filepath))
 
     if file is None or file == working_dir:
+        logger.warning(f"Delete path failed: uuid={uuid} filepath={filepath}")
         return {"error": "Path doesn't exist!"}, 400
 
     if file.is_dir():
         if os.listdir(file):
+            logger.warning(f"Delete folder failed: uuid={uuid} path={file} not empty")
             return {"error": "Folder is not empty!"}, 400
+
         os.rmdir(file)
     else:
         os.remove(file)
+
+    logger.info(f"Path deleted: uuid={uuid} path={file}")
 
     return "ok", 200
 
@@ -356,15 +374,28 @@ def instance_rename_file(uuid: str):
     )
 
     if src_file is None:
+        logger.warning(
+            f"Rename failed: uuid={uuid} source={src} destination={dst}"
+        )
         return {"error": "Missing source file"}, 400
 
     if dst_file is None:
+        logger.warning(
+            f"Rename failed: uuid={uuid} source={src} destination={dst}"
+        )
         return {"error": "Invalid destination file"}, 400
 
     if dst_file.exists():
+        logger.warning(
+            f"Rename failed: uuid={uuid} destination already exists={dst_file}"
+        )
         return {"error": "Destination file already exists"}, 400
 
     shutil.move(src_file, dst_file)
+
+    logger.info(
+        f"File renamed: uuid={uuid} source={src_file} destination={dst_file}"
+    )
 
     return "ok", 200
 
@@ -390,12 +421,20 @@ def instance_create_file(uuid: str):
     )
 
     if file_path is None:
+        logger.warning(
+            f"Create file failed: uuid={uuid} filename={file_name}"
+        )
         return {"error": "Invalid file path"}, 400
 
     if file_path.exists():
+        logger.warning(
+            f"Create file failed: uuid={uuid} path already exists={file_path}"
+        )
         return {"error": "File already exists"}, 400
 
     file_path.touch()
+
+    logger.info(f"File created: uuid={uuid} path={file_path}")
 
     return "ok", 200
 
@@ -419,11 +458,19 @@ def instance_create_folder(uuid: str):
     )
 
     if folder_path is None:
+        logger.warning(
+            f"Create folder failed: uuid={uuid} folder={folder_name}"
+        )
         return {"error": "Invalid folder path"}, 400
 
     if folder_path.exists():
+        logger.warning(
+            f"Create folder failed: uuid={uuid} path already exists={folder_path}"
+        )
         return {"error": "Folder already exists"}, 400
 
     os.makedirs(folder_path, exist_ok=True)
+
+    logger.info(f"Folder created: uuid={uuid} path={folder_path}")
 
     return "ok", 200

@@ -111,7 +111,7 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
             "readOnly": request.args.get("edit") is None,
             "instance": instance,
             "filepath": request.args["file"],
-            "parent": Path(request.args["file"]).parent
+            "parent": Path(request.args["file"]).parent,
         }
         template = current_app.jinja_env.from_string(resource_file)
         return Markup(template.render(context=context))

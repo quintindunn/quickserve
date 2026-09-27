@@ -178,15 +178,15 @@
                         </a>
                         <div class="fs-actions">
                             {% if file.isFile %}
-                                <input type="hidden" name="filename" value="/{{ file.filename }}">
-                                <input type="hidden" name="cwd" value="/{{ file.cwd }}">
+                                <input type="hidden" name="filename" value="{{ file.filename }}">
+                                <input type="hidden" name="cwd" value="{{ file.cwd }}">
                                 <button type="button" onclick="fs_edit(this)">Edit</button>
                                 <button type="button" onclick="fs_rename(this)">Rename</button>
                                 <button type="button" onclick="fs_delete(this)">Delete</button>
                                 <button type="button" onclick="fs_download(this)">Download</button>
                             {% elif file.isEmptyDir %}
-                                <input type="hidden" name="filename" value="/{{ file.filename }}">
-                                <input type="hidden" name="cwd" value="/{{ file.cwd }}">
+                                <input type="hidden" name="filename" value="{{ file.filename }}">
+                                <input type="hidden" name="cwd" value="{{ file.cwd }}">
                                 <span></span>
                                 <span></span>
                                 <button type="button" onclick="fs_delete(this)">Delete</button>
