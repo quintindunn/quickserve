@@ -1,3 +1,6 @@
 # Table of contents
 
-* [Page](README.md)
+* [QuickServe](README.md)
+* [QuickServe Folder](quickserve-folder.md)
+* [Modules](modules.md)
+* [Configuration](configuration.md)
