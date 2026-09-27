@@ -225,6 +225,30 @@
                         return
                     }
                     console.log(`renaming to ${input.value}`);
+
+                    const url = {{ url_for("modules.instancestatic.instance_rename_file", uuid=context.instance.uuid) | tojson }}
+
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            cwd: cwd,
+                            src: filename,
+                            dst: input.value
+                        })
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            window.location.reload();
+                        }
+
+                        return response.text().then(text => {
+                            alert(text);
+                        });
+                    })
+
                     cleanup();
                 }
 

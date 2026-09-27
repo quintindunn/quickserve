@@ -7,6 +7,7 @@ Date: 09/09/2026
 
 import base64
 import os.path
+import shutil
 
 from flask import (
     Blueprint,
@@ -303,3 +304,50 @@ def instance_delete_file(uuid: str):
 
     os.remove(file)
     return "ok", 200
+
+@instance_static.route("/<uuid>/renamefile/", methods=["POST"])
+def instance_rename_file(uuid: str):
+    data = request.get_json()
+    cwd = data.get("cwd")
+    src = data.get("src")
+    dst = data.get("dst")
+
+    if not cwd:
+        return {"error": "Missing current working directory"}, 400
+    if not src:
+        return {"error": "Missing source file"}, 400
+    if not dst:
+        return {"error": "Missing destination file"}, 400
+
+    if "/" in src:
+        return {"error": "Invalid source file"}, 400
+    if "/" in dst:
+        return {"error": "Invalid destination file"}, 400
+
+    instance_service: "InstanceService" = current_app.extensions[
+        "quickserve.instance_service"
+    ]
+    instance = instance_service.from_uuid(uuid)
+
+    fs_root = getattr(instance.module.service, "FS_ROOT", "")
+    working_dir = (instance.working_directory() / fs_root).resolve()
+    src_file = (working_dir / cwd.lstrip("/") / src).resolve()
+    dst_file = (working_dir / cwd.lstrip("/") / dst).resolve()
+
+    if (
+        not src_file.is_relative_to(working_dir)
+        or not src_file.exists()
+        or not src_file.is_file()
+    ):
+        return {"error": "Missing source file"}, 400
+
+    if not dst_file.is_relative_to(working_dir):
+        return {"error": "Invalid destination file"}, 400
+
+    if dst_file.exists():
+        return {"error": "Destination file already exists"}, 400
+
+    shutil.move(src_file, dst_file)
+
+    return "ok", 200
+
