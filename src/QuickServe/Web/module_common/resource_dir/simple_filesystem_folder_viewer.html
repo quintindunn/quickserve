@@ -5,20 +5,30 @@
                 background-color: #1e1e1e;
                 padding: 2vh 2vw;
             }
+
             .file-viewer > ul {
                 list-style-type: none;
             }
+
             .file-heading {
                 font-size: 1.5rem;
                 font-weight: bold;
             }
+
             .file-heading > .folder-controls {
                 float: right;
             }
+
             .fs-item {
                 display: grid;
                 grid-template-rows: 1fr;
                 grid-template-columns: 5fr 2fr;
+            }
+
+            .fs-actions {
+                display: grid;
+                grid-template-columns: 3em 4em 4em 5em;
+                gap: .25em;
             }
 
             .fs-item:hover {
@@ -115,13 +125,7 @@
     <div class="file-name-popup" data-show="false">
         <div class="popup">
             <span id="popup-prompt"></span>
-
-            <input
-                id="popup-input"
-                type="text"
-                value="foo.txt"
-            >
-
+            <input id="popup-input" type="text" value="foo.txt">
             <div class="popup-buttons">
                 <button type="button" id="popup-cancel"></button>
                 <button type="button" id="popup-confirm"></button>
@@ -141,46 +145,56 @@
                 <div class="fs-item">
                     <a href="?directory=./{{ context.parent_folder }}">
                         <span class="fs-name">
-                            <img src="{{ url_for('static', filename='common/folder-svgrepo-com.svg') }}" alt="Folder">
+                            <img src="{{ url_for('static', filename='common/folder-svgrepo-com.svg') }}"
+                                 alt="Folder">
                             ..
                         </span>
                     </a>
                 </div>
             </li>
             {% for file in context.files %}
-            <li>
-                <div class="fs-item">
-                    <a href="
+                <li>
+                    <div class="fs-item">
+                        <a href="
                     {% if file.isFile %}
                         ?file=.{{ file.cwd }}{{ file.filename }}
                     {% else %}
                         ?directory=.{{ file.cwd }}{{ file.filename }}
                     {% endif %}
                     ">
-                        <span class="fs-name">
-                            <img src="
+                            <span class="fs-name">
+                                <img src="
                                 {% if file.isFile %}
                                     {{ url_for('static', filename='common/file-code-svgrepo-com.svg') }}
                                 {% else %}
                                     {{ url_for('static', filename='common/folder-svgrepo-com.svg') }}
                                 {% endif %}
-                            " alt="{% if file.isFile %}File{% else %}Folder{% endif %}">
-                            {{ file.filename }}
-                        </span>
-                        <span>{{ file.modified }}</span>
-                        <span>{{ file.size }}</span>
-                    </a>
-                        {% if file.isFile %}
-                            <input type="hidden" name="filename" value="{{ file.filename }}">
-                            <input type="hidden" name="cwd" value="{{ file.cwd }}">
-                            <span><button type="button" onclick="fs_edit(this)">Edit</button> | <button type="button" onclick="fs_rename(this)">Rename</button> | <button type="button" onclick="fs_delete(this)">Delete</button> | <button type="button" onclick="fs_download(this)">Download</button></span>
-                        {% elif file.isEmptyDir %}
-                            <input type="hidden" name="filename" value="{{ file.filename }}">
-                            <input type="hidden" name="cwd" value="{{ file.cwd }}">
-                            <span><button type="button" onclick="fs_delete(this)">Delete</button></span>
-                        {% endif %}
-                </div>
-            </li>
+                            "
+                                     alt="{% if file.isFile %}File{% else %}Folder{% endif %}">
+                                {{ file.filename }}
+                            </span>
+                            <span>{{ file.modified }}</span>
+                            <span>{{ file.size }}</span>
+                        </a>
+                        <div class="fs-actions">
+                            {% if file.isFile %}
+                                <input type="hidden" name="filename" value="{{ file.filename }}">
+                                <input type="hidden" name="cwd" value="{{ file.cwd }}">
+                                <button type="button" onclick="fs_edit(this)">Edit</button>
+                                <button type="button" onclick="fs_rename(this)">Rename</button>
+                                <button type="button" onclick="fs_delete(this)">Delete</button>
+                                <button type="button" onclick="fs_download(this)">Download</button>
+                            {% elif file.isEmptyDir %}
+                                <input type="hidden" name="filename" value="{{ file.filename }}">
+                                <input type="hidden" name="cwd" value="{{ file.cwd }}">
+                                <span></span>
+                                <span></span>
+                                <button type="button" onclick="fs_delete(this)">Delete</button>
+                                <span></span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
             {% endfor %}
         </ul>
         <script>
@@ -473,5 +487,4 @@
                         }
         </script>
     </div>
-
 </div>

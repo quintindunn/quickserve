@@ -30,9 +30,7 @@
             }
         }
     </style>
-
     <div style="margin-bottom: 25px"></div>
-
     <div class="file-viewer">
         <div class="file-heading">
             <span>{{ context.filename }}</span>
@@ -41,7 +39,7 @@
                     <button type="button" id="save">Save</button>
                     <button type="button" id="cancel">Cancel</button>
                 {% else %}
-                    <button type="button" id="editButton" >Edit</button>
+                    <button type="button" id="editButton">Edit</button>
                     <script>
                     document.getElementById('editButton').addEventListener('click', () => {
                       const url = new URL(window.location);
@@ -51,13 +49,11 @@
                     });
                     </script>
                 {% endif %}
-                    <button type="button" id="download">Download</button>
+                <button type="button" id="download">Download</button>
             </span>
         </div>
-
         <div id="code-editor" class="code-editor"></div>
     </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ace.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ext-modelist.min.js"></script>
     <script>
