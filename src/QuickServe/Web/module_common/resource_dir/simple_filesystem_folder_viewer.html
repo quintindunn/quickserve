@@ -12,6 +12,9 @@
                 font-size: 1.5rem;
                 font-weight: bold;
             }
+            .file-heading > .folder-controls {
+                float: right;
+            }
             .fs-item {
                 display: grid;
                 grid-template-rows: 1fr;
@@ -120,6 +123,9 @@
     <div class="file-viewer">
         <span class="file-heading">
             Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
+            <span class="folder-controls">
+                <button id="file-create">Create File</button>
+            </span>
         </span>
         <ul>
             <li>
@@ -165,6 +171,60 @@
             {% endfor %}
         </ul>
         <script>
+            const create_file_btn = document.getElementById("file-create");
+            create_file_btn.addEventListener("click", () => {
+                const { popup, input, cancel, confirm } = setup_popup("create");
+
+                function cancel_handler() {
+                    cancel_popup();
+                    cleanup();
+                }
+
+                function confirm_handler() {
+                    console.log(`Creating ${input.value}`);
+
+                    const url = {{ url_for("modules.instancestatic.instance_create_file", uuid=context.instance.uuid) | tojson }}
+
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            cwd: {{ context.root_directory | tojson}},
+                            filename: input.value,
+                        })
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            window.location.reload();
+                        }
+
+                        return response.text().then(text => {
+                            alert(text);
+                        });
+                    })
+
+                    cleanup();
+                }
+
+                function input_handler(event) {
+                    if (event.key === "Enter") {
+                        confirm_handler();
+                    }
+                }
+
+                function cleanup() {
+                    cancel.removeEventListener("click", cancel_handler);
+                    confirm.removeEventListener("click", confirm_handler);
+                    input.removeEventListener("keydown", input_handler);
+                }
+
+                cancel.addEventListener("click", cancel_handler);
+                confirm.addEventListener("click", confirm_handler);
+                input.addEventListener("keydown", input_handler);
+            });
+
             function fs_btn_get_filepath(btn) {
                 const container = btn.parentElement.parentElement;
                 const cwd = container.querySelector('input[name="cwd"]').value;
@@ -301,49 +361,48 @@
                 };
             }
 
-            function cancel_popup() {
-                const popup = document.querySelector(".file-name-popup");
-                popup.dataset.show = "false";
-            }
-
             function fs_download(btn) {
-                const filepath = fs_btn_get_filepath(btn)
-                const url = {{ url_for("modules.instancestatic.instance_download_file", uuid=context.instance.uuid) | tojson }}
+                            const filepath = fs_btn_get_filepath(btn)
+                            const url = {{ url_for("modules.instancestatic.instance_download_file", uuid=context.instance.uuid) | tojson }}
 
-                fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        filepath: filepath,
-                    })
-                })
-                .then(response => {
-                    if (response.status === 200) {
-                        return response.blob();
-                    }
+                            fetch(url, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    filepath: filepath,
+                                })
+                            })
+                            .then(response => {
+                                if (response.status === 200) {
+                                    return response.blob();
+                                }
 
-                    return response.text().then(text => {
-                        alert(text);
-                    });
-                })
-                .then(blob => {
-                    if (!blob) return;
+                                return response.text().then(text => {
+                                    alert(text);
+                                });
+                            })
+                            .then(blob => {
+                                if (!blob) return;
 
-                    const download_url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
+                                const download_url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
 
-                    a.href = download_url;
-                    a.download = filepath.split("/").pop();
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
+                                a.href = download_url;
+                                a.download = filepath.split("/").pop();
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
 
-                    URL.revokeObjectURL(download_url);
-                });
-            }
+                                URL.revokeObjectURL(download_url);
+                            });
+                        }
 
+            function cancel_popup() {
+                            const popup = document.querySelector(".file-name-popup");
+                            popup.dataset.show = "false";
+                        }
         </script>
     </div>
 

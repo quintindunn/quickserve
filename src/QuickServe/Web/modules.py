@@ -351,3 +351,36 @@ def instance_rename_file(uuid: str):
 
     return "ok", 200
 
+
+@instance_static.route("/<uuid>/createfile/", methods=["POST"])
+def instance_create_file(uuid: str):
+    data = request.get_json()
+    cwd = data.get("cwd")
+    file_name = data.get("filename")
+
+    if not cwd:
+        return {"error": "Missing current working directory"}, 400
+    if not file_name:
+        return {"error": "Missing file name"}, 400
+    if "/" in file_name:
+        return {"error": "Invalid filename"}, 400
+
+    instance_service: "InstanceService" = current_app.extensions[
+        "quickserve.instance_service"
+    ]
+    instance = instance_service.from_uuid(uuid)
+
+    fs_root = getattr(instance.module.service, "FS_ROOT", "")
+    working_dir = (instance.working_directory() / fs_root).resolve()
+    file_path = (working_dir / cwd.lstrip("/") / file_name).resolve()
+    if (
+        not file_path.is_relative_to(working_dir)
+    ):
+        return {"error": "Invalid file path"}, 400
+    if file_path.exists():
+        return {"error": "File already exists"}
+
+    file_path.touch()
+
+    return "ok", 200
+
