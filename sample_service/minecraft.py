@@ -37,7 +37,8 @@ class Service:
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
-    PAGES: list[str] = ["about", "create", "start"]
+    PAGES: list[str] = ["about", "create", "start", "filesystem"]
+    FS_ROOT: str = "server"
 
     module: "Module"
     runtime_manager: "RuntimeManager"
@@ -52,7 +53,11 @@ class Service:
         self.module = module
         self.downloader = Downloader()
         self.versions = [
-            {"is_release": version.type == VersionManifestReleaseTypeEnum.release, "id": id_} for id_, version in self.downloader.version_manifest.versions.items()
+            {
+                "is_release": version.type == VersionManifestReleaseTypeEnum.release,
+                "id": id_,
+            }
+            for id_, version in self.downloader.version_manifest.versions.items()
         ]
         self.downloader.get_release_manifest("1.8.9")
         self.runtime_manager = runtime_manager
@@ -221,3 +226,10 @@ class Service:
 
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
+
+    @instance_specific
+    def filesystem(self, instance: "BaseInstance", *args, **kwargs):
+        asset = self.module.get_resource_path("filesystem.html")
+
+        with open(asset, "r") as f:
+            return f.read(), dict()

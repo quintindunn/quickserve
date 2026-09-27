@@ -1,0 +1,542 @@
+<div id="filesystem-block">
+    <style>
+        @scope {
+            .file-viewer {
+                background-color: #1e1e1e;
+                padding: 2vh 2vw;
+            }
+
+            .file-viewer > ul {
+                list-style-type: none;
+            }
+
+            .file-heading {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+
+            .file-heading > .folder-controls {
+                float: right;
+            }
+
+            .fs-item {
+                display: grid;
+                grid-template-rows: 1fr;
+                grid-template-columns: 5fr 2fr;
+            }
+
+            .fs-actions {
+                display: grid;
+                grid-template-columns: 3em 4em 4em 5em;
+                gap: .25em;
+            }
+
+            .fs-item:hover {
+                background-color: #252525;
+            }
+
+            .fs-item > a {
+                display: grid;
+                grid-template-rows: 1fr;
+                grid-template-columns: 2fr 2fr 1fr;
+                height: 1.4rem;
+            }
+
+            .fs-item > span > button:hover {
+                cursor: pointer;
+            }
+
+            #file-create:hover {
+                cursor: pointer;
+            }
+
+            .fs-name {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+            .fs-name > img {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+            .file-name-popup {
+                position: fixed;
+                display: none;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 2;
+                background-color: rgba(0, 0, 0, 0.4);
+                align-items: center;
+                justify-content: center;
+            }
+
+            .file-name-popup[data-show="true"] {
+                display: flex;
+            }
+
+            .file-name-popup > .popup {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                min-width: 350px;
+                padding: 1.5rem;
+                background-color: #1e1e1e;
+                border-radius: 6px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            }
+
+            #popup-prompt {
+                font-size: 1.1rem;
+                font-weight: bold;
+            }
+
+            #popup-input {
+                box-sizing: border-box;
+                width: 100%;
+                padding: 0.6rem;
+                color: white;
+                background-color: #2a2a2a;
+                border: 1px solid #555;
+                border-radius: 4px;
+                outline: none;
+            }
+
+            #popup-input:focus {
+                border-color: #888;
+            }
+
+            .popup-buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 0.5rem;
+            }
+
+            .popup-buttons button {
+                padding: 0.5rem 1rem;
+                cursor: pointer;
+            }
+        }
+
+    </style>
+    <div style="margin-bottom: 25px"></div>
+    <div class="file-name-popup" data-show="false">
+        <div class="popup">
+            <span id="popup-prompt"></span>
+            <input id="popup-input" type="text" value="foo.txt">
+            <div class="popup-buttons">
+                <button type="button" id="popup-cancel"></button>
+                <button type="button" id="popup-confirm"></button>
+            </div>
+        </div>
+    </div>
+    <div class="file-viewer">
+        <span class="file-heading">
+            Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
+            <span class="folder-controls">
+                <button id="file-create">Create File</button>
+                <button id="folder-create">Create Folder</button>
+            </span>
+        </span>
+        <ul>
+            <li>
+                <div class="fs-item">
+                    <a href="?directory=./{{ context.parent_folder }}">
+                        <span class="fs-name">
+                            <img src="{{ url_for('static', filename='common/folder-svgrepo-com.svg') }}"
+                                 alt="Folder">
+                            ..
+                        </span>
+                    </a>
+                </div>
+            </li>
+            {% for file in context.files %}
+                <li>
+                    <div class="fs-item">
+                        <a href="
+                    {% if file.isFile %}
+                        ?file=.{{ file.cwd }}{{ file.filename }}
+                    {% else %}
+                        ?directory=.{{ file.cwd }}{{ file.filename }}
+                    {% endif %}
+                    ">
+                            <span class="fs-name">
+                                <img src="
+                                {% if file.isFile %}
+                                    {{ url_for('static', filename='common/file-code-svgrepo-com.svg') }}
+                                {% else %}
+                                    {{ url_for('static', filename='common/folder-svgrepo-com.svg') }}
+                                {% endif %}
+                            "
+                                     alt="{% if file.isFile %}File{% else %}Folder{% endif %}">
+                                {{ file.filename }}
+                            </span>
+                            <span>{{ file.modified }}</span>
+                            <span>{{ file.size }}</span>
+                        </a>
+                        <div class="fs-actions">
+                            {% if file.isFile %}
+                                <input type="hidden" name="filename" value="{{ file.filename }}">
+                                <input type="hidden" name="cwd" value="{{ file.cwd }}">
+                                <button type="button" onclick="fs_edit(this)">Edit</button>
+                                <button type="button" onclick="fs_rename(this)">Rename</button>
+                                <button type="button" onclick="fs_delete(this)">Delete</button>
+                                <button type="button" onclick="fs_download(this)">Download</button>
+                            {% elif file.isEmptyDir %}
+                                <input type="hidden" name="filename" value="{{ file.filename }}">
+                                <input type="hidden" name="cwd" value="{{ file.cwd }}">
+                                <span></span>
+                                <span></span>
+                                <button type="button" onclick="fs_delete(this)">Delete</button>
+                                <span></span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        <script>
+            const create_file_btn = document.getElementById("file-create");
+            const create_folder_btn = document.getElementById("folder-create");
+
+            function validate_file_name(filename) {
+                if (!filename || filename.trim() !== filename) {
+                    return false;
+                }
+
+                if (filename === "." || filename === "..") {
+                    return false;
+                }
+
+                // Windows/macOS/Linux invalid characters
+                if (/[<>:"/\\|?*\x00-\x1F]/.test(filename)) {
+                    return false;
+                }
+
+                // Windows reserved device names
+                const name = filename.split(".")[0].toUpperCase();
+
+                if (
+                    ["CON", "PRN", "AUX", "NUL",
+                     "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+                     "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+                    ].includes(name)
+                ) {
+                    return false;
+                }
+
+                if (/[ .]$/.test(filename)) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            function validate_folder_name(folder_name) {
+                if (!folder_name || folder_name.trim() !== folder_name) {
+                    return false;
+                }
+
+                const folders = folder_name.split("/");
+                return folders.every(folder => validate_file_name(folder));
+            }
+
+            create_file_btn.addEventListener("click", () => {
+                const { popup, input, cancel, confirm } = setup_popup("create", "file");
+
+                function cancel_handler() {
+                    cancel_popup();
+                    cleanup();
+                }
+
+                function confirm_handler() {
+                    console.log(`Creating ${input.value}`);
+
+                    if (!validate_file_name(input.value)) {
+                        alert("Error, invalid file name!")
+                        return
+                    }
+
+                    const url = {{ url_for("modules.instancestatic.instance_create_file", uuid=context.instance.uuid) | tojson }}
+
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            cwd: {{ context.root_directory | tojson}},
+                            filename: input.value,
+                        })
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            window.location.reload();
+                        }
+
+                        return response.text().then(text => {
+                            alert(text);
+                        });
+                    })
+
+                    cleanup();
+                }
+
+                function input_handler(event) {
+                    if (event.key === "Enter") {
+                        confirm_handler();
+                    }
+                }
+
+                function cleanup() {
+                    cancel.removeEventListener("click", cancel_handler);
+                    confirm.removeEventListener("click", confirm_handler);
+                    input.removeEventListener("keydown", input_handler);
+                }
+
+                cancel.addEventListener("click", cancel_handler);
+                confirm.addEventListener("click", confirm_handler);
+                input.addEventListener("keydown", input_handler);
+            });
+
+            create_folder_btn.addEventListener("click", () => {
+                const { popup, input, cancel, confirm } = setup_popup("create", "folder");
+
+                function cancel_handler() {
+                    cancel_popup();
+                    cleanup();
+                }
+
+                function confirm_handler() {
+                    console.log(`Creating ${input.value}`);
+
+                    if (!validate_folder_name(input.value)) {
+                        alert("Error, invalid folder name!")
+                        return
+                    }
+
+                    const url = {{ url_for("modules.instancestatic.instance_create_folder", uuid=context.instance.uuid) | tojson }}
+
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            cwd: {{ context.root_directory | tojson}},
+                            foldername: input.value,
+                        })
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            window.location.reload();
+                        }
+
+                        return response.text().then(text => {
+                            alert(text);
+                        });
+                    })
+
+                    cleanup();
+                }
+
+                function input_handler(event) {
+                    if (event.key === "Enter") {
+                        confirm_handler();
+                    }
+                }
+
+                function cleanup() {
+                    cancel.removeEventListener("click", cancel_handler);
+                    confirm.removeEventListener("click", confirm_handler);
+                    input.removeEventListener("keydown", input_handler);
+                }
+
+                cancel.addEventListener("click", cancel_handler);
+                confirm.addEventListener("click", confirm_handler);
+                input.addEventListener("keydown", input_handler);
+            });
+
+            function fs_btn_get_filepath(btn) {
+                const container = btn.parentElement.parentElement;
+                const cwd = container.querySelector('input[name="cwd"]').value;
+                const filename = container.querySelector('input[name="filename"]').value;
+
+                return `.${ cwd }${ filename }`
+            }
+
+            function fs_edit(btn) {
+                const filepath = fs_btn_get_filepath(btn)
+                window.location = `?file=${filepath}`;
+            }
+
+            function fs_delete(btn) {
+                const filepath = fs_btn_get_filepath(btn)
+
+                if (!confirm(`Are you sure you want to delete "${filepath}"?`)) {
+                    return;
+                }
+
+                const url = {{ url_for("modules.instancestatic.instance_delete_path", uuid=context.instance.uuid) | tojson }}
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        filepath: filepath,
+                    })
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        window.location.reload();
+                    }
+
+                    return response.text().then(text => {
+                        alert(text);
+                    });
+                })
+            }
+
+            function fs_rename(btn) {
+                const container = btn.parentElement.parentElement;
+                const cwd = container.querySelector('input[name="cwd"]').value;
+                const filename = container.querySelector('input[name="filename"]').value;
+                const { popup, input, cancel, confirm } = setup_popup("rename", filename);
+
+                function cancel_handler() {
+                    cancel_popup();
+                    cleanup();
+                }
+
+                function confirm_handler() {
+                    const new_name = input.value;
+                    if (new_name === filename) {
+                        cancel_handler();
+                        return
+                    }
+                    console.log(`renaming to ${input.value}`);
+
+                    const url = {{ url_for("modules.instancestatic.instance_rename_file", uuid=context.instance.uuid) | tojson }}
+
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            cwd: cwd,
+                            src: filename,
+                            dst: input.value
+                        })
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            window.location.reload();
+                        }
+
+                        return response.text().then(text => {
+                            alert(text);
+                        });
+                    })
+
+                    cleanup();
+                }
+
+                function input_handler(event) {
+                    if (event.key === "Enter") {
+                        confirm_handler();
+                    }
+                }
+
+                function cleanup() {
+                    cancel.removeEventListener("click", cancel_handler);
+                    confirm.removeEventListener("click", confirm_handler);
+                    input.removeEventListener("keydown", input_handler);
+                }
+
+                cancel.addEventListener("click", cancel_handler);
+                confirm.addEventListener("click", confirm_handler);
+                input.addEventListener("keydown", input_handler);
+            }
+
+            function setup_popup(mode, modifier = "") {
+                const popup = document.querySelector(".file-name-popup");
+                const prompt = document.getElementById("popup-prompt");
+                const input = document.getElementById("popup-input");
+                const cancel = document.getElementById("popup-cancel");
+                const confirm = document.getElementById("popup-confirm");
+
+                if (mode === "create") {
+                    prompt.textContent = `Create ${modifier}`;
+                    input.value = "";
+                    confirm.textContent = "Create";
+                } else if (mode === "rename") {
+                    prompt.textContent = `Rename file ${modifier}`;
+                    input.value = modifier;
+                    confirm.textContent = "Rename";
+                } else {
+                    throw new Error(`Invalid popup mode: ${mode}`);
+                }
+
+                cancel.textContent = "Cancel";
+                popup.dataset.show = "true";
+                input.focus();
+                input.select();
+
+                return {
+                    popup,
+                    input,
+                    cancel,
+                    confirm
+                };
+            }
+
+            function fs_download(btn) {
+                            const filepath = fs_btn_get_filepath(btn)
+                            const url = {{ url_for("modules.instancestatic.instance_download_file", uuid=context.instance.uuid) | tojson }}
+
+                            fetch(url, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    filepath: filepath,
+                                })
+                            })
+                            .then(response => {
+                                if (response.status === 200) {
+                                    return response.blob();
+                                }
+
+                                return response.text().then(text => {
+                                    alert(text);
+                                });
+                            })
+                            .then(blob => {
+                                if (!blob) return;
+
+                                const download_url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+
+                                a.href = download_url;
+                                a.download = filepath.split("/").pop();
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+
+                                URL.revokeObjectURL(download_url);
+                            });
+                        }
+
+            function cancel_popup() {
+                            const popup = document.querySelector(".file-name-popup");
+                            popup.dataset.show = "false";
+                        }
+        </script>
+    </div>
+</div>

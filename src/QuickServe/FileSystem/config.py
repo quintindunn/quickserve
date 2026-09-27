@@ -16,7 +16,6 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from QuickServe.FileSystem.path_resolver import Workspace
 
-
 logger = logging.getLogger("FileSystem.config")
 
 

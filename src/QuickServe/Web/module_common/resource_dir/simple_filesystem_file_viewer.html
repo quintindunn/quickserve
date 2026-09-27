@@ -1,0 +1,173 @@
+<div id="filesystem-block">
+    <style>
+        @scope {
+            .file-viewer {
+                background-color: #1e1e1e;
+                padding: 2vh 2vw;
+            }
+
+            .file-heading {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+
+            .file-controls {
+                float: right;
+            }
+
+            .file-controls > button:hover {
+                cursor: pointer;
+            }
+
+            .file-controls > button {
+                margin-left: 10px;
+            }
+
+            .code-editor {
+                width: 100%;
+                height: 70vh;
+                margin-top: 15px;
+            }
+
+            .back-btn {
+                margin-left: 10px;
+            }
+        }
+    </style>
+    <div style="margin-bottom: 25px"></div>
+    <div class="file-viewer">
+        <div class="file-heading">
+            <span>{{ context.filename }}</span>
+            <button type="button" class="back-btn" onclick="window.location = '?directory={{ context.parent }}'">Back</button>
+            <span class="file-controls">
+                {% if not context.readOnly %}
+                    <button type="button" id="save">Save</button>
+                    <button type="button" id="cancel">Cancel</button>
+                {% else %}
+                    <button type="button" id="editButton">Edit</button>
+                    <script>
+                    document.getElementById('editButton').addEventListener('click', () => {
+                      const url = new URL(window.location);
+                      url.searchParams.set('edit', '');
+                      history.pushState({}, '', url);
+                      window.location.reload();
+                    });
+                    </script>
+                {% endif %}
+                <button type="button" id="download">Download</button>
+            </span>
+        </div>
+        <div id="code-editor" class="code-editor"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ext-modelist.min.js"></script>
+    <script>
+        const filename = {{ context.filename | tojson }};
+        const content = {{ context.content | tojson }};
+
+        const editor = ace.edit("code-editor");
+
+        editor.setValue(content, -1);
+        editor.setTheme("ace/theme/monokai");
+        {% if context.readOnly %}
+            editor.setReadOnly(true);
+        {% else %}
+            function base64Encode(str) {
+              const bytes = new TextEncoder().encode(str);
+              const binString = String.fromCodePoint(...bytes);
+              return btoa(binString);
+            }
+
+            let unsaved_changes = false;
+            editor.session.on("change", () => {
+                unsaved_changes = true;
+            });
+
+            window.addEventListener("beforeunload", (event) => {
+                if (unsaved_changes) {
+                    event.preventDefault();
+                    event.returnValue = "";
+                }
+            });
+
+            const save_button = document.getElementById("save");
+            const cancel_button = document.getElementById("cancel");
+
+            cancel_button.addEventListener("click", () => {
+                unsaved_changes = false;
+                window.location.reload();
+            });
+
+            save_button.addEventListener("click", () => {
+                save_button.disabled = true;
+                cancel_button.disabled = true;
+                const url = {{ url_for("modules.instancestatic.instance_save_file", uuid=context.instance.uuid) | tojson }}
+                const content = base64Encode(editor.getValue());
+                const filepath = {{ context.filepath | tojson }}
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        filepath: filepath,
+                        content: content
+                    })
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        unsaved_changes = false;
+                        window.location.reload();
+                    } else {
+                        return response.text().then(text => alert(text));
+                    }
+                });
+            })
+
+        {% endif %}
+
+        const modelist = ace.require("ace/ext/modelist");
+        const mode = modelist.getModeForPath(filename);
+        editor.session.setMode(mode.mode);
+
+        const download_button = document.getElementById("download");
+        download_button.addEventListener("click", () => {
+            const url = {{ url_for("modules.instancestatic.instance_download_file", uuid=context.instance.uuid) | tojson }};
+            const filepath = {{ context.filepath | tojson }}
+
+            fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        filepath: filepath,
+                    })
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.blob();
+                    }
+
+                    return response.text().then(text => {
+                        alert(text);
+                    });
+                })
+                .then(blob => {
+                    if (!blob) return;
+
+                    const download_url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+
+                    a.href = download_url;
+                    a.download = filepath.split("/").pop();
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+
+                    URL.revokeObjectURL(download_url);
+                });
+        })
+    </script>
+</div>
