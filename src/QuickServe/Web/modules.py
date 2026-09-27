@@ -223,15 +223,41 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     return redirect(url, code=code)
 
 
-def _get_file(instance: BaseInstance, filepath: str) -> Path | None:
+def _get_working_dir(instance: BaseInstance) -> Path:
     fs_root = getattr(instance.module.service, "FS_ROOT", "")
-    working_dir = (instance.working_directory() / fs_root).resolve()
-    file = (working_dir / filepath.rstrip("/")).resolve()
+    return (instance.working_directory() / fs_root).resolve()
 
-    if not file.is_relative_to(working_dir) or not file.exists() or not file.is_file():
+
+def _get_path(
+    instance: BaseInstance,
+    filepath: str,
+    *,
+    must_exist: bool = True,
+    must_be_file: bool | None = None,
+) -> Path | None:
+    working_dir = _get_working_dir(instance)
+    path = (working_dir / filepath.lstrip("/")).resolve()
+
+    if not path.is_relative_to(working_dir):
         return None
 
-    return file
+    if must_exist and not path.exists():
+        return None
+
+    if must_be_file is True and not path.is_file():
+        return None
+
+    if must_be_file is False and not path.is_dir():
+        return None
+
+    return path
+
+
+def _get_instance(uuid: str) -> BaseInstance:
+    instance_service: "InstanceService" = current_app.extensions[
+        "quickserve.instance_service"
+    ]
+    return instance_service.from_uuid(uuid)
 
 
 @instance_static.route("/<uuid>/savefile/", methods=["POST"])
@@ -245,12 +271,7 @@ def instance_save_file(uuid: str):
     if not content:
         return {"error": "Missing content"}, 400
 
-    instance_service: "InstanceService" = current_app.extensions[
-        "quickserve.instance_service"
-    ]
-    instance = instance_service.from_uuid(uuid)
-
-    file = _get_file(instance, str(filepath))
+    file = _get_path(_get_instance(uuid), str(filepath), must_be_file=True)
     if file is None:
         return {"error": "File not found!"}, 400
 
@@ -268,12 +289,7 @@ def instance_download_file(uuid: str):
     if not filepath:
         return {"error": "Missing filepath"}, 400
 
-    instance_service: "InstanceService" = current_app.extensions[
-        "quickserve.instance_service"
-    ]
-    instance = instance_service.from_uuid(uuid)
-
-    file = _get_file(instance, str(filepath))
+    file = _get_path(_get_instance(uuid), str(filepath), must_be_file=True)
     if file is None:
         return {"error": "File not found!"}, 400
 
@@ -288,16 +304,11 @@ def instance_delete_path(uuid: str):
     if not filepath:
         return {"error": "Missing filepath"}, 400
 
-    instance_service: "InstanceService" = current_app.extensions[
-        "quickserve.instance_service"
-    ]
-    instance = instance_service.from_uuid(uuid)
+    instance = _get_instance(uuid)
+    working_dir = _get_working_dir(instance)
+    file = _get_path(instance, str(filepath))
 
-    fs_root = getattr(instance.module.service, "FS_ROOT", "")
-    working_dir = (instance.working_directory() / fs_root).resolve()
-    file = (working_dir / str(filepath).rstrip("/")).resolve()
-
-    if file == working_dir or not file.is_relative_to(working_dir) or not file.exists():
+    if file is None or file == working_dir:
         return {"error": "Path doesn't exist!"}, 400
 
     if file.is_dir():
@@ -324,29 +335,30 @@ def instance_rename_file(uuid: str):
     if not dst:
         return {"error": "Missing destination file"}, 400
 
-    if "/" in src:
+    src = src.lstrip("/")
+
+    if "/" in src or "\\" in src:
         return {"error": "Invalid source file"}, 400
-    if "/" in dst:
+    if "/" in dst or "\\" in dst:
         return {"error": "Invalid destination file"}, 400
 
-    instance_service: "InstanceService" = current_app.extensions[
-        "quickserve.instance_service"
-    ]
-    instance = instance_service.from_uuid(uuid)
+    instance = _get_instance(uuid)
 
-    fs_root = getattr(instance.module.service, "FS_ROOT", "")
-    working_dir = (instance.working_directory() / fs_root).resolve()
-    src_file = (working_dir / cwd.lstrip("/") / src).resolve()
-    dst_file = (working_dir / cwd.lstrip("/") / dst).resolve()
+    src_file = _get_path(
+        instance,
+        f"{cwd.lstrip('/')}/{src}",
+        must_be_file=True,
+    )
+    dst_file = _get_path(
+        instance,
+        f"{cwd.lstrip('/')}/{dst}",
+        must_exist=False,
+    )
 
-    if (
-        not src_file.is_relative_to(working_dir)
-        or not src_file.exists()
-        or not src_file.is_file()
-    ):
+    if src_file is None:
         return {"error": "Missing source file"}, 400
 
-    if not dst_file.is_relative_to(working_dir):
+    if dst_file is None:
         return {"error": "Invalid destination file"}, 400
 
     if dst_file.exists():
@@ -367,21 +379,21 @@ def instance_create_file(uuid: str):
         return {"error": "Missing current working directory"}, 400
     if not file_name:
         return {"error": "Missing file name"}, 400
-    if "/" in file_name:
+    if "/" in file_name or "\\" in file_name:
         return {"error": "Invalid filename"}, 400
 
-    instance_service: "InstanceService" = current_app.extensions[
-        "quickserve.instance_service"
-    ]
-    instance = instance_service.from_uuid(uuid)
+    instance = _get_instance(uuid)
+    file_path = _get_path(
+        instance,
+        f"{cwd.lstrip('/')}/{file_name}",
+        must_exist=False,
+    )
 
-    fs_root = getattr(instance.module.service, "FS_ROOT", "")
-    working_dir = (instance.working_directory() / fs_root).resolve()
-    file_path = (working_dir / cwd.lstrip("/") / file_name).resolve()
-    if not file_path.is_relative_to(working_dir):
+    if file_path is None:
         return {"error": "Invalid file path"}, 400
+
     if file_path.exists():
-        return {"error": "File already exists"}
+        return {"error": "File already exists"}, 400
 
     file_path.touch()
 
@@ -399,18 +411,18 @@ def instance_create_folder(uuid: str):
     if not folder_name:
         return {"error": "Missing folder name"}, 400
 
-    instance_service: "InstanceService" = current_app.extensions[
-        "quickserve.instance_service"
-    ]
-    instance = instance_service.from_uuid(uuid)
+    instance = _get_instance(uuid)
+    folder_path = _get_path(
+        instance,
+        f"{cwd.lstrip('/')}/{folder_name}",
+        must_exist=False,
+    )
 
-    fs_root = getattr(instance.module.service, "FS_ROOT", "")
-    working_dir = (instance.working_directory() / fs_root).resolve()
-    folder_path = (working_dir / cwd.lstrip("/") / folder_name).resolve()
-    if not folder_path.is_relative_to(working_dir):
+    if folder_path is None:
         return {"error": "Invalid folder path"}, 400
+
     if folder_path.exists():
-        return {"error": "Folder already exists"}
+        return {"error": "Folder already exists"}, 400
 
     os.makedirs(folder_path, exist_ok=True)
 
