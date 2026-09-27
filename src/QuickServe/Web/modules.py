@@ -387,6 +387,7 @@ def instance_create_file(uuid: str):
 
     return "ok", 200
 
+
 @instance_static.route("/<uuid>/createfolder/", methods=["POST"])
 def instance_create_folder(uuid: str):
     data = request.get_json()
