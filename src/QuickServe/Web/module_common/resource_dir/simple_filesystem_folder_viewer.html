@@ -39,10 +39,84 @@
                 width: 1.2rem;
                 height: 1.2rem;
             }
+            .file-name-popup {
+                position: fixed;
+                display: none;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 2;
+                background-color: rgba(0, 0, 0, 0.4);
+                align-items: center;
+                justify-content: center;
+            }
+
+            .file-name-popup[data-show="true"] {
+                display: flex;
+            }
+
+            .file-name-popup > .popup {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                min-width: 350px;
+                padding: 1.5rem;
+                background-color: #1e1e1e;
+                border-radius: 6px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            }
+
+            #popup-prompt {
+                font-size: 1.1rem;
+                font-weight: bold;
+            }
+
+            #popup-input {
+                box-sizing: border-box;
+                width: 100%;
+                padding: 0.6rem;
+                color: white;
+                background-color: #2a2a2a;
+                border: 1px solid #555;
+                border-radius: 4px;
+                outline: none;
+            }
+
+            #popup-input:focus {
+                border-color: #888;
+            }
+
+            .popup-buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 0.5rem;
+            }
+
+            .popup-buttons button {
+                padding: 0.5rem 1rem;
+                cursor: pointer;
+            }
         }
 
     </style>
     <div style="margin-bottom: 25px"></div>
+    <div class="file-name-popup" data-show="false">
+        <div class="popup">
+            <span id="popup-prompt"></span>
+
+            <input
+                id="popup-input"
+                type="text"
+                value="foo.txt"
+            >
+
+            <div class="popup-buttons">
+                <button type="button" id="popup-cancel"></button>
+                <button type="button" id="popup-confirm"></button>
+            </div>
+        </div>
+    </div>
     <div class="file-viewer">
         <span class="file-heading">
             Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
@@ -134,8 +208,78 @@
             }
 
             function fs_rename(btn) {
-                const filepath = fs_btn_get_filepath(btn)
-                console.log(`fs_rename ${filepath}`)
+                const container = btn.parentElement.parentElement;
+                const cwd = container.querySelector('input[name="cwd"]').value;
+                const filename = container.querySelector('input[name="filename"]').value;
+                const { popup, input, cancel, confirm } = setup_popup("rename", filename);
+
+                function cancel_handler() {
+                    cancel_popup();
+                    cleanup();
+                }
+
+                function confirm_handler() {
+                    const new_name = input.value;
+                    if (new_name === filename) {
+                        cancel_handler();
+                        return
+                    }
+                    console.log(`renaming to ${input.value}`);
+                    cleanup();
+                }
+
+                function input_handler(event) {
+                    if (event.key === "Enter") {
+                        confirm_handler();
+                    }
+                }
+
+                function cleanup() {
+                    cancel.removeEventListener("click", cancel_handler);
+                    confirm.removeEventListener("click", confirm_handler);
+                    input.removeEventListener("keydown", input_handler);
+                }
+
+                cancel.addEventListener("click", cancel_handler);
+                confirm.addEventListener("click", confirm_handler);
+                input.addEventListener("keydown", input_handler);
+            }
+
+            function setup_popup(mode, filename = "") {
+                const popup = document.querySelector(".file-name-popup");
+                const prompt = document.getElementById("popup-prompt");
+                const input = document.getElementById("popup-input");
+                const cancel = document.getElementById("popup-cancel");
+                const confirm = document.getElementById("popup-confirm");
+
+                if (mode === "create") {
+                    prompt.textContent = "Create file";
+                    input.value = "";
+                    confirm.textContent = "Create";
+                } else if (mode === "rename") {
+                    prompt.textContent = `Rename file ${filename}`;
+                    input.value = filename;
+                    confirm.textContent = "Rename";
+                } else {
+                    throw new Error(`Invalid popup mode: ${mode}`);
+                }
+
+                cancel.textContent = "Cancel";
+                popup.dataset.show = "true";
+                input.focus();
+                input.select();
+
+                return {
+                    popup,
+                    input,
+                    cancel,
+                    confirm
+                };
+            }
+
+            function cancel_popup() {
+                const popup = document.querySelector(".file-name-popup");
+                popup.dataset.show = "false";
             }
 
             function fs_download(btn) {
@@ -175,6 +319,7 @@
                     URL.revokeObjectURL(download_url);
                 });
             }
+
         </script>
     </div>
 
