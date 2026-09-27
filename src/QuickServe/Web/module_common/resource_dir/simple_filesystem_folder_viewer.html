@@ -201,6 +201,48 @@
             const create_file_btn = document.getElementById("file-create");
             const create_folder_btn = document.getElementById("folder-create");
 
+            function validate_file_name(filename) {
+                if (!filename || filename.trim() !== filename) {
+                    return false;
+                }
+
+                if (filename === "." || filename === "..") {
+                    return false;
+                }
+
+                // Windows/macOS/Linux invalid characters
+                if (/[<>:"/\\|?*\x00-\x1F]/.test(filename)) {
+                    return false;
+                }
+
+                // Windows reserved device names
+                const name = filename.split(".")[0].toUpperCase();
+
+                if (
+                    ["CON", "PRN", "AUX", "NUL",
+                     "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+                     "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+                    ].includes(name)
+                ) {
+                    return false;
+                }
+
+                if (/[ .]$/.test(filename)) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            function validate_folder_name(folder_name) {
+                if (!folder_name || folder_name.trim() !== folder_name) {
+                    return false;
+                }
+
+                const folders = folder_name.split("/");
+                return folders.every(folder => validate_file_name(folder));
+            }
+
             create_file_btn.addEventListener("click", () => {
                 const { popup, input, cancel, confirm } = setup_popup("create", "file");
 
@@ -211,6 +253,11 @@
 
                 function confirm_handler() {
                     console.log(`Creating ${input.value}`);
+
+                    if (!validate_file_name(input.value)) {
+                        alert("Error, invalid file name!")
+                        return
+                    }
 
                     const url = {{ url_for("modules.instancestatic.instance_create_file", uuid=context.instance.uuid) | tojson }}
 
@@ -264,6 +311,11 @@
 
                 function confirm_handler() {
                     console.log(`Creating ${input.value}`);
+
+                    if (!validate_folder_name(input.value)) {
+                        alert("Error, invalid folder name!")
+                        return
+                    }
 
                     const url = {{ url_for("modules.instancestatic.instance_create_folder", uuid=context.instance.uuid) | tojson }}
 
