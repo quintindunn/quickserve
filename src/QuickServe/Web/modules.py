@@ -228,15 +228,10 @@ def _get_file(instance: BaseInstance, filepath: str) -> Path | None:
     working_dir = (instance.working_directory() / fs_root).resolve()
     file = (working_dir / filepath.rstrip("/")).resolve()
 
-    if (
-        not file.is_relative_to(working_dir)
-        or not file.exists()
-        or not file.is_file()
-    ):
+    if not file.is_relative_to(working_dir) or not file.exists() or not file.is_file():
         return None
 
     return file
-
 
 
 @instance_static.route("/<uuid>/savefile/", methods=["POST"])
@@ -285,8 +280,8 @@ def instance_download_file(uuid: str):
     return send_file(file)
 
 
-@instance_static.route("/<uuid>/deletefile/", methods=["POST"])
-def instance_delete_file(uuid: str):
+@instance_static.route("/<uuid>/deletepath/", methods=["POST"])
+def instance_delete_path(uuid: str):
     data = request.get_json()
     filepath = data.get("filepath")
 
@@ -298,12 +293,22 @@ def instance_delete_file(uuid: str):
     ]
     instance = instance_service.from_uuid(uuid)
 
-    file = _get_file(instance, str(filepath))
-    if file is None:
-        return {"error": "File not found!"}, 400
+    fs_root = getattr(instance.module.service, "FS_ROOT", "")
+    working_dir = (instance.working_directory() / fs_root).resolve()
+    file = (working_dir / str(filepath).rstrip("/")).resolve()
 
-    os.remove(file)
+    if file == working_dir or not file.is_relative_to(working_dir) or not file.exists():
+        return {"error": "Path doesn't exist!"}, 400
+
+    if file.is_dir():
+        if os.listdir(file):
+            return {"error": "Folder is not empty!"}, 400
+        os.rmdir(file)
+    else:
+        os.remove(file)
+
     return "ok", 200
+
 
 @instance_static.route("/<uuid>/renamefile/", methods=["POST"])
 def instance_rename_file(uuid: str):
@@ -373,9 +378,7 @@ def instance_create_file(uuid: str):
     fs_root = getattr(instance.module.service, "FS_ROOT", "")
     working_dir = (instance.working_directory() / fs_root).resolve()
     file_path = (working_dir / cwd.lstrip("/") / file_name).resolve()
-    if (
-        not file_path.is_relative_to(working_dir)
-    ):
+    if not file_path.is_relative_to(working_dir):
         return {"error": "Invalid file path"}, 400
     if file_path.exists():
         return {"error": "File already exists"}
@@ -383,4 +386,3 @@ def instance_create_file(uuid: str):
     file_path.touch()
 
     return "ok", 200
-

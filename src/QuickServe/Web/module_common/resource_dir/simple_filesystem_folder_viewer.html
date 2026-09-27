@@ -32,6 +32,14 @@
                 height: 1.4rem;
             }
 
+            .fs-item > span > button:hover {
+                cursor: pointer;
+            }
+
+            #file-create:hover {
+                cursor: pointer;
+            }
+
             .fs-name {
                 display: flex;
                 align-items: center;
@@ -164,7 +172,11 @@
                         {% if file.isFile %}
                             <input type="hidden" name="filename" value="{{ file.filename }}">
                             <input type="hidden" name="cwd" value="{{ file.cwd }}">
-                            <span><button type="button" onclick="fs_edit(this)">Edit</button> | <button type="button" onclick="fs_delete(this)">Delete</button> | <button type="button" onclick="fs_rename(this)">Rename</button> | <button type="button" onclick="fs_download(this)">Download</button></span>
+                            <span><button type="button" onclick="fs_edit(this)">Edit</button> | <button type="button" onclick="fs_rename(this)">Rename</button> | <button type="button" onclick="fs_delete(this)">Delete</button> | <button type="button" onclick="fs_download(this)">Download</button></span>
+                        {% elif file.isEmptyDir %}
+                            <input type="hidden" name="filename" value="{{ file.filename }}">
+                            <input type="hidden" name="cwd" value="{{ file.cwd }}">
+                            <span><button type="button" onclick="fs_delete(this)">Delete</button></span>
                         {% endif %}
                 </div>
             </li>
@@ -245,7 +257,7 @@
                     return;
                 }
 
-                const url = {{ url_for("modules.instancestatic.instance_delete_file", uuid=context.instance.uuid) | tojson }}
+                const url = {{ url_for("modules.instancestatic.instance_delete_path", uuid=context.instance.uuid) | tojson }}
 
                 fetch(url, {
                     method: "POST",
