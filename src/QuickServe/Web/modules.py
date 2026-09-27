@@ -386,3 +386,31 @@ def instance_create_file(uuid: str):
     file_path.touch()
 
     return "ok", 200
+
+@instance_static.route("/<uuid>/createfolder/", methods=["POST"])
+def instance_create_folder(uuid: str):
+    data = request.get_json()
+    cwd = data.get("cwd")
+    folder_name = data.get("foldername")
+
+    if not cwd:
+        return {"error": "Missing current working directory"}, 400
+    if not folder_name:
+        return {"error": "Missing folder name"}, 400
+
+    instance_service: "InstanceService" = current_app.extensions[
+        "quickserve.instance_service"
+    ]
+    instance = instance_service.from_uuid(uuid)
+
+    fs_root = getattr(instance.module.service, "FS_ROOT", "")
+    working_dir = (instance.working_directory() / fs_root).resolve()
+    folder_path = (working_dir / cwd.lstrip("/") / folder_name).resolve()
+    if not folder_path.is_relative_to(working_dir):
+        return {"error": "Invalid folder path"}, 400
+    if folder_path.exists():
+        return {"error": "Folder already exists"}
+
+    os.makedirs(folder_path, exist_ok=True)
+
+    return "ok", 200

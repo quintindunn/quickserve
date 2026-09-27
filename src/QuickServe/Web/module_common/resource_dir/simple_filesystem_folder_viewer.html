@@ -133,6 +133,7 @@
             Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
             <span class="folder-controls">
                 <button id="file-create">Create File</button>
+                <button id="folder-create">Create Folder</button>
             </span>
         </span>
         <ul>
@@ -184,8 +185,10 @@
         </ul>
         <script>
             const create_file_btn = document.getElementById("file-create");
+            const create_folder_btn = document.getElementById("folder-create");
+
             create_file_btn.addEventListener("click", () => {
-                const { popup, input, cancel, confirm } = setup_popup("create");
+                const { popup, input, cancel, confirm } = setup_popup("create", "file");
 
                 function cancel_handler() {
                     cancel_popup();
@@ -205,6 +208,59 @@
                         body: JSON.stringify({
                             cwd: {{ context.root_directory | tojson}},
                             filename: input.value,
+                        })
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            window.location.reload();
+                        }
+
+                        return response.text().then(text => {
+                            alert(text);
+                        });
+                    })
+
+                    cleanup();
+                }
+
+                function input_handler(event) {
+                    if (event.key === "Enter") {
+                        confirm_handler();
+                    }
+                }
+
+                function cleanup() {
+                    cancel.removeEventListener("click", cancel_handler);
+                    confirm.removeEventListener("click", confirm_handler);
+                    input.removeEventListener("keydown", input_handler);
+                }
+
+                cancel.addEventListener("click", cancel_handler);
+                confirm.addEventListener("click", confirm_handler);
+                input.addEventListener("keydown", input_handler);
+            });
+
+            create_folder_btn.addEventListener("click", () => {
+                const { popup, input, cancel, confirm } = setup_popup("create", "folder");
+
+                function cancel_handler() {
+                    cancel_popup();
+                    cleanup();
+                }
+
+                function confirm_handler() {
+                    console.log(`Creating ${input.value}`);
+
+                    const url = {{ url_for("modules.instancestatic.instance_create_folder", uuid=context.instance.uuid) | tojson }}
+
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            cwd: {{ context.root_directory | tojson}},
+                            foldername: input.value,
                         })
                     })
                     .then(response => {
@@ -341,7 +397,7 @@
                 input.addEventListener("keydown", input_handler);
             }
 
-            function setup_popup(mode, filename = "") {
+            function setup_popup(mode, modifier = "") {
                 const popup = document.querySelector(".file-name-popup");
                 const prompt = document.getElementById("popup-prompt");
                 const input = document.getElementById("popup-input");
@@ -349,12 +405,12 @@
                 const confirm = document.getElementById("popup-confirm");
 
                 if (mode === "create") {
-                    prompt.textContent = "Create file";
+                    prompt.textContent = `Create ${modifier}`;
                     input.value = "";
                     confirm.textContent = "Create";
                 } else if (mode === "rename") {
-                    prompt.textContent = `Rename file ${filename}`;
-                    input.value = filename;
+                    prompt.textContent = `Rename file ${modifier}`;
+                    input.value = modifier;
                     confirm.textContent = "Rename";
                 } else {
                     throw new Error(`Invalid popup mode: ${mode}`);
