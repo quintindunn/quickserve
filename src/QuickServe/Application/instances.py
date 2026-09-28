@@ -12,7 +12,6 @@ from uuid import UUID, uuid4
 
 from QuickServe.contracts import InstanceRecord, InstanceRepository
 from QuickServe.Driver.instance.base_instance import BaseInstance
-from QuickServe.Driver.port_manager import PortManager
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.path_resolver import Workspace
@@ -28,7 +27,6 @@ class InstanceService:
         self,
         catalog: ServiceCatalog,
         workspace: Workspace,
-        port_manager: PortManager,
         repository: InstanceRepository,
     ) -> None:
         """
@@ -36,13 +34,11 @@ class InstanceService:
 
         :param catalog: The loaded service catalog.
         :param workspace: The workspace used for instance files.
-        :param port_manager: The allocator for service ports.
         :param repository: The persistence implementation for instance records.
         :return: None
         """
         self.catalog = catalog
         self.workspace = workspace
-        self.port_manager = port_manager
         self.repository = repository
         self._instances: dict[str, BaseInstance] = {}
 
