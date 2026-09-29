@@ -1,5 +1,5 @@
 """
-Discovers and loads QuickServe service plugins.
+Discovers and loads QuickServe modules.
 
 Author: Quintin Dunn
 Date: 09/14/2026
@@ -16,54 +16,54 @@ from QuickServe.Runtimes.runtime_manager import RuntimeManager
 logger = logging.getLogger("QuickServe.plugins")
 
 
-class ServiceCatalog:
+class ModuleCatalog:
     """
-    Stores loaded service plugins by name.
+    Stores loaded plugins by name.
     """
 
     def __init__(self, modules: dict[str, BaseModule] | None = None) -> None:
         """
-        Initializes a service catalog.
+        Initializes a module catalog.
 
-        :param modules: Loaded modules indexed by service name.
+        :param modules: Loaded modules indexed by module name.
         :return: None
         """
         self._modules = modules or {}
 
     def get(self, name: str) -> BaseModule | None:
         """
-        Gets a service module if it is loaded.
+        Gets a module if it is loaded.
 
-        :param name: The service name.
+        :param name: The module name.
         :return: The loaded module, or None when it is unknown.
         """
         return self._modules.get(name)
 
     def require(self, name: str) -> BaseModule:
         """
-        Gets a service module or raises when it is unknown.
+        Gets a module or raises when it is unknown.
 
-        :param name: The service name.
+        :param name: The module name.
         :return: The loaded module.
-        :raises KeyError: If no module has the requested service name.
+        :raises KeyError: If no module has the requested module name.
         """
         module = self.get(name)
         if module is None:
-            raise KeyError(f"Unknown service module: {name}")
+            raise KeyError(f"Unknown module: {name}")
         return module
 
     def __contains__(self, name: str) -> bool:
         """
-        Checks whether a service module is loaded.
+        Checks whether a module is loaded.
 
-        :param name: The service name.
+        :param name: The module name.
         :return: True when the module is loaded.
         """
         return name in self._modules
 
     def items(self):
         """
-        Gets the loaded service-name and module pairs.
+        Gets the loaded module-name and module pairs.
 
         :return: The catalog items view.
         """
@@ -76,14 +76,14 @@ class ServiceCatalog:
 
         A copy prevents web code from mutating the loaded catalog.
 
-        :return: Loaded modules indexed by service name.
+        :return: Loaded modules indexed by module name.
         """
         return self._modules.copy()
 
 
 class PluginLoader:
     """
-    Loads and validates service packages from the workspace modules directory.
+    Loads and validates module packages from the workspace modules directory.
     """
 
     def __init__(self, workspace: Workspace, runtime_manager: "RuntimeManager") -> None:
@@ -97,19 +97,20 @@ class PluginLoader:
         self.workspace = workspace
         self.runtime_manager = runtime_manager
 
-    def load_all(self) -> ServiceCatalog:
+    def load_all(self) -> ModuleCatalog:
         """
-        Discovers, validates, and loads every service plugin.
+        Discovers, validates, and loads every module.
 
-        :return: The catalog of loaded service modules.
-        :raises ValueError: If more than one plugin exposes the same service name.
+        :return: The catalog of loaded modules.
+        :raises ValueError: If more than one plugin exposes the same module name.
         """
         modules_path = self.workspace.ensure_directory("modules")
         loaded: dict[str, BaseModule] = {}
         for path in modules_path.iterdir():
-            if not path.is_dir() or path.name.startswith("."):
+            if not path.resolve().is_dir() or path.name.startswith("."):
+                logger.debug(f"Skipping {path}")
                 continue
-            logger.info("Loading service plugin %s", path)
+            logger.info("Loading module %s", path)
             module = BaseModule(
                 module_path=path,
                 workspace=self.workspace,
@@ -118,6 +119,6 @@ class PluginLoader:
             module.load_module()
             name = module.module.NAME
             if name in loaded:
-                raise ValueError(f"Duplicate service name: {name}")
+                raise ValueError(f"Duplicate module name: {name}")
             loaded[name] = module
-        return ServiceCatalog(loaded)
+        return ModuleCatalog(loaded)

@@ -19,12 +19,12 @@ import requests
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 from .server import MinecraftServer
 
-from QuickServeServiceLibrary.decorators import instance_specific
+from QuickServeModuleLibrary.decorators import instance_specific
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
     from QuickServe.Driver.instance.base_instance import BaseInstance
-    from QuickServe.Application.instances import InstanceService
+    from QuickServe.Application.instances import InstanceManager
     from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
 logger = logging.getLogger("minecraft-vanilla")
@@ -49,7 +49,7 @@ class Module:
     instance_callback_map: dict[UUID, Callable]
 
     def __init__(self, module: "BaseModule", runtime_manager: "RuntimeManager"):
-        logger.info(f"Loading service: {self.NAME}")
+        logger.info(f"Loading module: {self.NAME}")
         self.module = module
         self.downloader = Downloader()
         self.versions = [
@@ -78,14 +78,14 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    def action_install(self, instances: "InstanceService", **kwargs):
+    def action_install(self, instances: "InstanceManager", **kwargs):
         """
         Installation action
-        :param instances: InstanceService reference, used for record insertion
+        :param instances: InstanceManager reference, used for record insertion
         :param kwargs: Required Kwargs:
         - minecraft-version: A valid Minecraft version, listed in Minecraft version manifest v2
         (https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
-        - instance-name: The name of the service instance being created.
+        - instance-name: The name of the instance being created.
         :return: The routing to the 'about' page, response code 302.
         """
         assert "minecraft-version" in kwargs
@@ -102,8 +102,8 @@ class Module:
         jar_url = manifest.server.url
         java_major = manifest.java.major_version
 
-        instance = instances.new_service(
-            module_name=self.NAME, service_name=instance_name
+        instance = instances.new_instance(
+            module_name=self.NAME, instance_name=instance_name
         )
 
         cwd = instance.working_directory()
