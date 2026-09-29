@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from types import ModuleType
 
-from QuickServe.contracts import Service
+from QuickServe.contracts import Module
 from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExist
 
 if TYPE_CHECKING:
@@ -23,11 +23,11 @@ from QuickServe.Runtimes.runtime_manager import RuntimeManager
 logger = logging.getLogger("QuickServerFS.Modules")
 
 
-class Module:
+class BaseModule:
     path: Path
     workspace: "Workspace"
-    module: ModuleType
-    service: Service
+    _module: ModuleType
+    module: Module
     runtime_manager: "RuntimeManager"
 
     def __init__(
@@ -41,18 +41,18 @@ class Module:
         self.runtime_manager = runtime_manager
 
     def raise_if_attr_not_exist(
-        self, attr_name: str, exception: Exception, service: bool = True
+        self, attr_name: str, exception: Exception, raw_import: bool = True
     ) -> None:
         """
-        Raises an exception if an attribute doesn't exist in a service/module.
+        Raises an exception if an attribute doesn't exist in a module.
 
         :param attr_name: The name of the attribute to check.
         :param exception: The exception to raise if Object.<attr_name> doesn't exist.
-        :param service: If true, check if self.service.<attr_name> exists,
-        otherwise check self.module.<attr_name>
+        :param raw_import: If true, check if self.module.<attr_name> exists,
+        otherwise check self._module.<attr_name> (The actual loaded module as a result of importing, not the instantiated module).
         :return: None
         """
-        obj = self.service if service else self.module
+        obj = self.module if raw_import else self._module
 
         if not hasattr(obj, attr_name):
             raise exception
@@ -71,12 +71,12 @@ class Module:
             "QUICKSERVE_VERSION": "Missing QuickServe version",
         }
         self.raise_if_attr_not_exist(
-            "Service",
-            InvalidModuleError(f'Module: "{self.path.name}" - Missing service class!'),
-            service=False,
+            "Module",
+            InvalidModuleError(f'Module: "{self.path.name}" - Missing Module class!'),
+            raw_import=False,
         )
 
-        self.service = self.module.Service(
+        self.module = self._module.Module(
             module=self, runtime_manager=self.runtime_manager
         )
         for attr, error in attr_error_map.items():
@@ -91,15 +91,15 @@ class Module:
 
         :return: None
         """
-        service_name = self.path.name
-        logger.info(f"Loading service {service_name}")
+        module_name = self.path.name
+        logger.info(f"Loading module {module_name}")
 
         modules_path = self.workspace.get_path("modules")
 
         if str(modules_path) not in sys.path:
             sys.path.insert(0, str(modules_path))
 
-        self.module = importlib.import_module(service_name)
+        self._module = importlib.import_module(module_name)
         self._validate_and_load_module()
 
     def get_resource_path(self, resource: str) -> Path:

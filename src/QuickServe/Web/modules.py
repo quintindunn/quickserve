@@ -23,7 +23,7 @@ from flask.typing import ResponseReturnValue
 
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
-from QuickServe.contracts import Service
+from QuickServe.contracts import Module
 
 from pathlib import Path
 
@@ -67,7 +67,7 @@ def _render_module_page(
         )
 
     module = catalog.require(module_name)
-    service = module.service
+    service = module.base_module
 
     websocket_server: "WebsocketServer" = current_app.extensions[
         "quickserve.websocket_server"
@@ -194,7 +194,7 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
 
     catalog = current_app.extensions["quickserve.catalog"]
     module = catalog.require(module_name)
-    service: "Service" = module.service
+    service: "Module" = module.base_module
 
     if not hasattr(service, method):
         return "500", 500
@@ -227,7 +227,7 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
 
 
 def _get_working_dir(instance: BaseInstance) -> Path:
-    fs_root = getattr(instance.module.service, "FS_ROOT", "")
+    fs_root = getattr(instance.base_module.module, "FS_ROOT", "")
     return (instance.working_directory() / fs_root).resolve()
 
 

@@ -14,7 +14,7 @@ from typing import Any, Protocol, TypeAlias
 PageResult: TypeAlias = str | tuple[str, dict[str, Any]]
 
 
-class Service(Protocol):
+class Module(Protocol):
     """
     Defines the required interface for a service plugin.
     """

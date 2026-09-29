@@ -8,9 +8,8 @@ Date: 09/14/2026
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 
-from QuickServe.FileSystem.modules import Module
+from QuickServe.FileSystem.modules import BaseModule
 from QuickServe.FileSystem.path_resolver import Workspace
 from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
@@ -22,7 +21,7 @@ class ServiceCatalog:
     Stores loaded service plugins by name.
     """
 
-    def __init__(self, modules: dict[str, Module] | None = None) -> None:
+    def __init__(self, modules: dict[str, BaseModule] | None = None) -> None:
         """
         Initializes a service catalog.
 
@@ -31,7 +30,7 @@ class ServiceCatalog:
         """
         self._modules = modules or {}
 
-    def get(self, name: str) -> Module | None:
+    def get(self, name: str) -> BaseModule | None:
         """
         Gets a service module if it is loaded.
 
@@ -40,7 +39,7 @@ class ServiceCatalog:
         """
         return self._modules.get(name)
 
-    def require(self, name: str) -> Module:
+    def require(self, name: str) -> BaseModule:
         """
         Gets a service module or raises when it is unknown.
 
@@ -71,7 +70,7 @@ class ServiceCatalog:
         return self._modules.items()
 
     @property
-    def modules(self) -> dict[str, Module]:
+    def modules(self) -> dict[str, BaseModule]:
         """
         Gets a copy of the loaded modules.
 
@@ -106,18 +105,18 @@ class PluginLoader:
         :raises ValueError: If more than one plugin exposes the same service name.
         """
         modules_path = self.workspace.ensure_directory("modules")
-        loaded: dict[str, Module] = {}
+        loaded: dict[str, BaseModule] = {}
         for path in modules_path.iterdir():
             if not path.is_dir() or path.name.startswith("."):
                 continue
             logger.info("Loading service plugin %s", path)
-            module = Module(
+            module = BaseModule(
                 module_path=path,
                 workspace=self.workspace,
                 runtime_manager=self.runtime_manager,
             )
             module.load_module()
-            name = module.service.NAME
+            name = module.module.NAME
             if name in loaded:
                 raise ValueError(f"Duplicate service name: {name}")
             loaded[name] = module

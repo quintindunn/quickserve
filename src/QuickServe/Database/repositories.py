@@ -1,5 +1,5 @@
 """
-Peewee repositories for QuickServe data.
+Peewee manager for QuickServe data.
 
 Author: Quintin Dunn
 Date: 09/14/2026
@@ -11,7 +11,7 @@ from QuickServe.contracts import InstanceRecord
 from QuickServe.Database.instances import InstanceModel
 
 
-class PeeweeInstanceRepository:
+class PeeweeInstanceManager:
     """
     Stores and retrieves service instance records.
     """

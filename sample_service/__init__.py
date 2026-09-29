@@ -5,4 +5,4 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-from .minecraft import Service
+from .minecraft import Module

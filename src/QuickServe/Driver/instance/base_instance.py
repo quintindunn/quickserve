@@ -15,12 +15,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.path_resolver import Workspace
-    from QuickServe.FileSystem.modules import Module
+    from QuickServe.FileSystem.modules import BaseModule
 
 
 @dataclass(slots=True)
 class BaseInstance:
-    module: "Module"
+    base_module: "BaseModule"
     service_name: str
     uuid: UUID
     module_name: str

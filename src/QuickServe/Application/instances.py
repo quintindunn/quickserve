@@ -101,7 +101,7 @@ class InstanceService:
         :raises RuntimeError: If no websocket ports are available.
         """
         instance = BaseInstance(
-            module=module,
+            base_module=module,
             service_name=service_name,
             module_name=module_name,
             uuid=identifier,

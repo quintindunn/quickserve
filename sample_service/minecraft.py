@@ -22,7 +22,7 @@ from .server import MinecraftServer
 from QuickServeServiceLibrary.decorators import instance_specific
 
 if TYPE_CHECKING:
-    from QuickServe.FileSystem.modules import Module
+    from QuickServe.FileSystem.modules import BaseModule
     from QuickServe.Driver.instance.base_instance import BaseInstance
     from QuickServe.Application.instances import InstanceService
     from QuickServe.Runtimes.runtime_manager import RuntimeManager
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("minecraft-vanilla")
 
 
-class Service:
+class Module:
     NAME: str = "Minecraft-Vanilla"
     VERSION: str = "0.0.1"
     QUICKSERVE_VERSION: str = "0.0.1"
@@ -40,7 +40,7 @@ class Service:
     PAGES: list[str] = ["about", "create", "start", "filesystem"]
     FS_ROOT: str = "server"
 
-    module: "Module"
+    module: "BaseModule"
     runtime_manager: "RuntimeManager"
     downloader: "Downloader"
     ws_send_callback: Callable
@@ -48,7 +48,7 @@ class Service:
     instance_server_map: dict[UUID, MinecraftServer]
     instance_callback_map: dict[UUID, Callable]
 
-    def __init__(self, module: "Module", runtime_manager: "RuntimeManager"):
+    def __init__(self, module: "BaseModule", runtime_manager: "RuntimeManager"):
         logger.info(f"Loading service: {self.NAME}")
         self.module = module
         self.downloader = Downloader()

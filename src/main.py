@@ -25,7 +25,7 @@ if __name__ == "__main__":
     from QuickServe.Database.database import connect as db_connect
     from QuickServe.Database.database import initialize as db_initialize
     from QuickServe.Database.models import MODELS
-    from QuickServe.Database.repositories import PeeweeInstanceRepository
+    from QuickServe.Database.repositories import PeeweeInstanceManager
     from QuickServe.Web import create_app
     from QuickServe.FileSystem.config import Config
     from QuickServe.FileSystem.path_resolver import Workspace
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     instance_service = InstanceService(
         catalog=catalog,
         workspace=workspace,
-        repository=PeeweeInstanceRepository(),
+        repository=PeeweeInstanceManager(),
     )
 
     websocket_server = WebsocketServer(

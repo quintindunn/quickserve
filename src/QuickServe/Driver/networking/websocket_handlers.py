@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 from websockets.asyncio.server import ServerConnection
 
 from QuickServe.Driver.networking.common import InstanceWebsocketConnection
-from QuickServe.contracts import Service
+from QuickServe.contracts import Module
 
 if TYPE_CHECKING:
     from QuickServe.Driver.networking.websocket import WebsocketServer
@@ -46,7 +46,7 @@ async def instance_handler(
 
     instance_service = server.get_instance_service()
     instance = instance_service.from_uuid(instance_uuid)
-    service: "Service" = instance.module.service
+    service: "Module" = instance.base_module.base_module
 
     async for message in connection:
         if not hasattr(service, "on_message"):
