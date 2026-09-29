@@ -4,7 +4,7 @@ from functools import wraps as _wraps
 from flask import request as _request
 
 if TYPE_CHECKING:
-    from QuickServe.contracts import Service
+    from QuickServe.contracts import Module
 
 
 def instance_specific(func):
@@ -22,5 +22,5 @@ def instance_specific(func):
     return wrapper
 
 
-def simple_controller_processor(cls: "Service"):
+def simple_controller_processor(cls: "Module"):
     return cls

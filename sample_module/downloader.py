@@ -4,7 +4,7 @@ Downloader class for Minecraft servers
 Author: Quintin Dunn
 Date: 09/09/2026
 """
-
+import json
 from enum import Enum
 from functools import lru_cache
 
@@ -67,6 +67,11 @@ class ReleaseManifestServer(BaseModel):
 class ReleaseManifest(BaseModel):
     java: Java
     server: ReleaseManifestServer
+
+
+def _is_less_than_eq_1_2_4(version: str) -> bool:
+    versions = {'1.2.4', '1.2.3', '1.2.2', '1.2.1', '1.1', '1.0', 'b1.8.1', 'b1.8', 'b1.7.3', 'b1.7.2', 'b1.7', 'b1.6.6', 'b1.6.5', 'b1.6.4', 'b1.6.3', 'b1.6.2', 'b1.6.1', 'b1.6', 'b1.5_01', 'b1.5', 'b1.4_01', 'b1.4', 'b1.3_01', 'b1.3b', 'b1.2_02', 'b1.2_01', 'b1.2', 'b1.1_02', 'b1.1_01', 'b1.0.2', 'b1.0_01', 'b1.0', 'a1.2.6', 'a1.2.5', 'a1.2.4_01', 'a1.2.3_04', 'a1.2.3_02', 'a1.2.3_01', 'a1.2.3', 'a1.2.2b', 'a1.2.2a', 'a1.2.1_01', 'a1.2.1', 'a1.2.0_02', 'a1.2.0_01', 'a1.2.0', 'a1.1.2_01', 'a1.1.2', 'a1.1.0', 'a1.0.17_04', 'a1.0.17_02', 'a1.0.16', 'a1.0.15', 'a1.0.14', 'a1.0.11', 'a1.0.5_01', 'a1.0.4', 'inf-20100618', 'c0.30_01c', 'c0.0.13a', 'c0.0.13a_03', 'c0.0.11a', 'rd-161348', 'rd-160052', 'rd-20090515', 'rd-132328', 'rd-132211'}
+    return version in versions
 
 
 class Downloader:
@@ -144,25 +149,29 @@ class Downloader:
         release = self.version_manifest.versions[id_]
 
         url = release.release_url
+        print(url)
 
         request = requests.get(url)
         request.raise_for_status()
 
         release_raw = request.json()
 
+        target_file = "client" if _is_less_than_eq_1_2_4(id_) else "server"
         return ReleaseManifest(
             java=Java(
                 component=release_raw["javaVersion"]["component"],
                 major_version=release_raw["javaVersion"]["majorVersion"],
             ),
             server=ReleaseManifestServer(
-                sha1=release_raw["downloads"]["server"]["sha1"],
-                size=release_raw["downloads"]["server"]["size"],
-                url=release_raw["downloads"]["server"]["url"],
+                sha1=release_raw["downloads"][target_file]["sha1"],
+                size=release_raw["downloads"][target_file]["size"],
+                url=release_raw["downloads"][target_file]["url"],
             ),
         )
 
 
 if __name__ == "__main__":
     downloader = Downloader()
-    print(downloader.get_release_manifest("1.8.9"))
+    with open("urls.txt", 'w') as f:
+        for version in downloader.version_manifest.versions.values():
+            f.write(version.release_url + "\n")

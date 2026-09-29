@@ -1,5 +1,5 @@
 """
-Defines shared interfaces and data structures for QuickServe services.
+Defines shared interfaces and data structures for QuickServe modules.
 
 Author: Quintin Dunn
 Date: 09/14/2026
@@ -14,9 +14,9 @@ from typing import Any, Protocol, TypeAlias
 PageResult: TypeAlias = str | tuple[str, dict[str, Any]]
 
 
-class Service(Protocol):
+class Module(Protocol):
     """
-    Defines the required interface for a service plugin.
+    Defines the required interface for a module.
     """
 
     NAME: str
@@ -45,17 +45,17 @@ class WebSettings(Protocol):
 @dataclass(frozen=True, slots=True)
 class InstanceRecord:
     """
-    Stores identifying data for a service instance.
+    Stores identifying data for a module instance.
     """
 
-    service_uuid: UUID
-    service_name: str
+    instance_uuid: UUID
+    instance_name: str
     module_name: str
 
 
 class InstanceRepository(Protocol):
     """
-    Defines storage operations for service instances.
+    Defines storage operations for instances.
     """
 
     def create(self, record: InstanceRecord) -> InstanceRecord: ...

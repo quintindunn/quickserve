@@ -1,5 +1,5 @@
 """
-Driver utilities for service instances and port allocation.
+Driver utilities for module instances.
 
 Author: Quintin Dunn
 Date: 09/14/2026

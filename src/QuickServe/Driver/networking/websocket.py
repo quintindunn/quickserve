@@ -1,5 +1,5 @@
 """
-Websocket server for communication with services
+Websocket server for communication with modules
 
 Author: Quintin Dunn
 Date: 09/17/2026
@@ -19,7 +19,7 @@ from uuid import UUID
 
 if TYPE_CHECKING:
     from QuickServe.Driver.networking.common import InstanceWebsocketConnection
-    from QuickServe.Application.instances import InstanceService
+    from QuickServe.Application.instances import InstanceManager
     from QuickServe.contracts import WebSettings
 
 
@@ -42,7 +42,7 @@ def wrap_endpoint(server, endpoint):
 
 class WebsocketServer:
     """
-    Common websocket server for all services streamed communication to backend.
+    Common websocket server for all modules streamed communication to backend.
     """
 
     host: str
@@ -50,10 +50,10 @@ class WebsocketServer:
     router_map: Map
     _stop_flag: asyncio.Event
     _connection_instances: set["InstanceWebsocketConnection"]
-    _instance_service: "InstanceService"
+    _instance_manager: "InstanceManager"
     _loop: asyncio.AbstractEventLoop
 
-    def __init__(self, config: "WebSettings", instance_service: "InstanceService"):
+    def __init__(self, config: "WebSettings", instance_manager: "InstanceManager"):
         self.host = config.websocket_host
         self.port = config.websocket_port
         self.router_map = Map(
@@ -64,13 +64,13 @@ class WebsocketServer:
                 )
             ]
         )
-        self._instance_service = instance_service
+        self._instance_manager = instance_manager
         self._stop_flag = asyncio.Event()
         self._connection_instances: set["InstanceWebsocketConnection"] = set()
         self._loop = None
 
-    def get_instance_service(self):
-        return self._instance_service
+    def get_instance_manager(self):
+        return self._instance_manager
 
     def send_instance(self, instance_uuid: UUID, message: str):
         logger.debug(f"Sending instance {instance_uuid} {message!r}")

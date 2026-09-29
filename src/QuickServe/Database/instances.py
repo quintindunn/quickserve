@@ -15,8 +15,8 @@ from QuickServe.Database.database import database_proxy
 class InstanceModel(Model):
     """Model for registered instances."""
 
-    service_uuid = UUIDField(null=False)
-    service_name = CharField(null=False)
+    instance_uuid = UUIDField(null=False)
+    instance_name = CharField(null=False)
     module_name = CharField(null=False)
     created_on = DateTimeField(default=datetime.now)
 

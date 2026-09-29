@@ -1,5 +1,5 @@
 """
-The module blueprint for installed services
+The module blueprint for installed modules
 
 Author: Quintin Dunn
 Date: 09/09/2026
@@ -23,14 +23,14 @@ from flask.typing import ResponseReturnValue
 
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
-from QuickServe.contracts import Service
+from QuickServe.contracts import Module
 
 from pathlib import Path
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from QuickServe.Application.instances import InstanceService
+    from QuickServe.Application.instances import InstanceManager
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
@@ -66,28 +66,28 @@ def _render_module_page(
             "<body><h1>Page not found!</h1></body></html>"
         )
 
-    module = catalog.require(module_name)
-    service = module.service
+    base_module = catalog.require(module_name)
+    module = base_module.module
 
     websocket_server: "WebsocketServer" = current_app.extensions[
         "quickserve.websocket_server"
     ]
 
     ctx = {
-        "module_name": service.NAME,
-        "module_version": service.VERSION,
-        "module_pages": service.PAGES,
+        "module_name": module.NAME,
+        "module_version": module.VERSION,
+        "module_pages": module.PAGES,
         "websocket_host": websocket_server.host,
         "websocket_port": websocket_server.port,
     }
 
-    if hasattr(service, "AUTHORS"):
-        ctx["module_authors"] = service.AUTHORS
+    if hasattr(module, "AUTHORS"):
+        ctx["module_authors"] = module.AUTHORS
 
-    if not hasattr(service, page):
-        raise ValueError(f"Service {module_name} doesn't have method {page}")
+    if not hasattr(module, page):
+        raise ValueError(f"Module {module_name} doesn't have method {page}")
 
-    page = getattr(service, page)
+    page = getattr(module, page)
     if "instance_uuid" in context:
 
         def build_callback():
@@ -131,7 +131,7 @@ def _render_module_page(
 @modules.route("/<module_name>")
 def module_about(module_name: str) -> ResponseReturnValue:
     """
-    Route for the about page returned from Service.about.
+    Route for the about page returned from Module.about.
 
     :param module_name: The name of the module being rendered.
     :return: the rendered page.
@@ -142,7 +142,7 @@ def module_about(module_name: str) -> ResponseReturnValue:
 @modules.route("/<module_name>/<page>")
 def module_page(module_name: str, page: str) -> ResponseReturnValue:
     """
-    Route for the custom pages registered in Service.PAGES.
+    Route for the custom pages registered in Module.PAGES.
 
     :param module_name: The name of the module being rendered.
     :param page: The page to render
@@ -152,14 +152,14 @@ def module_page(module_name: str, page: str) -> ResponseReturnValue:
 
 
 def get_instance_from_db(uuid: str):
-    return current_app.extensions["quickserve.instance_service"].from_uuid(uuid)
+    return current_app.extensions["quickserve.instance_manager"].from_uuid(uuid)
 
 
 @instances.route("/<uuid>/<page>")
 def module_instance(uuid: str, page: str) -> ResponseReturnValue:
     instance = get_instance_from_db(uuid=uuid)
     setattr(request, "instance", instance)
-    ctx = {"instance_uuid": instance.uuid, "service_name": instance.service_name}
+    ctx = {"instance_uuid": instance.uuid, "instance_name": instance.instance_name}
     return _render_module_page(module_name=instance.module_name, page=page, context=ctx)
 
 
@@ -193,16 +193,16 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     method = f"action_{method}"
 
     catalog = current_app.extensions["quickserve.catalog"]
-    module = catalog.require(module_name)
-    service: "Service" = module.service
+    base_module = catalog.require(module_name)
+    module: "Module" = base_module.module
 
-    if not hasattr(service, method):
+    if not hasattr(module, method):
         return "500", 500
 
-    method = getattr(service, method)
+    method = getattr(module, method)
 
-    instance_service = current_app.extensions["quickserve.instance_service"]
-    values = method(instance_service, **request.form.to_dict())
+    instance_manager = current_app.extensions["quickserve.instance_manager"]
+    values = method(instance_manager, **request.form.to_dict())
     code = 302
 
     instance = None
@@ -222,12 +222,12 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
             "modules.instances.module_instance", uuid=instance.uuid, page=endpoint
         )
     else:
-        url = url_for("modules.module_page", module_name=service.NAME, page=endpoint)
+        url = url_for("modules.module_page", module_name=module.NAME, page=endpoint)
     return redirect(url, code=code)
 
 
 def _get_working_dir(instance: BaseInstance) -> Path:
-    fs_root = getattr(instance.module.service, "FS_ROOT", "")
+    fs_root = getattr(instance.base_module.module, "FS_ROOT", "")
     return (instance.working_directory() / fs_root).resolve()
 
 
@@ -257,10 +257,10 @@ def _get_path(
 
 
 def _get_instance(uuid: str) -> BaseInstance:
-    instance_service: "InstanceService" = current_app.extensions[
-        "quickserve.instance_service"
+    instance_manager: "InstanceManager" = current_app.extensions[
+        "quickserve.instance_manager"
     ]
-    return instance_service.from_uuid(uuid)
+    return instance_manager.from_uuid(uuid)
 
 
 @instance_static.route("/<uuid>/savefile/", methods=["POST"])
