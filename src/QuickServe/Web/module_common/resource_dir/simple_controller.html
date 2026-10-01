@@ -217,9 +217,9 @@
             autoScroll = isAtBottom();
 
             stickBottom.classList.toggle("active", autoScroll);
-            stickBottom.textContent = autoScroll
-                ? "Following"
-                : "Auto-Scroll";
+            stickBottom.textContent = autoScroll ?
+                "Following" :
+                "Auto-Scroll";
         });
 
         stickBottom.addEventListener("click", () => {
@@ -286,11 +286,14 @@
             };
 
             ws.onmessage = (event) => {
-                writeTerminal(event.data)
+                event.data.arrayBuffer()
+                    .then((buffer) => {
+                        const text = new TextDecoder().decode(buffer);
+                        writeTerminal(text);
+                    });
             }
 
 
         }, 1000);
-
     </script>
 </div>

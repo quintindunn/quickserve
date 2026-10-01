@@ -5,10 +5,6 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-import json
-import os
-import signal
-import threading
 import logging
 
 from typing import TYPE_CHECKING, Callable
@@ -16,6 +12,8 @@ from uuid import UUID
 
 import requests
 
+from QuickServeModuleLibrary.process import ManagedProcess
+from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 from .server import MinecraftServer
 
@@ -45,8 +43,7 @@ class Module:
     downloader: "Downloader"
     ws_send_callback: Callable
 
-    instance_server_map: dict[UUID, MinecraftServer]
-    instance_callback_map: dict[UUID, Callable]
+    simple_controller_process_manager: "SimpleControllerProcessManager"
 
     def __init__(self, module: "BaseModule", runtime_manager: "RuntimeManager"):
         logger.info(f"Loading module: {self.NAME}")
@@ -61,6 +58,9 @@ class Module:
         ]
         self.downloader.get_release_manifest("1.8.9")
         self.runtime_manager = runtime_manager
+
+        self.simple_controller_process_manager = SimpleControllerProcessManager()
+
         self.instance_server_map = dict()
         self.instance_callback_map = dict()
 
@@ -125,34 +125,13 @@ class Module:
 
         return "start", 302, instance
 
-    def on_message(self, msg: str, instance: "BaseInstance") -> None:
-        msg = json.loads(msg)
-        is_simple_controller = msg.get("isSimpleController") == True
-        if not is_simple_controller:
-            return
-
-        msg_type = msg.get("type")
-
-        server = self.instance_server_map.get(instance.uuid)
-
-        if msg_type == "start":
-            self.on_start(instance=instance)
-        elif (server is None) or (not server.is_running):
-            return
-        elif msg_type == "stop":
-            self.on_stop(instance=instance)
-        elif msg_type == "kill":
-            self.on_kill(instance=instance)
-        elif msg_type == "command":
-            self.on_command(instance=instance, command=msg.get("raw"))
-
-    def on_start(self, instance: "BaseInstance"):
-        server = self.instance_server_map.get(instance.uuid)
-        if server is not None and server.is_running:
-            logger.info("Server already running. ")
-            return
-
-        # Get Java Requirements
+    def build_process(
+        self,
+        instance: "BaseInstance",
+        send_callback: Callable,
+        xmx: str = "4G",
+        xms: str = "4G",
+    ):
         jre_requirements_path = instance.working_directory() / "jre-requirements"
         assert jre_requirements_path.exists()
 
@@ -163,59 +142,23 @@ class Module:
             jre_requirement, "jre"
         )
 
-        if instance.uuid in self.instance_server_map:
-            server = self.instance_server_map[instance.uuid]
-            if not server.is_running:
-                server.start(java_executable=java_executable)
-                return
+        command = [
+            java_executable,
+            f"-Xmx{xmx}",
+            f"-Xms{xms}",
+            "-jar",
+            "./server.jar",
+            "nogui",
+        ]
+        process = ManagedProcess(
+            command=command, root_dir=instance.working_directory() / "server"
+        )
+        process.on_stderr(send_callback)
+        process.on_stdout(send_callback)
+        return process
 
-        server = MinecraftServer(instance.working_directory() / "server")
-        self.instance_server_map[instance.uuid] = server
-        server.start(java_executable=java_executable)
-
-        callback = self.instance_callback_map.get(instance.uuid)
-        if callback is None:
-            logger.warning("No callback!")
-            return
-
-        def stdout_read():
-            for line in iter(server.proc.stdout.readline, ""):
-                callback(line)
-
-        def stderr_read():
-            for line in iter(server.proc.stderr.readline, ""):
-                callback(line)
-
-        def proc_read():
-            threading.Thread(target=stdout_read, daemon=True).start()
-            threading.Thread(target=stderr_read, daemon=True).start()
-
-        proc_read()
-
-    def on_kill(self, instance: "BaseInstance"):
-        logger.info("Killing server")
-        server = self.instance_server_map.get(instance.uuid)
-        if server.is_running:
-            logger.info(f"Killing process with PID {server.proc.pid}")
-            os.kill(server.proc.pid, signal.SIGKILL)
-            print(server.proc.returncode)
-
-    def on_stop(self, instance: "BaseInstance"):
-        logger.info("Stopping server")
-        server = self.instance_server_map.get(instance.uuid)
-        if server is None or not server.is_running:
-            return
-
-        server.proc.stdin.write("stop\n")
-        server.proc.stdin.flush()
-
-    def on_command(self, instance: "BaseInstance", command: str):
-        server = self.instance_server_map.get(instance.uuid)
-        if server is None or not server.is_running:
-            return
-
-        server.proc.stdin.write(command)
-        server.proc.stdin.flush()
+    def on_message(self, msg: str, instance: "BaseInstance") -> None:
+        self.simple_controller_process_manager.on_message(msg=msg, instance=instance)
 
     @instance_specific
     def start(
@@ -223,6 +166,14 @@ class Module:
     ) -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
         self.instance_callback_map[instance.uuid] = send_callback
+
+        if not self.simple_controller_process_manager.has_instance(instance=instance):
+            self.simple_controller_process_manager.register(
+                instance=instance,
+                process=self.build_process(
+                    instance=instance, send_callback=send_callback
+                ),
+            )
 
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}

@@ -72,4 +72,9 @@ if __name__ == "__main__":
         instance_manager=instance_manager,
         websocket_server=websocket_server,
     )
-    app.run(host=config.web.website_host, port=config.web.website_port, debug=config.web.website_debug, use_reloader=False)
+    app.run(
+        host=config.web.website_host,
+        port=config.web.website_port,
+        debug=config.web.website_debug,
+        use_reloader=False,
+    )
