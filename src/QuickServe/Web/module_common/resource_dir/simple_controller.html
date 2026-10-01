@@ -286,7 +286,11 @@
             };
 
             ws.onmessage = (event) => {
-                writeTerminal(event.data)
+                event.data.arrayBuffer()
+                    .then((buffer) => {
+                        const text = new TextDecoder().decode(buffer);
+                        writeTerminal(text);
+                    });
             }
 
 

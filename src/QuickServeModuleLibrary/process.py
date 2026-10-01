@@ -1,3 +1,4 @@
+from pathlib import Path
 from subprocess import Popen, PIPE
 from typing import Callable
 
@@ -8,18 +9,23 @@ import os
 
 
 class ManagedProcess:
-    proc: Popen
+    proc: Popen | None
     _on_stdout: list[Callable[[bytes], None]]
     _on_stderr: list[Callable[[bytes], None]]
     command: str
+    root_dir: Path
 
-    def __init__(self, command):
+    def __init__(self, command, root_dir: Path = None):
         self.command = command
+        self.proc = None
         self._on_stderr = list()
         self._on_stdout = list()
+        self.root_dir = root_dir
 
     def start(self):
-        self.proc: Popen = Popen(self.command, stdin=PIPE, stderr=PIPE, stdout=PIPE)
+        self.proc: Popen = Popen(
+            self.command, stdin=PIPE, stderr=PIPE, stdout=PIPE, cwd=self.root_dir
+        )
         Thread(target=self._handle_stdout, daemon=True).start()
         Thread(target=self._handle_stderr, daemon=True).start()
 
@@ -67,7 +73,8 @@ class ManagedProcess:
         Checks if the process is still running.
         :return: True if the process is running, else False.
         """
-
+        if self.proc is None:
+            return False
         self.proc.poll()
         return self.proc.returncode is None
 
