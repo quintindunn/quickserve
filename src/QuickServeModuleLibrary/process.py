@@ -161,7 +161,6 @@ if __name__ == "__main__":
     process.write(b"Hello!\n")
     process.write(b"Testing input\n")
 
-    # Let it run for a while...
     import time
 
     time.sleep(2)
