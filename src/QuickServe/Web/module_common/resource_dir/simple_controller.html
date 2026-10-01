@@ -217,9 +217,9 @@
             autoScroll = isAtBottom();
 
             stickBottom.classList.toggle("active", autoScroll);
-            stickBottom.textContent = autoScroll
-                ? "Following"
-                : "Auto-Scroll";
+            stickBottom.textContent = autoScroll ?
+                "Following" :
+                "Auto-Scroll";
         });
 
         stickBottom.addEventListener("click", () => {
@@ -291,6 +291,5 @@
 
 
         }, 1000);
-
     </script>
 </div>

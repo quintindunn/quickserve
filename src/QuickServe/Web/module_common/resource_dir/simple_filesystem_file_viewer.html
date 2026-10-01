@@ -15,11 +15,11 @@
                 float: right;
             }
 
-            .file-controls > button:hover {
+            .file-controls>button:hover {
                 cursor: pointer;
             }
 
-            .file-controls > button {
+            .file-controls>button {
                 margin-left: 10px;
             }
 
@@ -38,7 +38,9 @@
     <div class="file-viewer">
         <div class="file-heading">
             <span>{{ context.filename }}</span>
-            <button type="button" class="back-btn" onclick="window.location = '?directory={{ context.parent }}'">Back</button>
+            <button type="button"
+                    class="back-btn"
+                    onclick="window.location = '?directory={{ context.parent }}'">Back</button>
             <span class="file-controls">
                 {% if not context.readOnly %}
                     <button type="button" id="save">Save</button>
@@ -46,12 +48,12 @@
                 {% else %}
                     <button type="button" id="editButton">Edit</button>
                     <script>
-                    document.getElementById('editButton').addEventListener('click', () => {
-                      const url = new URL(window.location);
-                      url.searchParams.set('edit', '');
-                      history.pushState({}, '', url);
-                      window.location.reload();
-                    });
+                        document.getElementById('editButton').addEventListener('click', () => {
+                            const url = new URL(window.location);
+                            url.searchParams.set('edit', '');
+                            history.pushState({}, '', url);
+                            window.location.reload();
+                        });
                     </script>
                 {% endif %}
                 <button type="button" id="download">Download</button>
@@ -70,42 +72,42 @@
         editor.setValue(content, -1);
         editor.setTheme("ace/theme/monokai");
         {% if context.readOnly %}
-            editor.setReadOnly(true);
+        editor.setReadOnly(true);
         {% else %}
-            function base64Encode(str) {
-              const bytes = new TextEncoder().encode(str);
-              const binString = String.fromCodePoint(...bytes);
-              return btoa(binString);
+        function base64Encode(str) {
+            const bytes = new TextEncoder().encode(str);
+            const binString = String.fromCodePoint(...bytes);
+            return btoa(binString);
+        }
+
+        let unsaved_changes = false;
+        editor.session.on("change", () => {
+            unsaved_changes = true;
+        });
+
+        window.addEventListener("beforeunload", (event) => {
+            if (unsaved_changes) {
+                event.preventDefault();
+                event.returnValue = "";
             }
+        });
 
-            let unsaved_changes = false;
-            editor.session.on("change", () => {
-                unsaved_changes = true;
-            });
+        const save_button = document.getElementById("save");
+        const cancel_button = document.getElementById("cancel");
 
-            window.addEventListener("beforeunload", (event) => {
-                if (unsaved_changes) {
-                    event.preventDefault();
-                    event.returnValue = "";
-                }
-            });
+        cancel_button.addEventListener("click", () => {
+            unsaved_changes = false;
+            window.location.reload();
+        });
 
-            const save_button = document.getElementById("save");
-            const cancel_button = document.getElementById("cancel");
+        save_button.addEventListener("click", () => {
+            save_button.disabled = true;
+            cancel_button.disabled = true;
+            const url = {{ url_for("modules.instancestatic.instance_save_file", uuid=context.instance.uuid) | tojson }}
+            const content = base64Encode(editor.getValue());
+            const filepath = {{ context.filepath | tojson }}
 
-            cancel_button.addEventListener("click", () => {
-                unsaved_changes = false;
-                window.location.reload();
-            });
-
-            save_button.addEventListener("click", () => {
-                save_button.disabled = true;
-                cancel_button.disabled = true;
-                const url = {{ url_for("modules.instancestatic.instance_save_file", uuid=context.instance.uuid) | tojson }}
-                const content = base64Encode(editor.getValue());
-                const filepath = {{ context.filepath | tojson }}
-
-                fetch(url, {
+            fetch(url, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -123,8 +125,7 @@
                         return response.text().then(text => alert(text));
                     }
                 });
-            })
-
+        })
         {% endif %}
 
         const modelist = ace.require("ace/ext/modelist");

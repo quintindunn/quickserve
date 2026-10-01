@@ -10,6 +10,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.connect(("8.8.8.8", 80))
     local_ip = s.getsockname()[0]
 
+
 def simple_controller_builder(
     module_name: str, websocket_server: "WebsocketServer", _: str | None = None
 ) -> Callable[[], str]:
