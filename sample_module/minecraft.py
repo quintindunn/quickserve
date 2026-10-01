@@ -8,14 +8,12 @@ Date: 09/09/2026
 import logging
 
 from typing import TYPE_CHECKING, Callable
-from uuid import UUID
 
 import requests
 
 from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
-from .server import MinecraftServer
 
 from QuickServeModuleLibrary.decorators import instance_specific
 
