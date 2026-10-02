@@ -145,7 +145,3 @@ class Workspace:
             if kwargs is None:
                 kwargs = dict()
             callback(*args, **kwargs)
-
-
-# Maintains compatibility for callers using the Resolver name.
-Resolver = Workspace

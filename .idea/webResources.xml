@@ -2,10 +2,9 @@
 <project version="4">
   <component name="WebResourcesPaths">
     <contentEntries>
-      <entry url="file://$PROJECT_DIR$">
+      <entry url="file://$PROJECT_DIR$/sample_module">
         <entryData>
           <resourceRoots>
-            <path value="file://$PROJECT_DIR$/src/QuickServe/Web/module_common/resource_dir" />
             <path value="file://$PROJECT_DIR$/sample_module/resources" />
           </resourceRoots>
         </entryData>
