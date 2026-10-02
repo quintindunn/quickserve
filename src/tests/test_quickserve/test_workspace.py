@@ -23,6 +23,7 @@ class TestWorkspace(unittest.TestCase):
         """
         Sets up the workspace for tests
         """
+
         self.worked = False
         self.tmp = TemporaryDirectory()
         self.cwd = Path(self.tmp.name).resolve().absolute()
@@ -32,14 +33,23 @@ class TestWorkspace(unittest.TestCase):
         """
         Deletes the temp directory, and setups a new one.
         """
+
         self.tmp.cleanup()
         self.cwd = Path(self.tmp.name).resolve().absolute()
 
     def test_ensure_directory(self):
+        """
+        Tests ensuring relative directory.
+        """
+
         self.workspace.ensure_directory("tests")
         self.assertTrue((self.cwd / "tests").exists())
 
     def test_ensure_directory_absolute(self):
+        """
+        Tests ensuring absolute directory.
+        """
+
         with TemporaryDirectory() as tmp:
             tmp = Path(tmp).absolute()
             self.workspace.ensure_directory(tmp / "test")
@@ -49,6 +59,7 @@ class TestWorkspace(unittest.TestCase):
         """
         Sets self.worked to True as a callback to test Workspace.call_if_not_exists
         """
+
         self.worked = True
 
     def test_call_if_not_exist_relative(self):
@@ -64,7 +75,9 @@ class TestWorkspace(unittest.TestCase):
         Tests the Workspace.call_if_not_exist function on an absolute path
         """
 
-        self.workspace.call_if_not_exist(Path.home() / str(uuid.uuid4()), self.call_if_not_exist_callback)
+        self.workspace.call_if_not_exist(
+            Path.home() / str(uuid.uuid4()), self.call_if_not_exist_callback
+        )
         self.assertTrue(self.worked)
 
     def test_call_if_not_exist_exists(self):

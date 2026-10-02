@@ -7,6 +7,12 @@ Date: 10/01/2026
 
 import unittest
 
+import sys
+
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
+
 from sample_module.downloader import Downloader, VersionManifestReleaseTypeEnum
 
 
@@ -36,9 +42,15 @@ class TestDownloader(unittest.TestCase):
         latest_release = None
         latest_snapshot = None
         for version in self.downloader.version_manifest.versions.values():
-            if latest_release is None and version.type == VersionManifestReleaseTypeEnum.release:
+            if (
+                latest_release is None
+                and version.type == VersionManifestReleaseTypeEnum.release
+            ):
                 latest_release = version
-            if latest_snapshot is None and version.type == VersionManifestReleaseTypeEnum.snapshot:
+            if (
+                latest_snapshot is None
+                and version.type == VersionManifestReleaseTypeEnum.snapshot
+            ):
                 latest_snapshot = version
             if latest_snapshot is not None and latest_release is not None:
                 break

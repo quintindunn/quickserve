@@ -15,6 +15,7 @@ from unittest.mock import patch
 from QuickServe.FileSystem.path_resolver import Workspace
 from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
+
 class TestRuntimes(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -43,7 +44,9 @@ class TestRuntimes(unittest.TestCase):
 
         runtime.ensure_jre(8, "jre")
         executable = runtime.get_java_executable(8, "jre", False)
-        expected_path = Path(self.cwd.name) / "runtimes" / "jre" / "8-jre" / "bin" / "java"
+        expected_path = (
+            Path(self.cwd.name) / "runtimes" / "jre" / "8-jre" / "bin" / "java"
+        )
         self.assertEqual(executable, expected_path)
         self.assertTrue(executable.exists())
 
@@ -84,7 +87,9 @@ class TestRuntimes(unittest.TestCase):
 
         runtime.ensure_jre(8, "jre")
         executable = runtime.get_java_executable(8, "jre", False)
-        expected_path = Path(self.cwd.name) / "runtimes" / "jre" / "8-jre" / "bin" / "java"
+        expected_path = (
+            Path(self.cwd.name) / "runtimes" / "jre" / "8-jre" / "bin" / "java"
+        )
         self.assertEqual(executable, expected_path)
         self.assertTrue(executable.exists())
 
