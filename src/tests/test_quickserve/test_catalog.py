@@ -12,12 +12,13 @@ class FakeModule:
     Fake module for testing within TestCatalog.
     """
 
-    def __init__(self, name: str, uuid: str):
-        self.name: str = name
-        self.uuid: str = uuid
+    def __init__(self, instance_name: str, instance_uuid: str, module_name: str):
+        self.instance_name: str = instance_name
+        self.instance_uuid: str = instance_uuid
+        self.module_name = module_name
 
     def __str__(self):
-        return f'<Fake Module "{self.name}" {self.uuid[:16]}>'
+        return f'<Fake Module \"{self.module_name}\"-"{self.instance_name}" {self.instance_uuid[:16]}>'
 
 
 class TestCatalog(unittest.TestCase):
@@ -37,10 +38,10 @@ class TestCatalog(unittest.TestCase):
             "56e99ed4-bdff-42fe-a967-dcd421dbb08e",
         ]
         modules = {
-            "foo": FakeModule("foo", self.uuids[0]),
-            "bar": FakeModule("foo", self.uuids[1]),
-            "foobar": FakeModule("foo", self.uuids[2]),
-            "buzz": FakeModule("foo", self.uuids[3]),
+            "foo": FakeModule(instance_name="foo", instance_uuid=self.uuids[0], module_name="foo"),
+            "bar": FakeModule(instance_name="bar", instance_uuid=self.uuids[1], module_name="bar"),
+            "foobar": FakeModule(instance_name="foobar", instance_uuid=self.uuids[2], module_name="foobar"),
+            "buzz": FakeModule(instance_name="buzz", instance_uuid=self.uuids[3], module_name="buzz"),
         }
 
         self.catalog = ModuleCatalog(modules)
@@ -51,16 +52,16 @@ class TestCatalog(unittest.TestCase):
         """
 
         catalog_1 = self.catalog.get("foo")
-        self.assertEqual(catalog_1.uuid, self.uuids[0])
+        self.assertEqual(catalog_1.instance_uuid, self.uuids[0])
 
         catalog_2 = self.catalog.get("bar")
-        self.assertEqual(catalog_2.uuid, self.uuids[1])
+        self.assertEqual(catalog_2.instance_uuid, self.uuids[1])
 
         catalog_3 = self.catalog.get("foobar")
-        self.assertEqual(catalog_3.uuid, self.uuids[2])
+        self.assertEqual(catalog_3.instance_uuid, self.uuids[2])
 
         catalog_4 = self.catalog.get("buzz")
-        self.assertEqual(catalog_4.uuid, self.uuids[3])
+        self.assertEqual(catalog_4.instance_uuid, self.uuids[3])
 
         catalog_5 = self.catalog.get("non-existent")
         self.assertIsNone(catalog_5)
@@ -71,16 +72,16 @@ class TestCatalog(unittest.TestCase):
         """
 
         catalog_1 = self.catalog.require("foo")
-        self.assertEqual(catalog_1.uuid, self.uuids[0])
+        self.assertEqual(catalog_1.instance_uuid, self.uuids[0])
 
         catalog_2 = self.catalog.require("bar")
-        self.assertEqual(catalog_2.uuid, self.uuids[1])
+        self.assertEqual(catalog_2.instance_uuid, self.uuids[1])
 
         catalog_3 = self.catalog.require("foobar")
-        self.assertEqual(catalog_3.uuid, self.uuids[2])
+        self.assertEqual(catalog_3.instance_uuid, self.uuids[2])
 
         catalog_4 = self.catalog.require("buzz")
-        self.assertEqual(catalog_4.uuid, self.uuids[3])
+        self.assertEqual(catalog_4.instance_uuid, self.uuids[3])
 
         with self.assertRaises(KeyError):
             self.catalog.require("non-existent")
