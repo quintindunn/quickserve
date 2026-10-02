@@ -23,6 +23,7 @@
 - [x] src/QuickServeModuleLibrary/\_\_init\_\_.py
 - [x] src/QuickServeModuleLibrary/decorators.py
 - [x] src/main.py
+- [x] src/QuickServe/Runtimes/runtime_manager.py
 - [ ] sample_module/minecraft.py
 - [ ] src/QuickServe/Application/instances.py
 - [ ] src/QuickServe/Database/database.py
@@ -34,7 +35,6 @@
 - [ ] src/QuickServe/FileSystem/modules.py
 - [ ] src/QuickServe/FileSystem/path_resolver.py
 - [ ] src/QuickServe/FileSystem/plugins.py
-- [ ] src/QuickServe/Runtimes/runtime_manager.py
 - [ ] src/QuickServe/Web/home.py
 - [ ] src/QuickServe/Web/modules.py
 - [ ] src/QuickServe/Web/module_common/registry.py

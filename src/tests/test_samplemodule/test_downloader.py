@@ -1,3 +1,10 @@
+"""
+Tests related to the downloader
+
+Author: Quintin Dunn
+Date: 10/01/2026
+"""
+
 import unittest
 
 from sample_module.downloader import Downloader, VersionManifestReleaseTypeEnum
