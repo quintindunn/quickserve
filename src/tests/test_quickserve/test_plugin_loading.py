@@ -1,12 +1,18 @@
+import logging
 import os.path
 import shutil
+import sys
 import unittest
 from tempfile import TemporaryDirectory
 
 from pathlib import Path
 
 from QuickServe.FileSystem.path_resolver import Workspace
-from tests.fake import ModulesDir
+from QuickServe.FileSystem.plugins import PluginLoader
+
+from tests.fake.module_dir import setup_modules
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 class TestPluginLoader(unittest.TestCase):
     @classmethod
@@ -26,5 +32,21 @@ class TestPluginLoader(unittest.TestCase):
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
 
-    def test_placeholder(self):
-        pass
+    def test_plugin_loader_load_all(self):
+        setup_modules(self.workspace)
+
+        plugin_loader = PluginLoader(workspace=self.workspace, runtime_manager=None)
+        catalog = plugin_loader.load_all()
+        self.assertEqual(len(list(catalog.items())), 1)
+
+    def test_plugin_loader_no_modules(self):
+        plugin_loader = PluginLoader(workspace=self.workspace, runtime_manager=None)
+        catalog = plugin_loader.load_all()
+        self.assertEqual(len(list(catalog.items())), 0)
+
+    def test_plugin_loader_duplicates(self):
+        setup_modules(self.workspace)
+        setup_modules(self.workspace, folder_name_modifier="_duplicate")
+
+        with self.assertRaises(ValueError):
+            PluginLoader(workspace=self.workspace, runtime_manager=None).load_all()
