@@ -20,6 +20,7 @@ import sys
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
+
 class TestRuntimes(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

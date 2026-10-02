@@ -30,6 +30,7 @@ class TestModel(BaseModel):
 
     value: str
 
+
 class TestConfig(unittest.TestCase):
     """
     Tests the config
@@ -72,8 +73,10 @@ class TestConfig(unittest.TestCase):
         with open(self.workspace.get_path("config.toml"), "r") as f:
             raw = f.read()
 
-        raw = raw.replace("secret-key-change-in-production", "changed-secret-key-not-for-prod")
-        with open(self.workspace.get_path("config.toml"), 'w') as f:
+        raw = raw.replace(
+            "secret-key-change-in-production", "changed-secret-key-not-for-prod"
+        )
+        with open(self.workspace.get_path("config.toml"), "w") as f:
             f.write(raw)
 
         config = Config(workspace=self.workspace)
@@ -84,7 +87,7 @@ class TestConfig(unittest.TestCase):
         Tests that an invalid config raises an error.
         """
 
-        with open(self.workspace.get_path("config.toml"), 'w') as f:
+        with open(self.workspace.get_path("config.toml"), "w") as f:
             f.write("162f8d6b0b8abb61a633abd67fc3619e")
 
         with self.assertRaises(tomllib.TOMLDecodeError):
@@ -101,8 +104,8 @@ class TestConfig(unittest.TestCase):
         with open(self.workspace.get_path("config.toml"), "r") as f:
             raw = f.read()
 
-        raw = raw.replace("\"secret-key-change-in-production\"", "5")
-        with open(self.workspace.get_path("config.toml"), 'w') as f:
+        raw = raw.replace('"secret-key-change-in-production"', "5")
+        with open(self.workspace.get_path("config.toml"), "w") as f:
             f.write(raw)
 
         with self.assertRaises(ValueError):
@@ -117,23 +120,22 @@ class TestConfig(unittest.TestCase):
             "path": Path("/test/path"),
             "list": [Path("/test/list"), "value"],
             "tuple": (Path("/test/tuple"), 123),
-            "nested": {
-                "path": Path("/test/nested")
-            },
-            "string": "value"
+            "nested": {"path": Path("/test/nested")},
+            "string": "value",
         }
 
         result = Config._toml_safe(value)
 
-        self.assertEqual(result, {
-            "path": "/test/path",
-            "list": ["/test/list", "value"],
-            "tuple": ["/test/tuple", 123],
-            "nested": {
-                "path": "/test/nested"
+        self.assertEqual(
+            result,
+            {
+                "path": "/test/path",
+                "list": ["/test/list", "value"],
+                "tuple": ["/test/tuple", 123],
+                "nested": {"path": "/test/nested"},
+                "string": "value",
             },
-            "string": "value"
-        })
+        )
 
     def test_get_model_direct(self):
         """

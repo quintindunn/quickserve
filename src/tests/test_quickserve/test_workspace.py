@@ -18,6 +18,7 @@ import sys
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
+
 class TestWorkspace(unittest.TestCase):
     """
     Tests the workspace class

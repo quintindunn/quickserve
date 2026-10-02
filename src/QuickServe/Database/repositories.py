@@ -18,7 +18,7 @@ class PeeweeInstanceManager:
 
     def create(self, record: InstanceRecord) -> InstanceRecord:
         """
-        Stores a instance record.
+        Stores an instance record.
 
         :param record: The instance data to persist.
         :return: The persisted instance data.

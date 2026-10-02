@@ -14,6 +14,7 @@ import sys
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
+
 class TestSanitizeFilename(unittest.TestCase):
     def test_valid_filename(self):
         self.assertEqual(sanitize_filename("hello-world_123"), "hello-world_123")

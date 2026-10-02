@@ -54,6 +54,7 @@ class Config:
     web: WebModel
     driver: DriverModel
     database: DatabaseModel
+
     def __init__(self, workspace: Workspace) -> None:
         """
         Initializes the configuration manager and loads the configuration.
