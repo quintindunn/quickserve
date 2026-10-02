@@ -14,6 +14,7 @@
     <option name="TEMPLATE_FOLDERS">
       <list>
         <option value="$MODULE_DIR$/src/QuickServe/Web/templates" />
+        <option value="$MODULE_DIR$/src/QuickServe/Web/module_common/resource_dir" />
       </list>
     </option>
   </component>
