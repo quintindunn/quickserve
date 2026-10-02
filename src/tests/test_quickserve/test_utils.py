@@ -9,6 +9,10 @@ import unittest
 
 from QuickServe.Driver.utils import sanitize_filename
 
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 class TestSanitizeFilename(unittest.TestCase):
     def test_valid_filename(self):

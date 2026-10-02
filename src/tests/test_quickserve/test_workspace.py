@@ -13,6 +13,10 @@ from tempfile import TemporaryDirectory
 
 from QuickServe.FileSystem.path_resolver import Workspace
 
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 class TestWorkspace(unittest.TestCase):
     """

@@ -15,6 +15,10 @@ from unittest.mock import patch
 from QuickServe.FileSystem.path_resolver import Workspace
 from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 class TestRuntimes(unittest.TestCase):
     @classmethod
