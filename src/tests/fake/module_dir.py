@@ -12,4 +12,4 @@ def setup_modules(workspace: "Workspace", folder_name_modifier: str = "") -> Pat
     module_folder = Path(mymodule.__file__).parent
     logger.info(f"Setting up modules from {module_folder}")
     shutil.copytree(module_folder, root / (module_folder.name + folder_name_modifier))
-    return workspace.ensure_directory("modules") / Path(mymodule.__file__).parent
+    return workspace.ensure_directory("modules") / Path(mymodule.__file__).parent.name
