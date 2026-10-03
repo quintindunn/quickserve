@@ -4,9 +4,10 @@ Tests the runtime manager
 Author: Quintin Dunn
 Date: 10/01/2026
 """
-
+import os
 import subprocess
 import unittest
+import platform
 from pathlib import Path
 
 from tempfile import TemporaryDirectory
@@ -28,6 +29,7 @@ class TestRuntimes(unittest.TestCase):
         Sets the cwd attribute
         """
         cls.cwd = None
+        os.environ["QS-TESTING-ON"] = platform.system()
 
     def tearDown(self):
         """
