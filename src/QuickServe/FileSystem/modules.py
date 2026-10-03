@@ -35,7 +35,7 @@ class BaseModule:
         module_path: str | Path,
         workspace: "Workspace",
         runtime_manager: "RuntimeManager",
-        **kwargs
+        **kwargs,
     ):
         self.path = Path(module_path)
         self.workspace = workspace
@@ -74,7 +74,7 @@ class BaseModule:
             "NAME": "Missing module name",
             "VERSION": "Missing module version",
             "QUICKSERVE_VERSION": "Missing QuickServe version",
-            "PAGES": "Missing module pages"
+            "PAGES": "Missing module pages",
         }
         self.raise_if_attr_not_exist(
             "Module",

@@ -14,6 +14,7 @@ from tests.fake.module_dir import setup_modules
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
+
 class TestPluginLoader(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

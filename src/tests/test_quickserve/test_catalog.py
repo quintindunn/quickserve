@@ -18,7 +18,7 @@ class FakeModule:
         self.module_name = module_name
 
     def __str__(self):
-        return f'<Fake Module \"{self.module_name}\"-"{self.instance_name}" {self.instance_uuid[:16]}>'
+        return f'<Fake Module "{self.module_name}"-"{self.instance_name}" {self.instance_uuid[:16]}>'
 
 
 class TestCatalog(unittest.TestCase):
@@ -38,10 +38,20 @@ class TestCatalog(unittest.TestCase):
             "56e99ed4-bdff-42fe-a967-dcd421dbb08e",
         ]
         modules = {
-            "foo": FakeModule(instance_name="foo", instance_uuid=self.uuids[0], module_name="foo"),
-            "bar": FakeModule(instance_name="bar", instance_uuid=self.uuids[1], module_name="bar"),
-            "foobar": FakeModule(instance_name="foobar", instance_uuid=self.uuids[2], module_name="foobar"),
-            "buzz": FakeModule(instance_name="buzz", instance_uuid=self.uuids[3], module_name="buzz"),
+            "foo": FakeModule(
+                instance_name="foo", instance_uuid=self.uuids[0], module_name="foo"
+            ),
+            "bar": FakeModule(
+                instance_name="bar", instance_uuid=self.uuids[1], module_name="bar"
+            ),
+            "foobar": FakeModule(
+                instance_name="foobar",
+                instance_uuid=self.uuids[2],
+                module_name="foobar",
+            ),
+            "buzz": FakeModule(
+                instance_name="buzz", instance_uuid=self.uuids[3], module_name="buzz"
+            ),
         }
 
         self.catalog = ModuleCatalog(modules)

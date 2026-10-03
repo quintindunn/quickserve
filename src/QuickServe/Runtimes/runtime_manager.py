@@ -209,23 +209,32 @@ class RuntimeManager:
                 )
         elif real_os == "Linux":
             dst.mkdir(exist_ok=True)
-            command = ["bsdtar", "-xf", str(src.resolve().absolute()), "-C", str(dst.resolve().absolute())]
+            command = [
+                "bsdtar",
+                "-xf",
+                str(src.resolve().absolute()),
+                "-C",
+                str(dst.resolve().absolute()),
+            ]
             try:
                 subprocess.run(command, check=True)
                 logger.info(f"Successfully extracted {src} to {dst}")
             except subprocess.CalledProcessError as e:
                 raise RuntimeError(f"Extraction failed: {e}")
             except FileNotFoundError:
-                raise RuntimeError("Error: 'bsdtar' is not installed or not found in system PATH. If you're on linux "
-                                   "`sudo apt install libarchive-tools`")
+                raise RuntimeError(
+                    "Error: 'bsdtar' is not installed or not found in system PATH. If you're on linux "
+                    "`sudo apt install libarchive-tools`"
+                )
 
             for payload_location in dst.glob("*/Payload"):
-                new_location = payload_location.parent / (payload_location.name + "_old")
+                new_location = payload_location.parent / (
+                    payload_location.name + "_old"
+                )
                 shutil.move(payload_location, new_location)
                 self.pkg_unpack(new_location, payload_location)
         else:
             raise NotImplementedError(f"Cannot unpack PKG file on {real_os}!")
-
 
     def install_jre_macos(
         self, tmp_location: Path, major_version: int, image_type: str

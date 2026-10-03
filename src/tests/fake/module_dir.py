@@ -7,6 +7,7 @@ from tests.fake import mymodule
 
 logger = logging.getLogger(__name__)
 
+
 def setup_modules(workspace: "Workspace", folder_name_modifier: str = "") -> Path:
     root = workspace.ensure_directory("modules")
     module_folder = Path(mymodule.__file__).parent

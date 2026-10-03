@@ -19,6 +19,7 @@ from tests.fake.module_dir import setup_modules
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
+
 class TestBaseModule(unittest.TestCase):
     """
     Tests the BaseModule class.
@@ -52,7 +53,7 @@ class TestBaseModule(unittest.TestCase):
         module = BaseModule(
             module_path=module_path,
             workspace=self.workspace,
-            runtime_manager=None  # noqa
+            runtime_manager=None,  # noqa
         )
 
         module.load_module()
@@ -67,7 +68,7 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
-            remove_attr_on_load="NAME"
+            remove_attr_on_load="NAME",
         )
 
         with self.assertRaises(InvalidModuleError):
@@ -83,7 +84,7 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
-            remove_attr_on_load="VERSION"
+            remove_attr_on_load="VERSION",
         )
 
         with self.assertRaises(InvalidModuleError):
@@ -99,7 +100,7 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
-            remove_attr_on_load="QUICKSERVE_VERSION"
+            remove_attr_on_load="QUICKSERVE_VERSION",
         )
 
         with self.assertRaises(InvalidModuleError):
@@ -115,7 +116,7 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
-            remove_attr_on_load="PAGES"
+            remove_attr_on_load="PAGES",
         )
 
         with self.assertRaises(InvalidModuleError):
@@ -134,7 +135,12 @@ class TestBaseModule(unittest.TestCase):
         )
 
         create_path = module.get_resource_path("create.html")
-        self.assertEqual(create_path, self.workspace.get_path(Path("modules") / "mymodule" / "resources" / "create.html"))
+        self.assertEqual(
+            create_path,
+            self.workspace.get_path(
+                Path("modules") / "mymodule" / "resources" / "create.html"
+            ),
+        )
 
     def test_get_missing_resource(self):
         """

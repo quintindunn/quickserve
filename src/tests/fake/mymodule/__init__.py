@@ -21,6 +21,7 @@ ABOUT_PAGE = """
 {% endblock %}
 """
 
+
 class Module:
     NAME: str = "Quick-Serve-Testing"
     VERSION: str = "0.0.1"
