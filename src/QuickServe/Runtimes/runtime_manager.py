@@ -185,6 +185,57 @@ class RuntimeManager:
                 image_type=image_type,
             )
 
+    def pkg_unpack(self, src: Path, dst: Path):
+        real_os = os.getenv("QS-TESTING-ON") or platform.system()
+
+        if real_os == "Darwin":
+            command = [
+                "pkgutil",
+                "--expand-full",
+                src,
+                dst.absolute(),
+            ]
+            proc = subprocess.Popen(
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            proc.wait()
+            if proc.returncode != 0:
+                stdout, stderr = proc.communicate()
+                raise RuntimeError(
+                    f"Error unpacking JRE archive:\n\tSTDOUT: {stdout.decode()!r}\n\tSTDERR:{stderr.decode()!r}"
+                )
+        elif real_os == "Linux":
+            dst.mkdir(exist_ok=True)
+            command = [
+                "bsdtar",
+                "-xf",
+                str(src.resolve().absolute()),
+                "-C",
+                str(dst.resolve().absolute()),
+            ]
+            try:
+                subprocess.run(command, check=True)
+                logger.info(f"Successfully extracted {src} to {dst}")
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(f"Extraction failed: {e}")
+            except FileNotFoundError:
+                raise RuntimeError(
+                    "Error: 'bsdtar' is not installed or not found in system PATH. If you're on linux "
+                    "`sudo apt install libarchive-tools`"
+                )
+
+            for payload_location in dst.glob("*/Payload"):
+                new_location = payload_location.parent / (
+                    payload_location.name + "_old"
+                )
+                shutil.move(payload_location, new_location)
+                self.pkg_unpack(new_location, payload_location)
+        else:
+            raise NotImplementedError(f"Cannot unpack PKG file on {real_os}!")
+
     def install_jre_macos(
         self, tmp_location: Path, major_version: int, image_type: str
     ) -> None:
@@ -202,24 +253,7 @@ class RuntimeManager:
         # Step 1.) unpack temp file
         unpacked_location = self.workspace.get_path(f"tmp/{uuid.uuid4()}")
         logger.debug(f"Unpacking {tmp_location} to {unpacked_location}")
-        command = [
-            "pkgutil",
-            "--expand-full",
-            tmp_location,
-            unpacked_location.absolute(),
-        ]
-        proc = subprocess.Popen(
-            command,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        proc.wait()
-        if proc.returncode != 0:
-            stdout, stderr = proc.communicate()
-            raise RuntimeError(
-                f"Error unpacking JRE archive:\n\tSTDOUT: {stdout.decode()!r}\n\tSTDERR:{stderr.decode()!r}"
-            )
+        self.pkg_unpack(tmp_location, unpacked_location)
 
         # Step 2.) Find secondary binary folder.
         step_1 = (

@@ -9,4 +9,13 @@
     <orderEntry type="jdk" jdkName="Python 3.14 (QuickServe)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="TemplatesService">
+    <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
+    <option name="TEMPLATE_FOLDERS">
+      <list>
+        <option value="$MODULE_DIR$/src/QuickServe/Web/templates" />
+        <option value="$MODULE_DIR$/src/QuickServe/Web/module_common/resource_dir" />
+      </list>
+    </option>
+  </component>
 </module>

@@ -54,7 +54,6 @@ class Config:
     web: WebModel
     driver: DriverModel
     database: DatabaseModel
-    workspace: Workspace
 
     def __init__(self, workspace: Workspace) -> None:
         """
@@ -73,6 +72,8 @@ class Config:
         self.read()
 
         logger.info("Configuration loaded successfully")
+
+    workspace: Workspace
 
     @property
     def config_path(self) -> Path:
