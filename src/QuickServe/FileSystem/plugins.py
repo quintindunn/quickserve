@@ -108,7 +108,7 @@ class PluginLoader:
         loaded: dict[str, BaseModule] = {}
         for path in modules_path.iterdir():
             if not path.resolve().is_dir() or path.name.startswith("."):
-                logger.debug(f"Skipping {path}")
+                logger.info(f"Skipping {path.resolve()}")
                 continue
             logger.info("Loading module %s", path)
             module = BaseModule(

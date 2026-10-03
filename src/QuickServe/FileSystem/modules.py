@@ -35,10 +35,15 @@ class BaseModule:
         module_path: str | Path,
         workspace: "Workspace",
         runtime_manager: "RuntimeManager",
+        **kwargs
     ):
         self.path = Path(module_path)
         self.workspace = workspace
         self.runtime_manager = runtime_manager
+
+        self._remove_attr_on_load = None
+        if "remove_attr_on_load" in kwargs:
+            self._remove_attr_on_load = kwargs["remove_attr_on_load"]
 
     def raise_if_attr_not_exist(
         self, attr_name: str, exception: Exception, raw_import: bool = True
@@ -69,6 +74,7 @@ class BaseModule:
             "NAME": "Missing module name",
             "VERSION": "Missing module version",
             "QUICKSERVE_VERSION": "Missing QuickServe version",
+            "PAGES": "Missing module pages"
         }
         self.raise_if_attr_not_exist(
             "Module",
@@ -79,6 +85,13 @@ class BaseModule:
         self.module = self._module.Module(
             module=self, runtime_manager=self.runtime_manager
         )
+
+        if isinstance(self._remove_attr_on_load, str):
+            if hasattr(self.module.__class__, self._remove_attr_on_load):
+                delattr(self.module.__class__, self._remove_attr_on_load)
+            if hasattr(self.module, self._remove_attr_on_load):
+                delattr(self.module, self._remove_attr_on_load)
+
         for attr, error in attr_error_map.items():
             logger.debug(f"{self.path.name} - Validating {attr}")
             self.raise_if_attr_not_exist(

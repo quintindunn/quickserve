@@ -7,8 +7,9 @@ from tests.fake import mymodule
 
 logger = logging.getLogger(__name__)
 
-def setup_modules(workspace: "Workspace", folder_name_modifier: str = "") -> None:
+def setup_modules(workspace: "Workspace", folder_name_modifier: str = "") -> Path:
     root = workspace.ensure_directory("modules")
     module_folder = Path(mymodule.__file__).parent
     logger.info(f"Setting up modules from {module_folder}")
     shutil.copytree(module_folder, root / (module_folder.name + folder_name_modifier))
+    return workspace.ensure_directory("modules") / Path(mymodule.__file__).parent
