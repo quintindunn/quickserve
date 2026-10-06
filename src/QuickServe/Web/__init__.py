@@ -10,6 +10,7 @@ from pathlib import Path
 from flask import Flask
 from flask import url_for
 
+from QuickServe.Common.search import Search
 from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
 from QuickServe.Web.api import api
@@ -29,6 +30,7 @@ def create_app(
     catalog: "ModuleCatalog",
     instance_manager: "InstanceManager",
     websocket_server: "WebsocketServer",
+    search_engine: "Search"
 ) -> Flask:
     """
     Creates a Flask application from already-constructed dependencies.
@@ -58,6 +60,7 @@ def create_app(
     app.extensions["quickserve.instance_manager"] = instance_manager
     app.extensions["quickserve.websocket_server"] = websocket_server
     app.extensions["quickserve.template_registry"] = Registry(websocket_server)
+    app.extensions["quickserve.search"] = search_engine
 
     @app.context_processor
     def global_context():

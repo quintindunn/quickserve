@@ -34,11 +34,14 @@ class _TfIDFDocument:
         identifier: str,
         title: str,
         document: str,
+        minor: str | None,
         title_weight: float,
+        minor_weight: float,
     ):
         self.identifier = identifier
         self.title = title
         self.document = document
+        self.minor = minor
         self.table = _TfIDFTable()
 
         for word in re.finditer(_WORD_PATTERN, title):
@@ -46,6 +49,9 @@ class _TfIDFDocument:
 
         for word in re.finditer(_WORD_PATTERN, document):
             self.table.add_item(word.group().lower())
+
+        for word in re.finditer(_WORD_PATTERN, minor):
+            self.table.add_item(word, minor_weight)
 
     @property
     def frequencies(self) -> dict[str, float]:
@@ -60,17 +66,21 @@ class _TfIDFDocument:
 
 
 class TfIDF:
-    def __init__(self, title_weight: float = 5):
+    def __init__(self, title_weight: float = 5, minor_weight: float = 0.75):
         self._title_weight = title_weight
+        self._minor_weight = minor_weight
+
         self.corpus: list[_TfIDFDocument] = []
 
-    def add_result(self, identifier: str, title: str, text: str) -> None:
+    def add_result(self, identifier: str, title: str, text: str, minor: str = None) -> None:
         self.corpus.append(
             _TfIDFDocument(
                 identifier,
                 title.lower(),
                 text.lower(),
+                minor.lower() if minor else None,
                 self._title_weight,
+                self._minor_weight
             )
         )
 
