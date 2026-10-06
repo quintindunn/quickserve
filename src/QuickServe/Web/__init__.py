@@ -12,6 +12,7 @@ from flask import url_for
 
 from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
+from QuickServe.Web.api import api
 from QuickServe.Web.module_common.registry import Registry
 from QuickServe.contracts import WebSettings
 
@@ -51,6 +52,8 @@ def create_app(
 
     app.register_blueprint(home)
     app.register_blueprint(modules)
+    app.register_blueprint(api)
+
     app.extensions["quickserve.catalog"] = catalog
     app.extensions["quickserve.instance_manager"] = instance_manager
     app.extensions["quickserve.websocket_server"] = websocket_server
