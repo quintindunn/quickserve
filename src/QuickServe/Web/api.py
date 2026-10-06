@@ -8,7 +8,7 @@ Date: 10/06/2026
 from flask import Blueprint, request, current_app
 from flask.typing import ResponseReturnValue
 
-from QuickServe.FileSystem.plugins import ModuleCatalog
+from QuickServe.Common.search import Search
 
 api = Blueprint("api", __name__, url_prefix="/api/v1")
 
@@ -18,10 +18,9 @@ def search() -> ResponseReturnValue:
 
     if not query:
         return ""
-    catalog: ModuleCatalog = current_app.extensions["quickserve.catalog"]
+    search: Search = current_app.extensions["quickserve.search"]
 
-    modules = catalog.items()
-
-
+    modules, instances = search.search(query=query, max_results=5)
+    print(f"{modules=} {instances=}")
 
     return "hello world"

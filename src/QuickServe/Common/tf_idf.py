@@ -1,7 +1,7 @@
 import math
 import re
 
-_WORD_PATTERN = re.compile(r"[^\W_]+")
+_WORD_PATTERN = re.compile(r"[^\W\-_]+")
 
 
 import re
@@ -34,7 +34,7 @@ class _TfIDFDocument:
         identifier: str,
         title: str,
         document: str,
-        minor: str | None,
+        minor: str,
         title_weight: float,
         minor_weight: float,
     ):
@@ -50,8 +50,8 @@ class _TfIDFDocument:
         for word in re.finditer(_WORD_PATTERN, document):
             self.table.add_item(word.group().lower())
 
-        for word in re.finditer(_WORD_PATTERN, minor):
-            self.table.add_item(word, minor_weight)
+        for word in re.finditer(_WORD_PATTERN, minor or ""):
+            self.table.add_item(word.group().lower(), minor_weight)
 
     @property
     def frequencies(self) -> dict[str, float]:
@@ -94,7 +94,7 @@ class TfIDF:
                 frequencies[term] = frequencies.get(term, 0) + 1
 
         return {
-            term: math.log((document_count + 1) / (count + 1))
+            term: math.log((document_count + 1) / (count + 1)) + 1
             for term, count in frequencies.items()
         }
 
@@ -147,12 +147,9 @@ class TfIDF:
             if similarity > 0:
                 results.append((document, similarity))
 
-            if len(results) == max_results:
-                break
-
         results.sort(key=lambda result: result[1], reverse=True)
 
-        return results
+        return results[:max_results]
 
 if __name__ == '__main__':
     # DOCUMENTS generated w/ AI

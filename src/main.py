@@ -60,10 +60,12 @@ if __name__ == "__main__":
     )
 
     search_engine = Search(catalog=catalog, instance_manager=instance_manager)
+    search_engine.update_all()
 
     websocket_server = WebsocketServer(
         config=config.web, instance_manager=instance_manager
     )
+
     Thread(
         target=start_websocket,
         args=[websocket_server],
