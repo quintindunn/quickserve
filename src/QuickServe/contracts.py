@@ -23,6 +23,7 @@ class Module(Protocol):
     VERSION: str
     QUICKSERVE_VERSION: str
     PAGES: list[str]
+    DESCRIPTION: str
 
     def about(self, *args: Any, **kwargs: Any) -> PageResult: ...
 
