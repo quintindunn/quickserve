@@ -6,6 +6,8 @@ from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.FileSystem.plugins import ModuleCatalog
 from QuickServe.contracts import Module
 
+from bs4 import BeautifulSoup
+
 class Search:
     module_tfidf: TfIDF
     instance_tfidf: TfIDF
@@ -26,7 +28,8 @@ class Search:
     @staticmethod
     def _build_module_tfidf_add(module: "Module") -> Tuple[str, str, str]:
         title = f"{module.NAME} {module.VERSION}"
-        body = f"{module.DESCRIPTION}\n\n{module.about()}"
+        soup = BeautifulSoup(module.about(), features="html.parser")
+        body = f"{module.DESCRIPTION}\n\n{soup.text}"
         return title, body, ""
 
     @staticmethod
@@ -51,8 +54,8 @@ class Search:
         self.instance_tfidf.add_result(identifier=str(instance.uuid), title=title, text=body, minor=minor)
 
     def update_modules(self):
-        for module in self.catalog.items():
-            self.register_module(module)
+        for _, module in self.catalog.items():
+            self.register_module(module.module)
 
     def update_instances(self):
         for instance in self.instance_manager.load_all():
@@ -61,3 +64,9 @@ class Search:
     def update_all(self):
         self.update_modules()
         self.update_instances()
+
+    def search(self, query: str, max_results: int = 5):
+        modules = self.module_tfidf.query(query=query, max_results=max_results)
+        instances = self.instance_tfidf.query(query=query, max_results=max_results)
+
+        return modules, instances
