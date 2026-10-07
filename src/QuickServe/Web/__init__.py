@@ -30,7 +30,7 @@ def create_app(
     catalog: "ModuleCatalog",
     instance_manager: "InstanceManager",
     websocket_server: "WebsocketServer",
-    search_engine: "Search"
+    search_engine: "Search",
 ) -> Flask:
     """
     Creates a Flask application from already-constructed dependencies.
