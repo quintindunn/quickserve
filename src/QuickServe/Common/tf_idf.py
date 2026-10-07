@@ -1,7 +1,6 @@
+import logging
 import math
 import re
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +22,9 @@ class _TfIDFTable:
 
     @property
     def tf(self) -> dict[str, float]:
+        if self._total_word == 0:
+            return {}
+
         return {
             term: frequency / self._total_word
             for term, frequency in self._table.items()
@@ -77,6 +79,7 @@ class TfIDF:
         self._minor_weight = minor_weight
 
         self.corpus: list[_TfIDFDocument] = []
+        self._vocabulary: set[str] = set()
 
         logger.debug(
             f"Initialized TF-IDF with title weight {title_weight} "
@@ -92,16 +95,17 @@ class TfIDF:
     ) -> None:
         logger.debug(f"Adding document {identifier!r}")
 
-        self.corpus.append(
-            _TfIDFDocument(
-                identifier,
-                title.lower(),
-                text.lower(),
-                minor.lower() if minor else None,
-                self._title_weight,
-                self._minor_weight,
-            )
+        document = _TfIDFDocument(
+            identifier,
+            title.lower(),
+            text.lower(),
+            minor.lower() if minor else None,
+            self._title_weight,
+            self._minor_weight,
         )
+
+        self.corpus.append(document)
+        self._vocabulary.update(document.frequencies)
 
         logger.info(
             f"Added document {identifier!r}; "
@@ -126,6 +130,31 @@ class TfIDF:
 
         return idf
 
+    def _expand_query(self, query: str) -> list[str]:
+        terms = [
+            word.group().lower()
+            for word in re.finditer(_WORD_PATTERN, query)
+        ]
+
+        expanded = []
+
+        for term in terms:
+            matches = [
+                vocabulary_term
+                for vocabulary_term in self._vocabulary
+                if vocabulary_term.startswith(term)
+            ]
+
+            if matches:
+                expanded.extend(matches)
+                logger.debug(
+                    f"Expanded query term {term!r} to {matches!r}"
+                )
+            else:
+                expanded.append(term)
+
+        return expanded
+
     def query(
         self,
         query: str,
@@ -135,8 +164,8 @@ class TfIDF:
 
         query_table = _TfIDFTable()
 
-        for word in re.finditer(_WORD_PATTERN, query):
-            query_table.add_item(word.group().lower())
+        for term in self._expand_query(query):
+            query_table.add_item(term)
 
         query_tf = query_table.tf
         idf = self.idf
@@ -144,14 +173,18 @@ class TfIDF:
         logger.debug(f"Query contains {len(query_tf)} unique terms")
 
         query_vector = {
-            term: tf * idf[term] for term, tf in query_tf.items() if term in idf
+            term: tf * idf[term]
+            for term, tf in query_tf.items()
+            if term in idf
         }
 
         results = []
 
         for document in self.corpus:
             document_vector = {
-                term: tf * idf[term] for term, tf in document.tf.items() if term in idf
+                term: tf * idf[term]
+                for term, tf in document.tf.items()
+                if term in idf
             }
 
             terms = set(query_vector) | set(document_vector)
@@ -172,16 +205,22 @@ class TfIDF:
             if query_magnitude == 0 or document_magnitude == 0:
                 similarity = 0
             else:
-                similarity = dot_product / (query_magnitude * document_magnitude)
+                similarity = dot_product / (
+                    query_magnitude * document_magnitude
+                )
 
             logger.debug(
-                f"Document {document.identifier!r} similarity: " f"{similarity:.4f}"
+                f"Document {document.identifier!r} "
+                f"similarity: {similarity:.4f}"
             )
 
             if similarity > 0:
                 results.append((document, similarity))
 
-        results.sort(key=lambda result: result[1], reverse=True)
+        results.sort(
+            key=lambda result: result[1],
+            reverse=True,
+        )
 
         results = results[:max_results]
 
