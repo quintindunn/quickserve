@@ -131,10 +131,7 @@ class TfIDF:
         return idf
 
     def _expand_query(self, query: str) -> list[str]:
-        terms = [
-            word.group().lower()
-            for word in re.finditer(_WORD_PATTERN, query)
-        ]
+        terms = [word.group().lower() for word in re.finditer(_WORD_PATTERN, query)]
 
         expanded = []
 
@@ -147,9 +144,7 @@ class TfIDF:
 
             if matches:
                 expanded.extend(matches)
-                logger.debug(
-                    f"Expanded query term {term!r} to {matches!r}"
-                )
+                logger.debug(f"Expanded query term {term!r} to {matches!r}")
             else:
                 expanded.append(term)
 
@@ -173,18 +168,14 @@ class TfIDF:
         logger.debug(f"Query contains {len(query_tf)} unique terms")
 
         query_vector = {
-            term: tf * idf[term]
-            for term, tf in query_tf.items()
-            if term in idf
+            term: tf * idf[term] for term, tf in query_tf.items() if term in idf
         }
 
         results = []
 
         for document in self.corpus:
             document_vector = {
-                term: tf * idf[term]
-                for term, tf in document.tf.items()
-                if term in idf
+                term: tf * idf[term] for term, tf in document.tf.items() if term in idf
             }
 
             terms = set(query_vector) | set(document_vector)
@@ -205,13 +196,10 @@ class TfIDF:
             if query_magnitude == 0 or document_magnitude == 0:
                 similarity = 0
             else:
-                similarity = dot_product / (
-                    query_magnitude * document_magnitude
-                )
+                similarity = dot_product / (query_magnitude * document_magnitude)
 
             logger.debug(
-                f"Document {document.identifier!r} "
-                f"similarity: {similarity:.4f}"
+                f"Document {document.identifier!r} " f"similarity: {similarity:.4f}"
             )
 
             if similarity > 0:
