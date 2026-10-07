@@ -34,6 +34,7 @@ class Module:
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
     PAGES: list[str] = ["about", "create", "start", "filesystem"]
+    DESCRIPTION: str = "Create a Minecraft Java Edition Vanilla Server!"
     FS_ROOT: str = "server"
 
     module: "BaseModule"

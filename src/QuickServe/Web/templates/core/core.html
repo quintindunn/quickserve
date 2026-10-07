@@ -4,9 +4,20 @@
         <title>{% block title %}QuickServe{% endblock %}</title>
         <link rel="stylesheet"
               href="{{ url_for('static', filename='core/core.css') }}">
+        <script src="{{ url_for('static', filename='core/search.js') }}" defer></script>
         {% block head %}{% endblock %}
     </head>
     <body>
+        <input type="hidden"
+               id="search-endpoint"
+               value="{{ url_for("api.search") }}">
+        <div class="search-bar">
+            <input placeholder="Search for Modules and Instances"
+                   type="text"
+                   id="search-bar"
+                   class="search-bar">
+            <div class="search-results" id="search-results"></div>
+        </div>
         <div class="main">
             <div class="sidebar">
                 <div class="sub1">

@@ -1,16 +1,16 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
-    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgb(31, 32, 41);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
+      rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -33,18 +33,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
-      rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+
   }
 }
 
@@ -177,4 +166,62 @@ body {
 .pages > span {
     margin-left: .25rem;
     margin-right: .25rem;
+}
+
+.search-bar {
+    display: flex;
+    flex-direction: column;
+}
+
+.search-bar > * {
+    margin: 0 auto;
+}
+
+.search-bar > input {
+    width: 30%;
+    height: 2vh;
+    padding: 1vh 1vw;
+    border-radius: 25px;
+    border: none;
+    background-color: var(--border);
+}
+
+.search-results {
+    display: none;
+    position: absolute;
+
+    top: calc(5vh + 1px);
+    left: calc(35% - 1vw);
+
+    z-index: 10;
+
+    border-radius: 25px;
+}
+
+.search-results[data-shown="true"] {
+    background-color: var(--accent-bg);
+    display: grid;
+    width: 30%;
+    height: auto;
+
+    grid-template-columns: 1fr 1fr;
+    padding: 1vh 1vw;
+}
+
+.search-results > div {
+    text-align: center;
+    padding: 0;
+    margin: 0 0 .2vh;
+}
+
+.search-results > div > div > a {
+    padding: 2vw 2vw;
+}
+
+.search-results > div:nth-child(1) {
+    border-right: 1px solid var(--border);
+}
+
+.search-results > div:nth-child(2) {
+    border-left: 1px solid var(--border);
 }

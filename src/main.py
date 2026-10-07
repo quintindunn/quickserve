@@ -11,6 +11,8 @@ import asyncio
 import logging
 import sys
 
+from QuickServe.Common.search import Search
+
 
 def start_websocket(ws_server):
     loop = asyncio.new_event_loop()
@@ -57,9 +59,13 @@ if __name__ == "__main__":
         repository=PeeweeInstanceManager(),
     )
 
+    search_engine = Search(catalog=catalog, instance_manager=instance_manager)
+    search_engine.update_all()
+
     websocket_server = WebsocketServer(
         config=config.web, instance_manager=instance_manager
     )
+
     Thread(
         target=start_websocket,
         args=[websocket_server],
@@ -71,6 +77,7 @@ if __name__ == "__main__":
         catalog=catalog,
         instance_manager=instance_manager,
         websocket_server=websocket_server,
+        search_engine=search_engine,
     )
     app.run(
         host=config.web.website_host,
