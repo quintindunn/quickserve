@@ -21,11 +21,13 @@ def is_child(instance_root: Path, requested_path: Path) -> bool:
 
 
 def redirect(url: str) -> str:
-    return Markup(f"""
+    return Markup(
+        f"""
         <script>
             window.location = `{url}`;
         </script>
-    """)
+    """
+    )
 
 
 def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
