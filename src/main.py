@@ -77,7 +77,7 @@ if __name__ == "__main__":
         catalog=catalog,
         instance_manager=instance_manager,
         websocket_server=websocket_server,
-        search_engine=search_engine
+        search_engine=search_engine,
     )
     app.run(
         host=config.web.website_host,

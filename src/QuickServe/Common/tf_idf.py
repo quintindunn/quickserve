@@ -1,10 +1,11 @@
 import math
 import re
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 _WORD_PATTERN = re.compile(r"[^\W\-_]+")
-
-
-import re
 
 
 class _TfIDFTable:
@@ -53,6 +54,11 @@ class _TfIDFDocument:
         for word in re.finditer(_WORD_PATTERN, minor or ""):
             self.table.add_item(word.group().lower(), minor_weight)
 
+        logger.debug(
+            f"Created document {identifier!r} with "
+            f"{len(self.frequencies)} unique terms"
+        )
+
     @property
     def frequencies(self) -> dict[str, float]:
         return self.table.frequencies
@@ -72,7 +78,20 @@ class TfIDF:
 
         self.corpus: list[_TfIDFDocument] = []
 
-    def add_result(self, identifier: str, title: str, text: str, minor: str = None) -> None:
+        logger.debug(
+            f"Initialized TF-IDF with title weight {title_weight} "
+            f"and minor weight {minor_weight}"
+        )
+
+    def add_result(
+        self,
+        identifier: str,
+        title: str,
+        text: str,
+        minor: str = None,
+    ) -> None:
+        logger.debug(f"Adding document {identifier!r}")
+
         self.corpus.append(
             _TfIDFDocument(
                 identifier,
@@ -80,8 +99,13 @@ class TfIDF:
                 text.lower(),
                 minor.lower() if minor else None,
                 self._title_weight,
-                self._minor_weight
+                self._minor_weight,
             )
+        )
+
+        logger.info(
+            f"Added document {identifier!r}; "
+            f"corpus now contains {len(self.corpus)} documents"
         )
 
     @property
@@ -93,12 +117,22 @@ class TfIDF:
             for term in document.frequencies:
                 frequencies[term] = frequencies.get(term, 0) + 1
 
-        return {
+        idf = {
             term: math.log((document_count + 1) / (count + 1)) + 1
             for term, count in frequencies.items()
         }
 
-    def query(self, query: str, max_results: int = 5) -> list[tuple[_TfIDFDocument, float]]:
+        logger.debug(f"Calculated IDF for {len(idf)} unique terms")
+
+        return idf
+
+    def query(
+        self,
+        query: str,
+        max_results: int = 5,
+    ) -> list[tuple[_TfIDFDocument, float]]:
+        logger.info(f"Running query {query!r}")
+
         query_table = _TfIDFTable()
 
         for word in re.finditer(_WORD_PATTERN, query):
@@ -107,19 +141,17 @@ class TfIDF:
         query_tf = query_table.tf
         idf = self.idf
 
+        logger.debug(f"Query contains {len(query_tf)} unique terms")
+
         query_vector = {
-            term: tf * idf[term]
-            for term, tf in query_tf.items()
-            if term in idf
+            term: tf * idf[term] for term, tf in query_tf.items() if term in idf
         }
 
         results = []
 
         for document in self.corpus:
             document_vector = {
-                term: tf * idf[term]
-                for term, tf in document.tf.items()
-                if term in idf
+                term: tf * idf[term] for term, tf in document.tf.items() if term in idf
             }
 
             terms = set(query_vector) | set(document_vector)
@@ -130,59 +162,29 @@ class TfIDF:
             )
 
             query_magnitude = math.sqrt(
-                sum(value ** 2 for value in query_vector.values())
+                sum(value**2 for value in query_vector.values())
             )
 
             document_magnitude = math.sqrt(
-                sum(value ** 2 for value in document_vector.values())
+                sum(value**2 for value in document_vector.values())
             )
 
             if query_magnitude == 0 or document_magnitude == 0:
                 similarity = 0
             else:
-                similarity = dot_product / (
-                        query_magnitude * document_magnitude
-                )
+                similarity = dot_product / (query_magnitude * document_magnitude)
+
+            logger.debug(
+                f"Document {document.identifier!r} similarity: " f"{similarity:.4f}"
+            )
 
             if similarity > 0:
                 results.append((document, similarity))
 
         results.sort(key=lambda result: result[1], reverse=True)
 
-        return results[:max_results]
+        results = results[:max_results]
 
-if __name__ == '__main__':
-    # DOCUMENTS generated w/ AI
-    DOCUMENTS = [
-        (
-            "Java Programming",
-            "Java is a popular programming language used for building applications and backend services."
-        ),
-        (
-            "Python Programming",
-            "Python is a popular programming language used for data science, machine learning, and web development."
-        ),
-        (
-            "JavaScript Web Development",
-            "JavaScript is a programming language commonly used for building interactive web applications."
-        ),
-        (
-            "Backend Development",
-            "Backend development often uses Java, Python, and other programming languages to build web services."
-        ),
-        (
-            "Machine Learning",
-            "Machine learning uses Python extensively for data analysis, training models, and artificial intelligence."
-        ),
-        (
-            "Web Development",
-            "Web development uses HTML, CSS, and JavaScript to create interactive websites and web applications."
-        ),
-    ]
+        logger.info(f"Query returned {len(results)} results")
 
-    tfidf = TfIDF()
-    for doc_title, doc in DOCUMENTS:
-        tfidf.add_result(title=doc_title, text=doc, identifier=doc_title)
-
-    results = tfidf.query("programming")
-    print(results[0])
+        return results
