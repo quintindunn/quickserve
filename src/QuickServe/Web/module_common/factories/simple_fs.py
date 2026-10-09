@@ -19,7 +19,7 @@ def is_child(instance_root: Path, requested_path: Path) -> bool:
     requested_path = requested_path.resolve()
     return requested_path.is_relative_to(instance_root.resolve())
 
-  
+
 def _redirect(url: str) -> Markup:
     """
     ** UNSAFE **
@@ -27,12 +27,12 @@ def _redirect(url: str) -> Markup:
     :param url: The URL to redirect to.
     :return: Markup object containing the script tag.
     """
+
     return Markup(f"""
         <script>
             window.location = `{url}`;
         </script>
-    """
-    )
+    """)
 
 
 def simple_filesystem_builder(module_name: str) -> Callable[[], str]:

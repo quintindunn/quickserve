@@ -24,6 +24,7 @@ class Registry:
     """
     Registry holds all registered common module functions.
     """
+
     registered: dict[str, Callable]
 
     def __init__(self, websocket_server: "WebsocketServer"):
