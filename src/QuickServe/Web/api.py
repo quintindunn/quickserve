@@ -21,13 +21,13 @@ def search() -> ResponseReturnValue:
 
     if not query:
         return ""
-    search: Search = current_app.extensions["quickserve.search"]
+    search_: Search = current_app.extensions["quickserve.search"]
     catalog: "ModuleCatalog" = current_app.extensions["quickserve.catalog"]
     instance_manager: "InstanceManager" = current_app.extensions[
         "quickserve.instance_manager"
     ]
 
-    modules, instances = search.search(query=query, max_results=5)
+    modules, instances = search_.search(query=query, max_results=5)
     modules = [catalog.get(module[0].identifier).module for module in modules]
     instances = [
         instance_manager.from_uuid(instance[0].identifier) for instance in instances

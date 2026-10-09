@@ -41,9 +41,7 @@ class TestModuleBlueprint(TestCase):
         self.app.config["TESTING"] = True
         self.app.register_blueprint(modules)
 
-        self.app.extensions["quickserve.instance_manager"] = (
-            self.instance_manager
-        )
+        self.app.extensions["quickserve.instance_manager"] = self.instance_manager
 
         self.client = self.app.test_client()
         self.url = "/module/instancestatic/test-uuid/"
@@ -79,9 +77,7 @@ class TestModuleBlueprint(TestCase):
         Test resolving a nonexistent file.
         """
 
-        self.assertIsNone(
-            _get_path(self.instance, "missing.txt")
-        )
+        self.assertIsNone(_get_path(self.instance, "missing.txt"))
 
     def test_get_path_traversal(self):
         """
@@ -91,9 +87,7 @@ class TestModuleBlueprint(TestCase):
         outside = self.root / "outside.txt"
         outside.touch()
 
-        self.assertIsNone(
-            _get_path(self.instance, "../outside.txt")
-        )
+        self.assertIsNone(_get_path(self.instance, "../outside.txt"))
 
     def test_create_file(self):
         """
