@@ -13,9 +13,9 @@ class ManagedProcess:
     _on_stdout: list[Callable[[bytes], None]]
     _on_stderr: list[Callable[[bytes], None]]
     command: str
-    root_dir: Path
+    root_dir: Path | None
 
-    def __init__(self, command, root_dir: Path = None):
+    def __init__(self, command, root_dir: Path | None = None):
         self.command = command
         self.proc = None
         self._on_stderr = list()
@@ -30,11 +30,13 @@ class ManagedProcess:
         Thread(target=self._handle_stderr, daemon=True).start()
 
     def _handle_stdout(self):
+        assert self.proc is not None
         for line in iter(self.proc.stdout.readline, b""):
             for callback in self._on_stdout:
                 callback(line)
 
     def _handle_stderr(self):
+        assert self.proc is not None
         for line in iter(self.proc.stderr.readline, b""):
             for callback in self._on_stderr:
                 callback(line)
@@ -45,7 +47,7 @@ class ManagedProcess:
         Returns the processes PID.
         :return: The PID of the process.
         """
-
+        assert self.proc is not None
         return self.proc.pid
 
     def terminate(self) -> None:
@@ -102,6 +104,7 @@ class ManagedProcess:
         :return: The process's exit code.
         """
 
+        assert self.proc is not None
         return self.proc.wait()
 
     def write(self, stdin: bytes) -> int:
@@ -113,6 +116,9 @@ class ManagedProcess:
         """
 
         if self.is_alive():
+            assert self.proc is not None
+            assert self.proc.stdin is not None
+
             written = self.proc.stdin.write(stdin)
             self.proc.stdin.flush()
             return written

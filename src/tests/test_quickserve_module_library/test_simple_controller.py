@@ -36,11 +36,13 @@ class TestSimpleControllerProcessManager(unittest.TestCase):
         :return: string of the generated JSON.
         """
 
-        return json.dumps({
-            "isSimpleController": True,
-            "type": msg_type,
-            **kwargs,
-        })
+        return json.dumps(
+            {
+                "isSimpleController": True,
+                "type": msg_type,
+                **kwargs,
+            }
+        )
 
     def test_has_instance(self):
         """
@@ -69,7 +71,6 @@ class TestSimpleControllerProcessManager(unittest.TestCase):
             self.manager._instance_process_map[self.instance.uuid],
             new_process,
         )
-
 
     def test_on_message_start_forward(self):
         """

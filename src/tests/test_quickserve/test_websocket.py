@@ -11,7 +11,6 @@ from uuid import UUID as UUIDType
 
 from QuickServe.Driver.networking import websocket
 
-
 UUID = "b92cea29-b309-401e-a878-161ada76f2f4"
 
 

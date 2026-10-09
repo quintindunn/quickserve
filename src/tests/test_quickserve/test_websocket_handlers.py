@@ -11,7 +11,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from QuickServe.Driver.networking import websocket_handlers
 
-
 UUID = "b92cea29-b309-401e-a878-161ada76f2f4"
 
 
@@ -22,9 +21,7 @@ class TestInstanceHandler(unittest.IsolatedAsyncioTestCase):
         self.connection.remote_address = ("127.0.0.1", 54321)
 
         self.module = MagicMock()
-        self.instance = SimpleNamespace(
-            base_module=SimpleNamespace(module=self.module)
-        )
+        self.instance = SimpleNamespace(base_module=SimpleNamespace(module=self.module))
 
         self.server.get_instance_manager.return_value.from_uuid.return_value = (
             self.instance

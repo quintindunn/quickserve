@@ -20,11 +20,17 @@ from QuickServe.Web.module_common.resources import get_resource
 from QuickServe.Web.module_common.factories.action import action_builder
 from QuickServe.Web.module_common.factories.link import link_builder
 from QuickServe.Web.module_common.factories.resource import resource_builder
-from QuickServe.Web.module_common.factories.simple_controller import simple_controller_builder
-from QuickServe.Web.module_common.factories.simple_fs import simple_filesystem_builder, is_child
+from QuickServe.Web.module_common.factories.simple_controller import (
+    simple_controller_builder,
+)
+from QuickServe.Web.module_common.factories.simple_fs import (
+    simple_filesystem_builder,
+    is_child,
+)
 from QuickServe.Web.module_common.factories.simple_fs import _redirect as redirect
 
 from flask import request
+
 
 class TestModuleCommonFunctionRegistry(unittest.TestCase):
     def test_get_resource_exists_read(self):
@@ -89,7 +95,7 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
 
     def test_resource(self):
         with patch(
-                "QuickServe.Web.module_common.factories.resource.url_for"
+            "QuickServe.Web.module_common.factories.resource.url_for"
         ) as mock_url_for:
             mock_url_for.return_value = "/module/mymodule/foo.txt"
 
@@ -118,24 +124,18 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
             ):
                 request.instance = Mock()
 
-                with patch.object(
-                    app.jinja_env, "from_string"
-                ) as mock_from_string:
+                with patch.object(app.jinja_env, "from_string") as mock_from_string:
                     mock_from_string.return_value.render.return_value = (
                         "<div>rendered</div>"
                     )
 
-                    controller = simple_controller_builder(
-                        "mymodule", websocket_server
-                    )
+                    controller = simple_controller_builder("mymodule", websocket_server)
                     result = controller()
 
                     mock_get_resource.assert_called_once_with(
                         "simple_controller.html", mode="r"
                     )
-                    mock_from_string.assert_called_once_with(
-                        "<div>mymodule</div>"
-                    )
+                    mock_from_string.assert_called_once_with("<div>mymodule</div>")
                     mock_from_string.return_value.render.assert_called_once_with(
                         context={
                             "module_name": "mymodule",
@@ -167,16 +167,12 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
             ):
                 request.instance = Mock()
 
-                with patch.object(
-                    app.jinja_env, "from_string"
-                ) as mock_from_string:
+                with patch.object(app.jinja_env, "from_string") as mock_from_string:
                     mock_from_string.return_value.render.return_value = (
                         "<div>rendered</div>"
                     )
 
-                    controller = simple_controller_builder(
-                        "mymodule", websocket_server
-                    )
+                    controller = simple_controller_builder("mymodule", websocket_server)
                     controller()
 
                     mock_from_string.return_value.render.assert_called_once_with(
@@ -238,9 +234,7 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
         ):
             request.instance = self.instance
 
-            with patch.object(
-                self.app.jinja_env, "from_string"
-            ) as mock_from_string:
+            with patch.object(self.app.jinja_env, "from_string") as mock_from_string:
                 mock_from_string.return_value.render.return_value = (
                     "<div>rendered</div>"
                 )
@@ -289,9 +283,7 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
         ):
             request.instance = self.instance
 
-            with patch.object(
-                self.app.jinja_env, "from_string"
-            ) as mock_from_string:
+            with patch.object(self.app.jinja_env, "from_string") as mock_from_string:
                 mock_from_string.return_value.render.return_value = (
                     "<div>rendered</div>"
                 )
@@ -317,9 +309,7 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
         ):
             request.instance = self.instance
 
-            with patch.object(
-                self.app.jinja_env, "from_string"
-            ) as mock_from_string:
+            with patch.object(self.app.jinja_env, "from_string") as mock_from_string:
                 mock_from_string.return_value.render.return_value = (
                     "<div>rendered</div>"
                 )
@@ -343,9 +333,7 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
         ):
             request.instance = self.instance
 
-            with patch.object(
-                self.app.jinja_env, "from_string"
-            ) as mock_from_string:
+            with patch.object(self.app.jinja_env, "from_string") as mock_from_string:
                 mock_from_string.return_value.render.return_value = (
                     "<div>rendered</div>"
                 )
@@ -377,9 +365,7 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
         ):
             request.instance = self.instance
 
-            with patch.object(
-                self.app.jinja_env, "from_string"
-            ) as mock_from_string:
+            with patch.object(self.app.jinja_env, "from_string") as mock_from_string:
                 mock_from_string.return_value.render.return_value = (
                     "<div>rendered</div>"
                 )

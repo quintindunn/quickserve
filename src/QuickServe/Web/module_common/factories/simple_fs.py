@@ -19,7 +19,7 @@ def is_child(instance_root: Path, requested_path: Path) -> bool:
     requested_path = requested_path.resolve()
     return requested_path.is_relative_to(instance_root.resolve())
 
-  
+
 def _redirect(url: str) -> Markup:
     """
     ** UNSAFE **
