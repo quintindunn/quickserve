@@ -21,7 +21,8 @@ from QuickServe.Web.module_common.factories.action import action_builder
 from QuickServe.Web.module_common.factories.link import link_builder
 from QuickServe.Web.module_common.factories.resource import resource_builder
 from QuickServe.Web.module_common.factories.simple_controller import simple_controller_builder
-from QuickServe.Web.module_common.factories.simple_fs import simple_filesystem_builder, is_child, redirect
+from QuickServe.Web.module_common.factories.simple_fs import simple_filesystem_builder, is_child
+from QuickServe.Web.module_common.factories.simple_fs import _redirect as redirect
 
 from flask import request
 
