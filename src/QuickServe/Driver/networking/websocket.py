@@ -29,8 +29,6 @@ HOST = "0.0.0.0"
 PORT = 5002
 
 
-
-
 def wrap_endpoint(server, endpoint):
     def _endpoint(conn, *args, **kwargs):
         return endpoint(server, conn, *args, **kwargs)
@@ -46,7 +44,7 @@ class WebsocketServer:
     host: str
     port: int
     router_map: Map
-    _stop_flag: asyncio.Event
+    _stop: asyncio.Event
     _connection_instances: set["InstanceWebsocketConnection"]
     _instance_manager: "InstanceManager"
     _loop: asyncio.AbstractEventLoop | None
@@ -63,7 +61,6 @@ class WebsocketServer:
             ]
         )
         self._instance_manager = instance_manager
-        self._stop_flag = asyncio.Event()
         self._connection_instances: set["InstanceWebsocketConnection"] = set()
         self._loop = None
         self._stop = asyncio.Event()
@@ -97,7 +94,16 @@ class WebsocketServer:
         """
 
         self._loop = asyncio.get_running_loop()
+        self._stop.clear()
 
         async with route(self.router_map, host=self.host, port=self.port):
             logger.info(f"Started websocket server on {self.host}:{self.port}")
             await self._stop.wait()
+
+    def stop(self) -> None:
+        """
+        Stops the websocket server
+
+        :return: None
+        """
+        self._stop.set()
