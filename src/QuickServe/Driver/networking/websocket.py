@@ -28,9 +28,7 @@ logger = logging.getLogger(__name__)
 HOST = "0.0.0.0"
 PORT = 5002
 
-server_stop_flag = asyncio.Event()
 
-stop = asyncio.Event()
 
 
 def wrap_endpoint(server, endpoint):
@@ -51,7 +49,7 @@ class WebsocketServer:
     _stop_flag: asyncio.Event
     _connection_instances: set["InstanceWebsocketConnection"]
     _instance_manager: "InstanceManager"
-    _loop: asyncio.AbstractEventLoop
+    _loop: asyncio.AbstractEventLoop | None
 
     def __init__(self, config: "WebSettings", instance_manager: "InstanceManager"):
         self.host = config.websocket_host
@@ -68,11 +66,15 @@ class WebsocketServer:
         self._stop_flag = asyncio.Event()
         self._connection_instances: set["InstanceWebsocketConnection"] = set()
         self._loop = None
+        self._stop = asyncio.Event()
 
     def get_instance_manager(self):
         return self._instance_manager
 
     def send_instance(self, instance_uuid: UUID, message: str):
+        if self._loop is None:
+            raise ConnectionError("Server is not started!")
+
         logger.debug(f"Sending instance {instance_uuid} {message!r}")
         for connection in self._connection_instances:
             if UUID(connection.instance_uuid) == instance_uuid:
@@ -89,7 +91,7 @@ class WebsocketServer:
 
     async def start(self) -> None:
         """
-        Starts the websocket server on WebsocketServer.host:WebsocketServer.port\
+        Starts the websocket server on WebsocketServer.host:WebsocketServer.port
 
         :return: None
         """
@@ -98,4 +100,4 @@ class WebsocketServer:
 
         async with route(self.router_map, host=self.host, port=self.port):
             logger.info(f"Started websocket server on {self.host}:{self.port}")
-            await stop.wait()
+            await self._stop.wait()

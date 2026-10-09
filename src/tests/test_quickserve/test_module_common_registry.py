@@ -14,7 +14,7 @@ from QuickServe.Web.module_common.factories.link import link_builder
 from QuickServe.Web.module_common.factories.resource import resource_builder
 
 
-class TestRegistry(unittest.TestCase):
+class TestModuleCommonFunctionRegistry(unittest.TestCase):
     def setUp(self):
         self.registry = Registry(MagicMock())
 
