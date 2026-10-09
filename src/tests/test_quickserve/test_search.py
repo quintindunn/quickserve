@@ -1,3 +1,10 @@
+"""
+Tests the module/instance searching.
+
+Author: Quintin Dunn
+Date: 10/09/2026
+"""
+
 import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -6,6 +13,10 @@ from QuickServe.Common.search import Search
 
 
 class TestSearch(unittest.TestCase):
+    """
+    Tests module/instance searching.
+    """
+
     def setUp(self):
         self.catalog = MagicMock()
         self.instance_manager = MagicMock()
@@ -16,6 +27,10 @@ class TestSearch(unittest.TestCase):
         )
 
     def test_build_module_tfidf_add(self):
+        """
+        Tests conversion of modules into a document for TfIDF.
+        """
+
         module = SimpleNamespace(
             NAME="TestModule",
             VERSION="1.2.3",
@@ -36,6 +51,10 @@ class TestSearch(unittest.TestCase):
         self.assertEqual(minor, "")
 
     def test_build_instance_tfidf_add(self):
+        """
+        Tests conversion of instances into a document for TfIDF.
+        """
+
         instance = SimpleNamespace(
             instance_name="My Server",
             module_name="Minecraft",
@@ -54,6 +73,10 @@ class TestSearch(unittest.TestCase):
         self.assertEqual(minor, "")
 
     def test_register_module(self):
+        """
+        Tests registering a module into TfIDF.
+        """
+
         module = SimpleNamespace(
             NAME="TestModule",
             VERSION="1.0",
@@ -77,6 +100,10 @@ class TestSearch(unittest.TestCase):
         )
 
     def test_register_instance(self):
+        """
+        Tests registering an instance into TfIDF.
+        """
+
         instance = SimpleNamespace(
             instance_name="My Server",
             module_name="Minecraft",
@@ -99,6 +126,10 @@ class TestSearch(unittest.TestCase):
         )
 
     def test_update_modules(self):
+        """
+        Tests updating the TfIDF's module corpus.
+        """
+
         module1 = SimpleNamespace(
             NAME="Module1",
             VERSION="1.0",
@@ -132,6 +163,10 @@ class TestSearch(unittest.TestCase):
         )
 
     def test_update_instances(self):
+        """
+        Tests updating the TfIDF's instance corpus.
+        """
+
         instance1 = SimpleNamespace(
             instance_name="Server 1",
             module_name="Minecraft",
@@ -163,6 +198,10 @@ class TestSearch(unittest.TestCase):
         )
 
     def test_update_all(self):
+        """
+        Tests updating both of the TfIDF's corpuses.
+        """
+
         self.search.update_modules = MagicMock()
         self.search.update_instances = MagicMock()
 
@@ -172,6 +211,10 @@ class TestSearch(unittest.TestCase):
         self.search.update_instances.assert_called_once_with()
 
     def test_search(self):
+        """
+        Tests searching for modules, and instances.
+        """
+
         module_result = (MagicMock(identifier="module"), 0.9)
         instance_result = (MagicMock(identifier="instance"), 0.8)
 
