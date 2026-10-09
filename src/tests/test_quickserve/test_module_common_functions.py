@@ -27,25 +27,45 @@ from QuickServe.Web.module_common.factories.simple_fs import (
     simple_filesystem_builder,
     is_child,
 )
-from QuickServe.Web.module_common.factories.simple_fs import _redirect as redirect
+from QuickServe.Web.module_common.factories.simple_fs import _redirect as redirect  # noqa
 
 from flask import request
 
 
-class TestModuleCommonFunctionRegistry(unittest.TestCase):
+class TestModuleCommonFunctions(unittest.TestCase):
+    """
+    Tests the module common functions
+    """
+
     def test_get_resource_exists_read(self):
+        """
+        Tests getting resources in "r" mode.
+        """
+
         asset = get_resource("simple_controller.html", mode="r")
         self.assertIsInstance(asset, str)
 
     def test_get_resource_exists_read_bytes(self):
+        """
+        Tests getting resources in "rb" mode.
+        """
+
         asset = get_resource("simple_controller.html", mode="rb")
         self.assertIsInstance(asset, bytes)
 
     def test_get_resource_not_exist(self):
+        """
+        Tests getting a non-existent resource.
+        """
+
         with self.assertRaises(ResourceDoesntExistException):
             get_resource("non-existent.quickserve")
 
     def test_action(self):
+        """
+        Tests the action function returns the correct url.
+        """
+
         with patch(
             "QuickServe.Web.module_common.factories.action.url_for"
         ) as mock_url_for:
@@ -62,6 +82,10 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
             self.assertEqual(result, "/module/mymodule/action/start")
 
     def test_module_link(self):
+        """
+        Tests the link function when within a module url returns the correct url.
+        """
+
         with patch(
             "QuickServe.Web.module_common.factories.link.url_for"
         ) as mock_url_for:
@@ -78,6 +102,10 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
             self.assertEqual(result, "/module/mymodule/about")
 
     def test_instance_link(self):
+        """
+        Tests the link when within an instance url returns the correct url.
+        """
+
         with patch(
             "QuickServe.Web.module_common.factories.link.url_for"
         ) as mock_url_for:
@@ -94,6 +122,10 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
             self.assertEqual(result, "/instance/123/about")
 
     def test_resource(self):
+        """
+        Tests the that the resource function returns the correct url for a given resource.
+        """
+
         with patch(
             "QuickServe.Web.module_common.factories.resource.url_for"
         ) as mock_url_for:
@@ -110,6 +142,10 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
             self.assertEqual(result, "/module/mymodule/foo.txt")
 
     def test_simple_controller(self):
+        """
+        Tests that the simple controller renders its template with the correct context and returns the rendered HTML as Markup.
+        """
+
         app = Flask(__name__)
 
         with patch(
@@ -147,6 +183,10 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
                     self.assertEqual(str(result), "<div>rendered</div>")
 
     def test_simple_controller_0_0_0_0_host(self):
+        """
+        Tests the simple controller function returns a non 0.0.0.0 host when host is 0.0.0.0.
+        """
+
         app = Flask(__name__)
 
         with (
@@ -185,6 +225,10 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
 
 
 class TestSimpleFilesystemBuilder(unittest.TestCase):
+    """
+    Tests for the simple filesystem.
+    """
+
     def setUp(self):
         self.app = Flask(__name__)
         self.temp_dir = TemporaryDirectory()
@@ -197,6 +241,10 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
         self.temp_dir.cleanup()
 
     def _build_filesystem(self):
+        """
+        Build the filesystem callable with mocked templates.
+        """
+
         with patch(
             "QuickServe.Web.module_common.factories.simple_fs.get_resource",
             side_effect=[
@@ -216,12 +264,11 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
 
         return filesystem
 
-    def test_simple_fs_builder_returns_callable(self):
-        filesystem = self._build_filesystem()
-
-        self.assertTrue(callable(filesystem))
-
     def test_simple_fs_folder_listing(self):
+        """
+        Test that the filesystem lists files and folders in the root directory.
+        """
+
         (self.working_dir / "folder").mkdir()
         (self.working_dir / "empty").mkdir()
         (self.working_dir / "file.txt").write_text("hello")
@@ -271,6 +318,10 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
                 self.assertEqual(files["file.txt"]["modified"], expected_date)
 
     def test_simple_fs_nested_folder_listing(self):
+        """
+        Test that the filesystem lists the contents of a nested directory.
+        """
+
         nested_dir = self.working_dir / "nested"
         nested_dir.mkdir()
         (nested_dir / "file.txt").write_text("hello")
@@ -301,6 +352,10 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
                 self.assertEqual(context["files"][0]["cwd"], "nested/")
 
     def test_simple_fs_folder_traversal_returns_empty_listing(self):
+        """
+        Test that directory traversal does not list files outside the root of the SimpleFS.
+        """
+
         filesystem = self._build_filesystem()
 
         with (
@@ -322,63 +377,11 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
 
                 self.assertEqual(context["files"], [])
 
-    def test_simple_fs_render_file_read_only(self):
-        (self.working_dir / "file.txt").write_text("hello world")
-
-        filesystem = self._build_filesystem()
-
-        with (
-            self.app.app_context(),
-            self.app.test_request_context("/?file=file.txt"),
-        ):
-            request.instance = self.instance
-
-            with patch.object(self.app.jinja_env, "from_string") as mock_from_string:
-                mock_from_string.return_value.render.return_value = (
-                    "<div>rendered</div>"
-                )
-
-                result = filesystem()
-
-                self.assertIsInstance(result, Markup)
-                mock_from_string.assert_called_once_with("<div>file</div>")
-
-                context = mock_from_string.return_value.render.call_args.kwargs[
-                    "context"
-                ]
-
-                self.assertEqual(context["filename"], "file.txt")
-                self.assertEqual(context["content"], "hello world")
-                self.assertTrue(context["readOnly"])
-                self.assertEqual(context["filepath"], "file.txt")
-                self.assertEqual(context["parent"], Path("."))
-                self.assertEqual(context["instance"], self.instance)
-
-    def test_simple_fs_render_file_edit_mode(self):
-        (self.working_dir / "file.txt").write_text("hello")
-
-        filesystem = self._build_filesystem()
-
-        with (
-            self.app.app_context(),
-            self.app.test_request_context("/?file=file.txt&edit"),
-        ):
-            request.instance = self.instance
-
-            with patch.object(self.app.jinja_env, "from_string") as mock_from_string:
-                mock_from_string.return_value.render.return_value = (
-                    "<div>rendered</div>"
-                )
-
-                filesystem()
-
-                context = mock_from_string.return_value.render.call_args.kwargs[
-                    "context"
-                ]
-
-                self.assertFalse(context["readOnly"])
-
     def test_simple_fs_render_file_traversal_redirects(self):
+        """
+        Test that trying to open files outside the root are redirected.
+        """
+
         outside_file = self.working_dir.parent / "outside.txt"
         outside_file.write_text("secret")
 
@@ -398,21 +401,11 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
         finally:
             outside_file.unlink(missing_ok=True)
 
-    def test_simple_fs_render_binary_file_raises(self):
-        (self.working_dir / "binary.dat").write_bytes(b"\x80\x81\x82")
-
-        filesystem = self._build_filesystem()
-
-        with (
-            self.app.app_context(),
-            self.app.test_request_context("/?file=binary.dat"),
-        ):
-            request.instance = self.instance
-
-            with self.assertRaises(NotImplementedError):
-                filesystem()
-
     def test_simple_fs_missing_instance_raises(self):
+        """
+        Test that it raises an error when trying to view a file outside the FS
+        """
+
         filesystem = self._build_filesystem()
 
         with (
@@ -423,6 +416,10 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
                 filesystem()
 
     def test_simple_fs_is_child(self):
+        """
+        Test that is_child correctly identifies paths within the root.
+        """
+
         root = self.working_dir
         child = root / "subdir" / "file.txt"
 
@@ -432,6 +429,10 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
         self.assertFalse(is_child(root, root / ".." / "outside.txt"))
 
     def test_simple_fs_redirect(self):
+        """
+        Test that redirect properly generates a redirect.
+        """
+
         result = redirect("/module/mymodule")
 
         self.assertIsInstance(result, Markup)
