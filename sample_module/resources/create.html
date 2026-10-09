@@ -29,19 +29,19 @@
                 </select>
             </label>
             <script defer>
-            const checkbox = document.getElementById("only-releases");
-            const select = document.getElementById("minecraft-version");
+                const checkbox = document.getElementById("only-releases");
+                const select = document.getElementById("minecraft-version");
 
-            function updateVersions() {
-                for (const option of select.options) {
-                    if (option.dataset.isRelease !== undefined) {
-                        option.hidden = checkbox.checked && option.dataset.isRelease !== "true";
+                function updateVersions() {
+                    for (const option of select.options) {
+                        if (option.dataset.isRelease !== undefined) {
+                            option.hidden = checkbox.checked && option.dataset.isRelease !== "true";
+                        }
                     }
                 }
-            }
 
-            checkbox.addEventListener("change", updateVersions);
-            updateVersions();
+                checkbox.addEventListener("change", updateVersions);
+                updateVersions();
             </script>
             <label for="eula">
                 <input type="checkbox" id="eula" name="eula">
@@ -51,13 +51,13 @@
         </form>
     </div>
     <script>
-    document.getElementById("install-form").addEventListener("submit", function (event) {
-        const eula = document.getElementById("eula");
+        document.getElementById("install-form").addEventListener("submit", function(event) {
+            const eula = document.getElementById("eula");
 
-        if (!eula.checked) {
-            event.preventDefault();
-            alert("You must agree to the Minecraft EULA before installing.");
-        }
-    });
+            if (!eula.checked) {
+                event.preventDefault();
+                alert("You must agree to the Minecraft EULA before installing.");
+            }
+        });
     </script>
 {% endblock %}

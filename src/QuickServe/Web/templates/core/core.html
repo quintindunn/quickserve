@@ -4,16 +4,27 @@
         <title>{% block title %}QuickServe{% endblock %}</title>
         <link rel="stylesheet"
               href="{{ url_for('static', filename='core/core.css') }}">
+        <script src="{{ url_for('static', filename='core/search.js') }}" defer></script>
         {% block head %}{% endblock %}
     </head>
     <body>
+        <input type="hidden"
+               id="search-endpoint"
+               value="{{ url_for("api.search") }}">
+        <div class="search-bar">
+            <input placeholder="Search for Modules and Instances"
+                   type="text"
+                   id="search-bar"
+                   class="search-bar">
+            <div class="search-results" id="search-results"></div>
+        </div>
         <div class="main">
             <div class="sidebar">
                 <div class="sub1">
-                    <span>Services</span>
+                    <span>Instances</span>
                     <div class="sub2">
-                        {% for service in services %}
-                            <div class="service-entry"><a href="{{ service.url }}">{{ service.name }}</a></div>
+                        {% for instance in instances %}
+                            <div class="instance-entry"><a href="{{ instance.url }}">{{ instance.name }}</a></div>
                         {% endfor %}
                     </div>
                 </div>

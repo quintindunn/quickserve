@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 from websockets.asyncio.server import ServerConnection
 
 from QuickServe.Driver.networking.common import InstanceWebsocketConnection
-from QuickServe.contracts import Service
+from QuickServe.contracts import Module
 
 if TYPE_CHECKING:
     from QuickServe.Driver.networking.websocket import WebsocketServer
@@ -26,7 +26,7 @@ async def instance_handler(
     server: "WebsocketServer", connection: "ServerConnection", instance_uuid: str
 ) -> None:
     """
-    Handles connections from frontend instances. Routes messages to their respective service.
+    Handles connections from frontend of instances. Routes messages to their respective backend instance.
     :param server: The WebsocketServer caller.
     :param connection: The connection to the client.
     :param instance_uuid: The UUID to the instance referenced from the client.
@@ -44,14 +44,14 @@ async def instance_handler(
 
     server.register_instance(instance_websocket_object)
 
-    instance_service = server.get_instance_service()
-    instance = instance_service.from_uuid(instance_uuid)
-    service: "Service" = instance.module.service
+    instance_manager = server.get_instance_manager()
+    instance = instance_manager.from_uuid(instance_uuid)
+    module: "Module" = instance.base_module.module
 
     async for message in connection:
-        if not hasattr(service, "on_message"):
+        if not hasattr(module, "on_message"):
             break
-        service.on_message(message, instance)  # noqa
+        module.on_message(message, instance)  # noqa
         logger.debug(
             f"New message from {connection.remote_address} - {message[:32]}{'...' if len(message) > 32 else ''}"
         )

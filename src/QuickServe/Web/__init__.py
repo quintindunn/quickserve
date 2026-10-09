@@ -10,31 +10,34 @@ from pathlib import Path
 from flask import Flask
 from flask import url_for
 
+from QuickServe.Common.search import Search
 from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
+from QuickServe.Web.api import api
 from QuickServe.Web.module_common.registry import Registry
 from QuickServe.contracts import WebSettings
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from QuickServe.FileSystem.plugins import ServiceCatalog
-    from QuickServe.Application.instances import InstanceService
+    from QuickServe.FileSystem.plugins import ModuleCatalog
+    from QuickServe.Application.instances import InstanceManager
     from QuickServe.Driver.networking.websocket import WebsocketServer
 
 
 def create_app(
     settings: WebSettings,
-    catalog: "ServiceCatalog",
-    instance_service: "InstanceService",
+    catalog: "ModuleCatalog",
+    instance_manager: "InstanceManager",
     websocket_server: "WebsocketServer",
+    search_engine: "Search",
 ) -> Flask:
     """
     Creates a Flask application from already-constructed dependencies.
 
     :param settings: The web settings used to configure Flask.
-    :param catalog: The catalog of loaded service plugins.
-    :param instance_service: The application service used by instance routes.
+    :param catalog: The catalog of loaded module instances.
+    :param instance_manager: The application manager used by instance routes.
     :return: The configured Flask application.
     """
 
@@ -51,21 +54,22 @@ def create_app(
 
     app.register_blueprint(home)
     app.register_blueprint(modules)
+    app.register_blueprint(api)
+
     app.extensions["quickserve.catalog"] = catalog
-    app.extensions["quickserve.instance_service"] = instance_service
+    app.extensions["quickserve.instance_manager"] = instance_manager
     app.extensions["quickserve.websocket_server"] = websocket_server
     app.extensions["quickserve.template_registry"] = Registry(websocket_server)
+    app.extensions["quickserve.search"] = search_engine
 
     @app.context_processor
     def global_context():
-        # catalog = current_app.extensions["quickserve.catalog"]
-        # instance_service = current_app.extensions["quickserve.instance_service"]
-        ctx = {"modules": catalog.modules, "services": list()}
-        for instance in instance_service.load_all():
-            ctx["services"].append(
+        ctx = {"modules": catalog.modules, "instances": list()}
+        for instance in instance_manager.load_all():
+            ctx["instances"].append(
                 {
                     "uuid": instance.uuid,
-                    "name": instance.service_name,
+                    "name": instance.instance_name,
                     "url": url_for(
                         "modules.instances.module_instance",
                         uuid=instance.uuid,

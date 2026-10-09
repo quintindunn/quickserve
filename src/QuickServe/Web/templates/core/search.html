@@ -1,0 +1,16 @@
+<div class="search-result-instances">
+    <div>Instances</div>
+    {% for instance in context.instances %}
+        <div>
+            <a href="{{ url_for("modules.instances.module_instance", uuid=instance.uuid, page="start") }}">{{ instance.instance_name }}</a>
+        </div>
+    {% endfor %}
+</div>
+<div class="search-result-modules">
+    <div>Modules</div>
+    {% for module in context.modules %}
+        <div>
+            <a href="{{ url_for('modules.module_about', module_name=module.NAME) }}">{{ module.NAME }}</a>
+        </div>
+    {% endfor %}
+</div>

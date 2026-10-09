@@ -1,5 +1,5 @@
 """
-Peewee repositories for QuickServe data.
+Peewee manager for QuickServe data.
 
 Author: Quintin Dunn
 Date: 09/14/2026
@@ -11,33 +11,33 @@ from QuickServe.contracts import InstanceRecord
 from QuickServe.Database.instances import InstanceModel
 
 
-class PeeweeInstanceRepository:
+class PeeweeInstanceManager:
     """
-    Stores and retrieves service instance records.
+    Stores and retrieves instance records.
     """
 
     def create(self, record: InstanceRecord) -> InstanceRecord:
         """
-        Stores a service instance record.
+        Stores a instance record.
 
         :param record: The instance data to persist.
         :return: The persisted instance data.
         """
         model = InstanceModel.create(
-            service_uuid=record.service_uuid,
-            service_name=record.service_name,
+            instance_uuid=record.instance_uuid,
+            instance_name=record.instance_name,
             module_name=record.module_name,
         )
         return self._record(model)
 
     def get(self, identifier: str | UUID) -> InstanceRecord:
         """
-        Gets a persisted service instance record.
+        Gets a persisted instance record.
 
         :param identifier: The UUID of the requested instance.
         :return: The matching instance data.
         """
-        model = InstanceModel.get(InstanceModel.service_uuid == identifier)
+        model = InstanceModel.get(InstanceModel.instance_uuid == identifier)
         return self._record(model)
 
     def load_all(self) -> list[InstanceRecord]:
@@ -58,7 +58,7 @@ class PeeweeInstanceRepository:
         :return: The corresponding instance record.
         """
         return InstanceRecord(
-            service_uuid=model.service_uuid,
-            service_name=model.service_name,
+            instance_uuid=model.instance_uuid,
+            instance_name=model.instance_name,
             module_name=model.module_name,
         )
