@@ -14,7 +14,11 @@ from QuickServe.Driver.networking import websocket_handlers
 UUID = "b92cea29-b309-401e-a878-161ada76f2f4"
 
 
-class TestInstanceHandler(unittest.IsolatedAsyncioTestCase):
+class TestWebsocketHandler(unittest.IsolatedAsyncioTestCase):
+    """
+    Tests the websocket message handlers
+    """
+
     def setUp(self):
         self.server = MagicMock()
         self.connection = MagicMock()
@@ -28,6 +32,10 @@ class TestInstanceHandler(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_instance_handler(self):
+        """
+        Tests that the instance handler properly forwards messages
+        """
+
         messages = ["hello", "world"]
 
         async def receive_messages():
@@ -51,6 +59,10 @@ class TestInstanceHandler(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_instance_handler_without_on_message(self):
+        """
+        Tests that only that the handler only forwards messages to instances with a message handler.
+        """
+
         del self.module.on_message
 
         async def receive_messages():
