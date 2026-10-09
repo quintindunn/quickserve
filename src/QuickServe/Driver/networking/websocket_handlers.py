@@ -7,7 +7,6 @@ Date: 09/17/2026
 
 import logging
 
-from uuid import UUID
 from typing import TYPE_CHECKING
 
 from websockets.asyncio.server import ServerConnection
