@@ -93,6 +93,7 @@ class TestWebsocket(unittest.TestCase):
         """
         Tests that when a message is sent to a specific instance, it is only sent to that instance, and not others.
         """
+
         connection = MagicMock()
         connection.instance_uuid = "a92cea29-b309-401e-a878-161ada76f2f4"
 
