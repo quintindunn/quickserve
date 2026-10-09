@@ -1,3 +1,10 @@
+"""
+Tests loading QuickServe modules.
+
+Author: Quintin Dunn
+Date: 10/09/2026
+"""
+
 import logging
 import os.path
 import shutil
@@ -16,6 +23,10 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 class TestPluginLoader(unittest.TestCase):
+    """
+    Tests the plugin loader.
+    """
+
     @classmethod
     def setUpClass(cls):
         """
@@ -34,6 +45,10 @@ class TestPluginLoader(unittest.TestCase):
                 shutil.rmtree(file_path)
 
     def test_plugin_loader_load_all(self):
+        """
+        Tests loading modules.
+        """
+
         setup_modules(self.workspace)
 
         plugin_loader = PluginLoader(workspace=self.workspace, runtime_manager=None)
@@ -41,11 +56,19 @@ class TestPluginLoader(unittest.TestCase):
         self.assertEqual(len(list(catalog.items())), 1)
 
     def test_plugin_loader_no_modules(self):
+        """
+        Tests loading with no modules.
+        """
+
         plugin_loader = PluginLoader(workspace=self.workspace, runtime_manager=None)
         catalog = plugin_loader.load_all()
         self.assertEqual(len(list(catalog.items())), 0)
 
     def test_plugin_loader_duplicates(self):
+        """
+        Tests loading with duplicate modules.
+        """
+
         setup_modules(self.workspace)
         setup_modules(self.workspace, folder_name_modifier="_duplicate")
 
