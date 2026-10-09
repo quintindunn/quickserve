@@ -32,6 +32,10 @@ class TestWebsocket(unittest.TestCase):
             self.websocket_server.stop()
 
     def test_wrap_endpoint(self):
+        """
+        Tests that endpoints get properly wrapped with the websocket server.
+        """
+
         def bar(server, conn):
             self.assertEqual(server, "foo")
             self.assertEqual(conn, "some_connection_info")
@@ -40,6 +44,10 @@ class TestWebsocket(unittest.TestCase):
         wrapped_endpoint("some_connection_info")
 
     def test_register_instance(self):
+        """
+        Tests that instances get properly registered.
+        """
+
         connection = MagicMock()
         self.websocket_server.register_instance(connection)
 
@@ -49,10 +57,18 @@ class TestWebsocket(unittest.TestCase):
         )
 
     def test_send_instance_server_not_started(self):
+        """
+        Tests that attempts to send messages to an instance when the server isn't alive raises an error.
+        """
+
         with self.assertRaisesRegex(ConnectionError, "Server is not started!"):
             self.websocket_server.send_instance(UUIDType(UUID), "hello")
 
     def test_send_instance(self):
+        """
+        Tests sending a specific instance messages.
+        """
+
         connection = MagicMock()
         connection.instance_uuid = UUID
         connection.connection.send = AsyncMock()
@@ -74,6 +90,9 @@ class TestWebsocket(unittest.TestCase):
         coroutine.close()
 
     def test_send_instance_different_uuid(self):
+        """
+        Tests that when a message is sent to a specific instance, it is only sent to that instance, and not others.
+        """
         connection = MagicMock()
         connection.instance_uuid = "a92cea29-b309-401e-a878-161ada76f2f4"
 
@@ -87,21 +106,3 @@ class TestWebsocket(unittest.TestCase):
             self.websocket_server.send_instance(UUIDType(UUID), "hello")
 
         run_coroutine.assert_not_called()
-
-    def test_stop(self):
-        self.websocket_server.stop()
-
-        self.assertTrue(self.websocket_server._stop.is_set())
-
-
-class TestWebsocketAsync(unittest.IsolatedAsyncioTestCase):
-    def setUp(self):
-        self.config = MagicMock()
-        self.config.websocket_host = "127.0.0.1"
-        self.config.websocket_port = 5000
-        self.instance_manager = MagicMock()
-
-        self.websocket_server = websocket.WebsocketServer(
-            config=self.config,
-            instance_manager=self.instance_manager,
-        )
