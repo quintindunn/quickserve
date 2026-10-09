@@ -15,6 +15,10 @@ from QuickServe.Web.module_common.factories.resource import resource_builder
 
 
 class TestModuleCommonFunctionRegistry(unittest.TestCase):
+    """
+    Tests the module function registry
+    """
+
     def setUp(self):
         self.registry = Registry(MagicMock())
 
