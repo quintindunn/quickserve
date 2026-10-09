@@ -1,3 +1,10 @@
+"""
+Registration of common module functions
+
+Author: Quintin Dunn
+Date: 09/27/2026
+"""
+
 import typing
 from typing import Callable
 
@@ -14,6 +21,9 @@ if typing.TYPE_CHECKING:
 
 
 class Registry:
+    """
+    Registry holds all registered common module functions.
+    """
     registered: dict[str, Callable]
 
     def __init__(self, websocket_server: "WebsocketServer"):
