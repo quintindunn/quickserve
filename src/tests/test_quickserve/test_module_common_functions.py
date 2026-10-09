@@ -27,7 +27,9 @@ from QuickServe.Web.module_common.factories.simple_fs import (
     simple_filesystem_builder,
     is_child,
 )
-from QuickServe.Web.module_common.factories.simple_fs import _redirect as redirect  # noqa
+from QuickServe.Web.module_common.factories.simple_fs import (
+    _redirect as redirect,
+)  # noqa
 
 from flask import request
 
