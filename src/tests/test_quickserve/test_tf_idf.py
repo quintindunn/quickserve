@@ -1,11 +1,26 @@
+"""
+Tests the TfIDF class
+
+Author: Quintin Dunn
+Date: 10/09/2026
+"""
+
 import math
 import unittest
 
-from QuickServe.Common.tf_idf import _TfIDFTable, _TfIDFDocument, TfIDF
+from QuickServe.Common.tf_idf import _TfIDFTable, _TfIDFDocument, TfIDF  # noqa
 
 
 class TestTfIDFTable(unittest.TestCase):
+    """
+    Tests the TfIDF table.
+    """
+
     def test_add_item(self):
+        """
+        Tests adding an item to the TfIDF table.
+        """
+
         table = _TfIDFTable()
 
         table.add_item("hello")
@@ -21,6 +36,10 @@ class TestTfIDFTable(unittest.TestCase):
         )
 
     def test_tf(self):
+        """
+        Tests the term frequency part of TF IDF
+        """
+
         table = _TfIDFTable()
 
         table.add_item("hello", 2)
@@ -36,7 +55,15 @@ class TestTfIDFTable(unittest.TestCase):
 
 
 class TestTfIDFDocument(unittest.TestCase):
+    """
+    Tests TfIDF registered documents
+    """
+
     def test_weights(self):
+        """
+        Tests that weighting of different parts affect TF IDF.
+        """
+
         document = _TfIDFDocument(
             "test",
             "Hello",
@@ -55,6 +82,10 @@ class TestTfIDFDocument(unittest.TestCase):
         )
 
     def test_tokenization(self):
+        """
+        Tests the TfIDF token correctly breaks strings into their individual words.
+        """
+
         document = _TfIDFDocument(
             "test",
             "Hello-World",
@@ -77,6 +108,10 @@ class TestTfIDFDocument(unittest.TestCase):
 
 class TestTfIDF(unittest.TestCase):
     def test_add_result(self):
+        """
+        Tests adding documents to the TfIDF corpus.
+        """
+
         tfidf = TfIDF()
 
         tfidf.add_result(
@@ -98,6 +133,10 @@ class TestTfIDF(unittest.TestCase):
         )
 
     def test_idf(self):
+        """
+        Tests that the inverse document frequency part of the TfIDF works.
+        """
+
         tfidf = TfIDF()
 
         tfidf.add_result("1", "", "hello world")
@@ -113,6 +152,10 @@ class TestTfIDF(unittest.TestCase):
         )
 
     def test_prefix_search(self):
+        """
+        Tests that full queries aren't required for a search to be fulfilled.
+        """
+
         tfidf = TfIDF()
 
         tfidf.add_result(
@@ -131,6 +174,10 @@ class TestTfIDF(unittest.TestCase):
         )
 
     def test_query_returns_matching_documents(self):
+        """
+        Tests that the query only returns matching documents.
+        """
+
         tfidf = TfIDF()
 
         tfidf.add_result(
@@ -153,6 +200,10 @@ class TestTfIDF(unittest.TestCase):
         self.assertGreater(results[0][1], 0)
 
     def test_query_ranks_best_match_first(self):
+        """
+        Tests that results rank properly
+        """
+
         tfidf = TfIDF(title_weight=1)
 
         tfidf.add_result(
@@ -178,6 +229,10 @@ class TestTfIDF(unittest.TestCase):
         )
 
     def test_minor_weight(self):
+        """
+        Tests that the minor weight affects the TfIDF.
+        """
+
         tfidf = TfIDF(minor_weight=0.75)
 
         tfidf.add_result(
@@ -200,6 +255,10 @@ class TestTfIDF(unittest.TestCase):
         )
 
     def test_unknown_query_returns_no_results(self):
+        """
+        Tests that a query that should return no results, returns no results.
+        """
+
         tfidf = TfIDF()
 
         tfidf.add_result("1", "", "hello world")
@@ -210,6 +269,10 @@ class TestTfIDF(unittest.TestCase):
         )
 
     def test_max_results(self):
+        """
+        Tests that results are limited to the max_results setting.
+        """
+
         tfidf = TfIDF()
 
         for i in range(10):
@@ -220,6 +283,10 @@ class TestTfIDF(unittest.TestCase):
         self.assertEqual(len(results), 3)
 
     def test_empty_query(self):
+        """
+        Tests what happens with an empty query.
+        """
+
         tfidf = TfIDF()
 
         tfidf.add_result("1", "", "hello world")
