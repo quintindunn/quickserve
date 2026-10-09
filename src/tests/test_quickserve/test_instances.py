@@ -1,3 +1,10 @@
+"""
+Tests the instance manager
+
+Author: Quintin Dunn
+Date: 10/09/2026
+"""
+
 import unittest
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
@@ -7,6 +14,10 @@ from QuickServe.contracts import InstanceRecord
 
 
 class TestInstanceManager(unittest.TestCase):
+    """
+    Tests the instance manager
+    """
+
     def setUp(self):
         self.catalog = MagicMock()
         self.workspace = MagicMock()
@@ -22,6 +33,10 @@ class TestInstanceManager(unittest.TestCase):
         self.catalog.require.return_value = self.module
 
     def test_new_instance(self):
+        """
+        Tests creating a new instance
+        """
+
         identifier = uuid4()
 
         self.repository.create.return_value = InstanceRecord(
@@ -67,6 +82,10 @@ class TestInstanceManager(unittest.TestCase):
         )
 
     def test_get_from_uuid(self):
+        """
+        Tests getting an instance from its UUID
+        """
+
         identifier = uuid4()
 
         self.repository.get.return_value = InstanceRecord(
@@ -94,6 +113,10 @@ class TestInstanceManager(unittest.TestCase):
         )
 
     def test_load_all(self):
+        """
+        Tests loading all instances.
+        """
+
         first_uuid = uuid4()
         second_uuid = uuid4()
 
@@ -138,6 +161,10 @@ class TestInstanceManager(unittest.TestCase):
         )
 
     def test_load_all_empty(self):
+        """
+        Tests loading all modules with no installed modules.
+        """
+
         self.repository.load_all.return_value = []
 
         instances = list(self.manager.load_all())
