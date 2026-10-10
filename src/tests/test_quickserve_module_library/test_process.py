@@ -147,6 +147,8 @@ class TestManagedProcess(TestCase):
         self.process.proc.stdin.write.assert_not_called()  # noqa
 
     def test_save_stdio(self):
+        """Tests saving stdio to terminal history"""
+
         self.process._save_stdio(b"stdin", b"input\n")
 
         self.assertEqual(
@@ -155,6 +157,8 @@ class TestManagedProcess(TestCase):
         )
 
     def test_save_stdio_flushes_at_interval(self):
+        """Tests that the process history buffer flushes at the right time"""
+
         self.process.history_buffer_flush_interval = 2
 
         with patch.object(self.process, "_flush_line_buffer") as mock_flush:
@@ -165,6 +169,8 @@ class TestManagedProcess(TestCase):
             mock_flush.assert_called_once()
 
     def test_flush_line_buffer(self):
+        """Tests that the line buffer flushes properly"""
+
         self.process.lines_buffer = [
             b"stdout:::hello\n",
             b"stderr:::error\n",
@@ -187,6 +193,8 @@ class TestManagedProcess(TestCase):
         self.assertTrue(self.process.line_buffer_has_written)
 
     def test_flush_line_buffer_removes_existing_history(self):
+        """Tests that old files that happen to have the same PID get overwritten"""
+
         history_dir = self.workspace.ensure_directory("tmp")
         history_path = history_dir / f"{self.process.pid}.quickservehistory"
         history_path.write_bytes(b"old history\n")
@@ -200,6 +208,8 @@ class TestManagedProcess(TestCase):
         )
 
     def test_flush_line_buffer_appends_after_first_flush(self):
+        """Tests that the file isn't overwriting existing data it shouldn't."""
+
         self.process.lines_buffer = [b"stdout:::first\n"]
         self.process._flush_line_buffer()
 
@@ -216,18 +226,9 @@ class TestManagedProcess(TestCase):
             b"stdout:::first\nstdout:::second\n",
         )
 
-    def test_get_terminal_history_without_process(self):
-        self.process.lines_buffer = [
-            b"stdout:::hello\n",
-            b"stderr:::error\n",
-        ]
-
-        self.assertEqual(
-            self.process._get_terminal_history(),
-            self.process.lines_buffer,
-        )
-
     def test_get_terminal_history_combines_file_and_buffer(self):
+        """Tests that get_terminal_history combines the buffer and history file."""
+
         self.process.lines_buffer = [b"stderr:::buffered\n"]
 
         self.process._flush_line_buffer()
@@ -243,10 +244,13 @@ class TestManagedProcess(TestCase):
         )
 
     def test_parse_line_history(self):
+        """Tests parsing individual lines from the history file/buffer parses properly"""
+
         lines = [
             b"stdout:::hello\n",
             b"stderr:::error\n",
             b"stdin:::input\n",
+            b"stdin:::foo:::bar\n"
         ]
 
         self.assertEqual(
@@ -259,6 +263,8 @@ class TestManagedProcess(TestCase):
         )
 
     def test_parse_line_history_preserves_separator_in_data(self):
+        """Tests that the line doesn't accidentally split on the wrong part when parsing."""
+
         lines = [b"stdout:::value:::continued\n"]
 
         self.assertEqual(
@@ -267,6 +273,8 @@ class TestManagedProcess(TestCase):
         )
 
     def test_get_terminal_history(self):
+        """Tests getting the terminal history"""
+
         self.process.lines_buffer = [
             b"stdout:::hello\n",
             b"stderr:::error\n",
