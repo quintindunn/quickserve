@@ -161,7 +161,13 @@ class SimpleControllerProcessManager:
             return
         process.write(command.encode())
 
-    def _on_history(self, instance: "BaseInstance"):
+    def _on_history(self, instance: "BaseInstance") -> None:
+        """
+        Called when the websocket sends the process a `history` command, sends the process history to the client.
+
+        :param instance: The instance which holds the process.
+        :return: None
+        """
         process = self._instance_process_map.get(instance.uuid)
         if process is None:
             return
