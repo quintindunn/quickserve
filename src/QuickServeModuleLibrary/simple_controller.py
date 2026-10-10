@@ -80,6 +80,8 @@ class SimpleControllerProcessManager:
 
         if msg_type == "start":
             self._on_start(instance=instance)
+        elif msg_type == "history":
+            self._on_history(instance=instance)
         elif (process is None) or (not process.is_alive()):
             logger.debug("Not continuing checks, process it dead or non-existent.")
             return True
@@ -158,3 +160,18 @@ class SimpleControllerProcessManager:
         if not process.is_alive():
             return
         process.write(command.encode())
+
+    def _on_history(self, instance: "BaseInstance"):
+        process = self._instance_process_map.get(instance.uuid)
+        if process is None:
+            return
+
+        terminal_history = process.get_terminal_history()
+
+        for stdio_type, line in terminal_history:
+            if stdio_type == b"stdout" or stdio_type == b"stdin":
+                for callback in process._on_stdout:
+                    callback(line)
+            elif stdio_type == b"stderr":
+                for callback in process._on_stderr:
+                    callback(line)

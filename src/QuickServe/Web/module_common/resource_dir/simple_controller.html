@@ -253,6 +253,10 @@
             const ws = new WebSocket(ws_url)
 
             ws.onopen = (event) => {
+                ws.send(JSON.stringify({
+                    isSimpleController: true,
+                    type: "history",
+                }))
                 command.addEventListener("keydown", (event) => {
                     if (event.key !== "Enter") return;
 
@@ -294,6 +298,6 @@
             }
 
 
-        }, 1000);
+        }, 1);
     </script>
 </div>

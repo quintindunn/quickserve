@@ -71,8 +71,8 @@ class ManagedProcess:
     def _parse_line_history(lines: list[bytes]) -> list[bytes]:
         new_lines = []
         for line in lines:
-            _, line = line.split(b":::", 1)
-            new_lines.append(line)
+            stdio_type, line = line.split(b":::", 1)
+            new_lines.append((stdio_type, line))
         return new_lines
 
     def get_terminal_history(self) -> list[bytes]:

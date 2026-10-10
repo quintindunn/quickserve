@@ -174,8 +174,6 @@ class Module:
                     instance=instance, send_callback=send_callback
                 ),
             )
-        else:
-            print(self.p.get_terminal_history())
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
