@@ -39,8 +39,9 @@ class ManagedProcess:
         self._on_stderr = list()
         self._on_stdout = list()
         self.root_dir = root_dir
-        self.lines_buffer = []
-        self.line_buffer_lock = RLock()
+        self.lines_buffer: list[bytes] = []
+        self.line_buffer_lock: RLock = RLock()
+        self.line_buffer_has_written: bool = False
         self.history_buffer_flush_interval = history_buffer_flush_interval
 
     def get_stdout_callbacks(self) -> list[Callable[[bytes], None]]:
@@ -104,6 +105,12 @@ class ManagedProcess:
         Flushes the line buffer into the log file.
         :return: None
         """
+
+        if not self.line_buffer_has_written:
+            path = self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory")
+            if path.exists():
+                os.remove(path)
+            self.line_buffer_has_written = True
 
         with open(self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory"), "ab") as f:
             f.writelines(self.lines_buffer)
