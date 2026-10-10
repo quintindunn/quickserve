@@ -1,6 +1,6 @@
 from pathlib import Path
 from subprocess import Popen, PIPE
-from typing import Callable
+from typing import Callable, Any, Generator
 
 from threading import Thread, RLock
 
@@ -51,6 +51,33 @@ class ManagedProcess:
         with open(self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory"), "ab") as f:
             f.writelines(self.lines_buffer)
         self.lines_buffer.clear()
+
+    def _get_terminal_history(self):
+        if self.proc is None:
+            return self.lines_buffer
+
+        history_path = self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory")
+        if not history_path.exists():
+            return self.lines_buffer
+
+        with open(history_path, "rb") as f:
+            lines = f.readlines()
+
+        lines.extend(self.lines_buffer)
+
+        return lines
+
+    @staticmethod
+    def _parse_line_history(lines: list[bytes]) -> list[bytes]:
+        new_lines = []
+        for line in lines:
+            _, line = line.split(b":::", 1)
+            new_lines.append(line)
+        return new_lines
+
+    def get_terminal_history(self) -> list[bytes]:
+        raw_history = self._get_terminal_history()
+        return self._parse_line_history(raw_history)
 
     def start(self):
         self.proc: Popen = Popen(
