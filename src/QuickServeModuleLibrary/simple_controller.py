@@ -170,8 +170,8 @@ class SimpleControllerProcessManager:
 
         for stdio_type, line in terminal_history:
             if stdio_type == b"stdout" or stdio_type == b"stdin":
-                for callback in process._on_stdout:
+                for callback in process.get_stdout_callbacks():
                     callback(line)
             elif stdio_type == b"stderr":
-                for callback in process._on_stderr:
+                for callback in process.get_stderr_callbacks():
                     callback(line)

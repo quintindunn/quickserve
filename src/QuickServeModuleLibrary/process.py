@@ -43,6 +43,22 @@ class ManagedProcess:
         self.line_buffer_lock = RLock()
         self.history_buffer_flush_interval = history_buffer_flush_interval
 
+    def get_stdout_callbacks(self) -> list[Callable[[bytes], None]]:
+        """
+        Gets the registered callbacks for stdout
+        :return: A list of the callbacks
+        """
+
+        return self._on_stdout
+
+    def get_stderr_callbacks(self) -> list[Callable[[bytes], None]]:
+        """
+        Gets the registered callbacks for stderr
+        :return: A list of the callbacks
+        """
+
+        return self._on_stderr
+
     def save_stdout(self, stdout: bytes) -> None:
         """
         Saves stdout for retrieval later for terminal history
