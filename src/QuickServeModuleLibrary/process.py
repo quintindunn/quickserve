@@ -1,6 +1,13 @@
+"""
+ManagedProcesses for easy integration with modules
+
+Author: Quintin Dunn
+Date: 10/10/2026
+"""
+
 from pathlib import Path
 from subprocess import Popen, PIPE
-from typing import Callable, Any, Generator
+from typing import Callable, Tuple
 
 from threading import Thread, RLock
 
@@ -14,6 +21,10 @@ if TYPE_CHECKING:
 
 
 class ManagedProcess:
+    """
+    Creates processes with easy to handle stdio, start, stop
+    """
+
     proc: Popen | None
     _on_stdout: list[Callable[[bytes], None]]
     _on_stderr: list[Callable[[bytes], None]]
@@ -32,27 +43,62 @@ class ManagedProcess:
         self.line_buffer_lock = RLock()
         self.history_buffer_flush_interval = history_buffer_flush_interval
 
-    def save_stdout(self, stdout: bytes):
+    def save_stdout(self, stdout: bytes) -> None:
+        """
+        Saves stdout for retrieval later for terminal history
+        :param stdout: The raw stdout in bytes.
+        :return: None
+        """
+
         self._save_stdio(b"stdout", stdout)
 
-    def save_stderr(self, stderr: bytes):
+    def save_stderr(self, stderr: bytes) -> None:
+        """
+        Saves stderr for retrieval later for terminal history
+        :param stderr: The raw stdout in bytes.
+        :return: None
+        """
+
         self._save_stdio(b"stderr", stderr)
 
-    def save_stdin(self, stdin: bytes):
+    def save_stdin(self, stdin: bytes) -> None:
+        """
+        Saves stdin for retrieval later for terminal history
+        :param stdin: The raw stdout in bytes.
+        :return: None
+        """
+
         self._save_stdio(b"stdin", stdin)
 
-    def _save_stdio(self, io_type: bytes, data: bytes):
+    def _save_stdio(self, io_type: bytes, data: bytes) -> None:
+        """
+        Saves stdio for retrieval later for terminal history
+        :param io_type: The type of stdio (stdout, stderr, stdin)
+        :param data: The data being stored.
+        :return: None
+        """
+
         line = b"%b:::%b" % (io_type, data)
         self.lines_buffer.append(line)
         if len(self.lines_buffer) >= self.history_buffer_flush_interval:
             self._flush_line_buffer()
 
-    def _flush_line_buffer(self):
+    def _flush_line_buffer(self) -> None:
+        """
+        Flushes the line buffer into the log file.
+        :return: None
+        """
+
         with open(self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory"), "ab") as f:
             f.writelines(self.lines_buffer)
         self.lines_buffer.clear()
 
-    def _get_terminal_history(self):
+    def _get_terminal_history(self) -> list[bytes]:
+        """
+        Retrieves the raw, unparsed terminal history from the log file, and the line buffer.
+        :return: A list of the lines from the history.
+        """
+
         if self.proc is None:
             return self.lines_buffer
 
@@ -68,35 +114,61 @@ class ManagedProcess:
         return lines
 
     @staticmethod
-    def _parse_line_history(lines: list[bytes]) -> list[bytes]:
+    def _parse_line_history(lines: list[bytes]) -> list[Tuple[bytes, bytes]]:
+        """
+        Parses the line history into something to be sent to the frontend
+        :param lines: The raw line history from ManagedProcess._get_terminal_history()
+        :return: A list of tuples with (stdio_type, data)
+        """
+
         new_lines = []
         for line in lines:
             stdio_type, line = line.split(b":::", 1)
             new_lines.append((stdio_type, line))
         return new_lines
 
-    def get_terminal_history(self) -> list[bytes]:
+    def get_terminal_history(self) -> list[Tuple[bytes, bytes]]:
+        """
+        Gets the terminal history
+        :return: A list of tuples with (stdio_type, data)
+        """
+
         raw_history = self._get_terminal_history()
         return self._parse_line_history(raw_history)
 
-    def start(self):
+    def start(self) -> None:
+        """
+        Starts the process
+        :return: None
+        """
+
         self.proc: Popen = Popen(
             self.command, stdin=PIPE, stderr=PIPE, stdout=PIPE, cwd=self.root_dir
         )
         Thread(target=self._handle_stdout, daemon=True).start()
         Thread(target=self._handle_stderr, daemon=True).start()
 
-    def _handle_stdout(self):
+    def _handle_stdout(self) -> None:
+        """
+        Handles stdout from the process.
+        :return: None
+        """
+
         assert self.proc is not None
-        for line in iter(self.proc.stdout.readline, b""):
+        for line in iter(self.proc.stdout.readline, b""):  # noqa
             for callback in self._on_stdout:
                 with self.line_buffer_lock:
                     self.save_stdout(line)
                 callback(line)
 
     def _handle_stderr(self):
+        """
+        Handles stderr from the process.
+        :return: None
+        """
+
         assert self.proc is not None
-        for line in iter(self.proc.stderr.readline, b""):
+        for line in iter(self.proc.stderr.readline, b""):  # noqa
             for callback in self._on_stderr:
                 with self.line_buffer_lock:
                     self.save_stderr(line)
