@@ -15,7 +15,11 @@ from typing import TYPE_CHECKING
 from types import ModuleType
 
 from QuickServe.contracts import Module
-from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExist, UnsupportedModuleError
+from QuickServe.FileSystem.exceptions import (
+    InvalidModuleError,
+    AssetDoesntExist,
+    UnsupportedModuleError,
+)
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.path_resolver import Workspace
@@ -76,7 +80,7 @@ class BaseModule:
             "VERSION": "Missing module version",
             "QUICKSERVE_VERSION": "Missing QuickServe version",
             "PAGES": "Missing module pages",
-            "SUPPORTED_OPERATING_SYSTEMS": "Missing supported operating systems list"
+            "SUPPORTED_OPERATING_SYSTEMS": "Missing supported operating systems list",
         }
         self.raise_if_attr_not_exist(
             "Module",
@@ -106,7 +110,9 @@ class BaseModule:
             if host_os == operating_system.lower():
                 break
         else:
-            raise UnsupportedModuleError(f'Module: "{self.path.name}" - Module doesn\'t support {host_os}!')
+            raise UnsupportedModuleError(
+                f'Module: "{self.path.name}" - Module doesn\'t support {host_os}!'
+            )
 
     def load_module(self) -> None:
         """
