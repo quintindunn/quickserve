@@ -259,6 +259,7 @@ class TestManagedProcess(TestCase):
                 (b"stdout", b"hello\n"),
                 (b"stderr", b"error\n"),
                 (b"stdin", b"input\n"),
+                (b"stdin", b"foo:::bar\n")
             ],
         )
 
