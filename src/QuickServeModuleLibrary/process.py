@@ -16,8 +16,10 @@ import os
 
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
+    from QuickServe.FileSystem.config import Config
 
 
 class ManagedProcess:
@@ -42,7 +44,8 @@ class ManagedProcess:
         self.lines_buffer: list[bytes] = []
         self.line_buffer_lock: RLock = RLock()
         self.line_buffer_has_written: bool = False
-        self.history_buffer_flush_interval = history_buffer_flush_interval
+        self.history_buffer_flush_interval: int = history_buffer_flush_interval
+        self.config: "Config" = base_module.config
 
     def get_stdout_callbacks(self) -> list[Callable[[bytes], None]]:
         """
@@ -130,7 +133,7 @@ class ManagedProcess:
         if not history_path.exists():
             return self.lines_buffer, []
 
-        n = 100_000
+        n = self.config.web.simple_controller_terminal_buffer
         chars = 0
         preparsed = []
 

@@ -50,7 +50,7 @@ if __name__ == "__main__":
     database.create_tables(models=MODELS)
 
     catalog = PluginLoader(
-        workspace=workspace, runtime_manager=runtime_manager
+        workspace=workspace, runtime_manager=runtime_manager, config=config
     ).load_all()
 
     instance_manager = InstanceManager(

@@ -9,9 +9,14 @@ from __future__ import annotations
 
 import logging
 
+from typing import TYPE_CHECKING
+
 from QuickServe.FileSystem.modules import BaseModule
 from QuickServe.FileSystem.path_resolver import Workspace
 from QuickServe.Runtimes.runtime_manager import RuntimeManager
+
+if TYPE_CHECKING:
+    from QuickServe.FileSystem.config import Config
 
 logger = logging.getLogger("QuickServe.plugins")
 
@@ -86,7 +91,7 @@ class PluginLoader:
     Loads and validates module packages from the workspace modules directory.
     """
 
-    def __init__(self, workspace: Workspace, runtime_manager: "RuntimeManager") -> None:
+    def __init__(self, workspace: Workspace, runtime_manager: "RuntimeManager", config: "Config") -> None:
         """
         Initializes the plugin loader.
 
@@ -96,6 +101,7 @@ class PluginLoader:
         """
         self.workspace = workspace
         self.runtime_manager = runtime_manager
+        self.config = config
 
     def load_all(self) -> ModuleCatalog:
         """
@@ -115,6 +121,7 @@ class PluginLoader:
                 module_path=path,
                 workspace=self.workspace,
                 runtime_manager=self.runtime_manager,
+                config=self.config
             )
             module.load_module()
             name = module.module.NAME

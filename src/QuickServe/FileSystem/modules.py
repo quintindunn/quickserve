@@ -23,7 +23,8 @@ from QuickServe.FileSystem.exceptions import (
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.path_resolver import Workspace
-from QuickServe.Runtimes.runtime_manager import RuntimeManager
+    from QuickServe.Runtimes.runtime_manager import RuntimeManager
+    from QuickServe.FileSystem.config import Config
 
 logger = logging.getLogger("QuickServerFS.Modules")
 
@@ -34,17 +35,20 @@ class BaseModule:
     _module: ModuleType
     module: Module
     runtime_manager: "RuntimeManager"
+    config: "Config"
 
     def __init__(
         self,
         module_path: str | Path,
         workspace: "Workspace",
         runtime_manager: "RuntimeManager",
+        config: "Config",
         **kwargs,
     ):
         self.path = Path(module_path)
         self.workspace = workspace
         self.runtime_manager = runtime_manager
+        self.config = config
 
         self._remove_attr_on_load = None
         if "remove_attr_on_load" in kwargs:
