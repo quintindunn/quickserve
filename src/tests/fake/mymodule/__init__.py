@@ -31,6 +31,8 @@ class Module:
     ]
     PAGES: list[str] = ["about", "create", "optional_page"]
 
+    SUPPORTED_OPERATING_SYSTEMS: list[str] = ["Linux", "Windows", "Darwin"]
+
     module: "BaseModule"
     runtime_manager: "RuntimeManager"
 
