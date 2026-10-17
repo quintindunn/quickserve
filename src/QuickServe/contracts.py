@@ -41,6 +41,7 @@ class WebSettings(Protocol):
     websocket_host: str
     website_host: str
     website_port: int
+    simple_controller_terminal_buffer: int
     website_debug: bool
 
 

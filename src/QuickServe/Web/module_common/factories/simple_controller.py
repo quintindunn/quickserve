@@ -1,10 +1,13 @@
 import socket
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 from markupsafe import Markup
 
-from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Web.module_common.resources import get_resource
 from flask import current_app, request
+
+if TYPE_CHECKING:
+    from QuickServe.Driver.networking.websocket import WebsocketServer
+    from QuickServe.FileSystem.config import Config
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.connect(("8.8.8.8", 80))
@@ -12,7 +15,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
 
 
 def simple_controller_builder(
-    module_name: str, websocket_server: "WebsocketServer", _: str | None = None
+    module_name: str, websocket_server: "WebsocketServer", config: "Config", _: str | None = None
 ) -> Callable[[], str]:
     resource: str = get_resource("simple_controller.html", mode="r")
 
@@ -29,6 +32,7 @@ def simple_controller_builder(
             "module_name": module_name,
             "websocket_host": websocket_host,
             "websocket_port": websocket_server.port,
+            "terminal_buffer": config.web.simple_controller_terminal_buffer
         }
         return Markup(template.render(context=context))
 

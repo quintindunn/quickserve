@@ -15,7 +15,6 @@ from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
 from QuickServe.Web.api import api
 from QuickServe.Web.module_common.registry import Registry
-from QuickServe.contracts import WebSettings
 
 from typing import TYPE_CHECKING
 
@@ -23,10 +22,11 @@ if TYPE_CHECKING:
     from QuickServe.FileSystem.plugins import ModuleCatalog
     from QuickServe.Application.instances import InstanceManager
     from QuickServe.Driver.networking.websocket import WebsocketServer
+    from QuickServe.FileSystem.config import Config
 
 
 def create_app(
-    settings: WebSettings,
+    config: Config,
     catalog: "ModuleCatalog",
     instance_manager: "InstanceManager",
     websocket_server: "WebsocketServer",
@@ -35,9 +35,11 @@ def create_app(
     """
     Creates a Flask application from already-constructed dependencies.
 
-    :param settings: The web settings used to configure Flask.
+    :param config: The QuickServe config.
     :param catalog: The catalog of loaded module instances.
     :param instance_manager: The application manager used by instance routes.
+    :param websocket_server: The QuickServe websocket server
+    :param search_engine: The TFIDF search engine
     :return: The configured Flask application.
     """
 
@@ -47,10 +49,10 @@ def create_app(
 
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
-    if any(not hasattr(v, k) for k, v in {"secret_key": settings}.items()):
+    if any(not hasattr(v, k) for k, v in {"secret_key": config.web}.items()):
         raise Exception("Invalid Config")
 
-    app.config["SECRET_KEY"] = settings.secret_key
+    app.config["SECRET_KEY"] = config.web.secret_key
 
     app.register_blueprint(home)
     app.register_blueprint(modules)
@@ -59,14 +61,14 @@ def create_app(
     app.extensions["quickserve.catalog"] = catalog
     app.extensions["quickserve.instance_manager"] = instance_manager
     app.extensions["quickserve.websocket_server"] = websocket_server
-    app.extensions["quickserve.template_registry"] = Registry(websocket_server)
+    app.extensions["quickserve.template_registry"] = Registry(websocket_server, config=config)
     app.extensions["quickserve.search"] = search_engine
 
     @app.context_processor
     def global_context():
         ctx = {"modules": catalog.modules, "instances": list()}
         for instance in instance_manager.load_all():
-            ctx["instances"].append(
+            ctx["instances"].append(  # noqa
                 {
                     "uuid": instance.uuid,
                     "name": instance.instance_name,
