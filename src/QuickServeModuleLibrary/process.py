@@ -85,7 +85,8 @@ class ManagedProcess:
         :return: None
         """
 
-        self._save_stdio(b"stdin", stdin)
+        self._save_stdio(b"stdin"
+                         b"", stdin)
 
     def _save_stdio(self, io_type: bytes, data: bytes) -> None:
         """
@@ -116,25 +117,54 @@ class ManagedProcess:
             f.writelines(self.lines_buffer)
         self.lines_buffer.clear()
 
-    def _get_terminal_history(self) -> list[bytes]:
+    def _get_terminal_history(self) -> Tuple[list[bytes], list[bytes]]:
         """
         Retrieves the raw, unparsed terminal history from the log file, and the line buffer.
         :return: A list of the lines from the history.
         """
 
         if self.proc is None:
-            return self.lines_buffer
+            return self.lines_buffer, []
 
         history_path = self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory")
         if not history_path.exists():
-            return self.lines_buffer
+            return self.lines_buffer, []
+
+        n = 100_000
+        chars = 0
+        preparsed = []
 
         with open(history_path, "rb") as f:
-            lines = f.readlines()
+            f.seek(0, 2)
+            position = f.tell()
+            buffer = b""
 
-        lines.extend(self.lines_buffer)
+            while position > 0 and chars < n:
+                size = min(8192, position)
+                position -= size
+                f.seek(position)
+                buffer = f.read(size) + buffer
 
-        return lines
+                lines = buffer.split(b"\n")
+                buffer = lines.pop(0)
+
+                for line in reversed(lines):
+                    if b":::" not in line:
+                        continue
+                    line += b"\n"
+                    stdio_type, content = line.split(b":::", 1)
+                    preparsed.insert(0, (stdio_type, content))
+                    chars += len(content)
+
+                    if chars >= n:
+                        break
+
+            if buffer and chars < n and b":::" in buffer:
+                line += b"\n"
+                stdio_type, content = line.split(b":::", 1)
+                preparsed.insert(0, (stdio_type, content))
+
+        return self.lines_buffer, preparsed
 
     @staticmethod
     def _parse_line_history(lines: list[bytes]) -> list[Tuple[bytes, bytes]]:
@@ -156,8 +186,9 @@ class ManagedProcess:
         :return: A list of tuples with (stdio_type, data)
         """
 
-        raw_history = self._get_terminal_history()
-        return self._parse_line_history(raw_history)
+        raw_history, final = self._get_terminal_history()
+        final.extend(self._parse_line_history(raw_history))
+        return final
 
     def start(self) -> None:
         """
