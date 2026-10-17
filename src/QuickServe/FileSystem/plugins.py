@@ -91,7 +91,9 @@ class PluginLoader:
     Loads and validates module packages from the workspace modules directory.
     """
 
-    def __init__(self, workspace: Workspace, runtime_manager: "RuntimeManager", config: "Config") -> None:
+    def __init__(
+        self, workspace: Workspace, runtime_manager: "RuntimeManager", config: "Config"
+    ) -> None:
         """
         Initializes the plugin loader.
 
@@ -121,7 +123,7 @@ class PluginLoader:
                 module_path=path,
                 workspace=self.workspace,
                 runtime_manager=self.runtime_manager,
-                config=self.config
+                config=self.config,
             )
             module.load_module()
             name = module.module.NAME

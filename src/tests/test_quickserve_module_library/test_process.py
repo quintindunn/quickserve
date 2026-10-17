@@ -241,14 +241,11 @@ class TestManagedProcess(TestCase):
         self.assertEqual(
             raw,
             [
-                b'stdout:::pending\n',
+                b"stdout:::pending\n",
             ],
         )
 
-        self.assertEqual(
-            preprocessed,
-            [(b'stderr', b'buffered\n')]
-        )
+        self.assertEqual(preprocessed, [(b"stderr", b"buffered\n")])
 
     def test_parse_line_history(self):
         """Tests parsing individual lines from the history file/buffer parses properly"""
@@ -257,7 +254,7 @@ class TestManagedProcess(TestCase):
             b"stdout:::hello\n",
             b"stderr:::error\n",
             b"stdin:::input\n",
-            b"stdin:::foo:::bar\n"
+            b"stdin:::foo:::bar\n",
         ]
 
         self.assertEqual(
@@ -266,7 +263,7 @@ class TestManagedProcess(TestCase):
                 (b"stdout", b"hello\n"),
                 (b"stderr", b"error\n"),
                 (b"stdin", b"input\n"),
-                (b"stdin", b"foo:::bar\n")
+                (b"stdin", b"foo:::bar\n"),
             ],
         )
 

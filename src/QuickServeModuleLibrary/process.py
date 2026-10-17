@@ -16,7 +16,6 @@ import os
 
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
     from QuickServe.FileSystem.config import Config
@@ -34,7 +33,13 @@ class ManagedProcess:
     root_dir: Path | None
     base_module: "BaseModule"
 
-    def __init__(self, command, base_module: "BaseModule", root_dir: Path | None = None, history_buffer_flush_interval: int = 20):
+    def __init__(
+        self,
+        command,
+        base_module: "BaseModule",
+        root_dir: Path | None = None,
+        history_buffer_flush_interval: int = 20,
+    ):
         self.command = command
         self.base_module = base_module
         self.proc = None
@@ -88,8 +93,7 @@ class ManagedProcess:
         :return: None
         """
 
-        self._save_stdio(b"stdin"
-                         b"", stdin)
+        self._save_stdio(b"stdin" b"", stdin)
 
     def _save_stdio(self, io_type: bytes, data: bytes) -> None:
         """
@@ -111,12 +115,18 @@ class ManagedProcess:
         """
 
         if not self.line_buffer_has_written:
-            path = self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory")
+            path = self.base_module.workspace.ensure_directory("tmp") / (
+                str(self.pid) + ".quickservehistory"
+            )
             if path.exists():
                 os.remove(path)
             self.line_buffer_has_written = True
 
-        with open(self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory"), "ab") as f:
+        with open(
+            self.base_module.workspace.ensure_directory("tmp")
+            / (str(self.pid) + ".quickservehistory"),
+            "ab",
+        ) as f:
             f.writelines(self.lines_buffer)
         self.lines_buffer.clear()
 
@@ -129,7 +139,9 @@ class ManagedProcess:
         if self.proc is None:
             return self.lines_buffer, []
 
-        history_path = self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory")
+        history_path = self.base_module.workspace.ensure_directory("tmp") / (
+            str(self.pid) + ".quickservehistory"
+        )
         if not history_path.exists():
             return self.lines_buffer, []
 

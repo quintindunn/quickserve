@@ -61,7 +61,9 @@ def create_app(
     app.extensions["quickserve.catalog"] = catalog
     app.extensions["quickserve.instance_manager"] = instance_manager
     app.extensions["quickserve.websocket_server"] = websocket_server
-    app.extensions["quickserve.template_registry"] = Registry(websocket_server, config=config)
+    app.extensions["quickserve.template_registry"] = Registry(
+        websocket_server, config=config
+    )
     app.extensions["quickserve.search"] = search_engine
 
     @app.context_processor
