@@ -1,3 +1,5 @@
+<img src="assets/QuickServe.png" height="300" alt="QuickServe Logo">
+
 ## WIP: QuickServe
 **QuickServe** is a cross-platform, modular, and intuitive application for creating server for all different games. Simply drag & drop the module for your game, and with 1 click create a server for it.
 
