@@ -11,6 +11,11 @@ class InvalidModuleError(Exception):
     Exception raised when a module fails validation
     """
 
+class UnsupportedModuleError(Exception):
+    """
+    Exception raised when a module is not supported.
+    """
+
 
 class AssetDoesntExist(Exception):
     """
