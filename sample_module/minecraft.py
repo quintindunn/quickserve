@@ -36,6 +36,7 @@ class Module:
     PAGES: list[str] = ["about", "create", "start", "filesystem"]
     DESCRIPTION: str = "Create a Minecraft Java Edition Vanilla Server!"
     FS_ROOT: str = "server"
+    SUPPORTED_OPERATING_SYSTEMS: list[str] = ["Darwin", "Linux"]
 
     module: "BaseModule"
     runtime_manager: "RuntimeManager"

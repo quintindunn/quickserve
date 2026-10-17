@@ -6,6 +6,7 @@ Date: 09/09/2026
 """
 
 import importlib
+import platform
 import sys
 import logging
 from pathlib import Path
@@ -14,7 +15,11 @@ from typing import TYPE_CHECKING
 from types import ModuleType
 
 from QuickServe.contracts import Module
-from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExist
+from QuickServe.FileSystem.exceptions import (
+    InvalidModuleError,
+    AssetDoesntExist,
+    UnsupportedModuleError,
+)
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.path_resolver import Workspace
@@ -75,6 +80,7 @@ class BaseModule:
             "VERSION": "Missing module version",
             "QUICKSERVE_VERSION": "Missing QuickServe version",
             "PAGES": "Missing module pages",
+            "SUPPORTED_OPERATING_SYSTEMS": "Missing supported operating systems list",
         }
         self.raise_if_attr_not_exist(
             "Module",
@@ -96,6 +102,16 @@ class BaseModule:
             logger.debug(f"{self.path.name} - Validating {attr}")
             self.raise_if_attr_not_exist(
                 attr, InvalidModuleError(f'Module: "{self.path.name}" - {error}')
+            )
+
+        host_os = platform.system().lower()
+
+        for operating_system in self.module.SUPPORTED_OPERATING_SYSTEMS:
+            if host_os == operating_system.lower():
+                break
+        else:
+            raise UnsupportedModuleError(
+                f'Module: "{self.path.name}" - Module doesn\'t support {host_os}!'
             )
 
     def load_module(self) -> None:

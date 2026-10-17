@@ -12,6 +12,12 @@ class InvalidModuleError(Exception):
     """
 
 
+class UnsupportedModuleError(Exception):
+    """
+    Exception raised when a module is not supported.
+    """
+
+
 class AssetDoesntExist(Exception):
     """
     Exception raised when an asset trying to be loaded isn't found.

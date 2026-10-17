@@ -24,6 +24,7 @@ class Module(Protocol):
     QUICKSERVE_VERSION: str
     PAGES: list[str]
     DESCRIPTION: str
+    SUPPORTED_OPERATING_SYSTEMS: list[str]
 
     def about(self, *args: Any, **kwargs: Any) -> PageResult: ...
 
