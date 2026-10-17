@@ -11,8 +11,9 @@ import sys
 import unittest
 from tempfile import TemporaryDirectory
 from pathlib import Path
+from unittest.mock import patch
 
-from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExist
+from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExist, UnsupportedModuleError
 from QuickServe.FileSystem.modules import BaseModule
 from QuickServe.FileSystem.path_resolver import Workspace
 from tests.fake.module_dir import setup_modules
@@ -121,6 +122,41 @@ class TestBaseModule(unittest.TestCase):
 
         with self.assertRaises(InvalidModuleError):
             module.load_module()
+
+    def test_plugin_supported_os(self):
+        module_path = setup_modules(self.workspace)
+
+        module = BaseModule(
+            module_path=module_path,
+            workspace=self.workspace,
+            runtime_manager=None,  # noqa
+        )
+        module.load_module()
+
+    def test_plugin_no_supported_os_attr(self):
+        module_path = setup_modules(self.workspace)
+
+        module = BaseModule(
+            module_path=module_path,
+            workspace=self.workspace,
+            runtime_manager=None,  # noqa
+            remove_attr_on_load="SUPPORTED_OPERATING_SYSTEMS"
+        )
+        with self.assertRaises(InvalidModuleError):
+            module.load_module()
+
+    def test_plugin_unsupported_os(self):
+        module_path = setup_modules(self.workspace)
+
+        module = BaseModule(
+            module_path=module_path,
+            workspace=self.workspace,
+            runtime_manager=None,  # noqa
+        )
+
+        with patch("QuickServe.FileSystem.modules.platform.system", return_value="unsupported_os"):
+            with self.assertRaises(UnsupportedModuleError):
+                module.load_module()
 
     def test_get_resource(self):
         """
