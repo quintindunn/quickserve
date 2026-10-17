@@ -237,7 +237,6 @@ class TestManagedProcess(TestCase):
         self.process.proc = Mock(pid=self.process.pid)
 
         raw, preprocessed = self.process._get_terminal_history()
-        print(raw, preprocessed)
         self.assertEqual(
             raw,
             [
