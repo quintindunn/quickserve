@@ -37,6 +37,7 @@ class WebModel(ConfigModel):
     website_port: int = 8080
     websocket_host: str = "0.0.0.0"
     websocket_port: int = 5000
+    simple_controller_terminal_buffer: int = 100_000
     website_debug: bool = False
 
 

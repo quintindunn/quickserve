@@ -184,15 +184,28 @@
     <input type="hidden"
            id="websocket-port"
            value="{{ context.websocket_port }}">
+    <input type="hidden"
+           id="terminal-buffer"
+           value="{{ context.terminal_buffer }}">
     <script defer>
         const ws_host = document.getElementById("websocket-host").value;
         const ws_port = document.getElementById("websocket-port").value;
-        const instance_uuid = document.location.pathname.split("/module/instance/")[1].split("/")[0];
+        const terminal_buffer = +document.getElementById("terminal-buffer").value;
+
+        const instance_uuid = document.location.pathname
+            .split("/module/instance/")[1]
+            .split("/")[0];
+
         const ws_url = `ws://${ws_host}:${ws_port}/instance/${instance_uuid}`;
 
-        const MAX_TERMINAL_CHARS = 100_000;
+        const MAX_TERMINAL_CHARS = terminal_buffer;
+
+        console.log(MAX_TERMINAL_CHARS, typeof MAX_TERMINAL_CHARS)
+
         let terminalBuffer = [];
         let terminalLength = 0;
+        let pendingOutput = "";
+        let renderScheduled = false;
 
         let controller = document.querySelector("#simple-controller");
         let terminal = document.querySelector("#terminal");
@@ -202,7 +215,6 @@
         let kill = document.querySelector("#kill");
         let stickBottom = document.querySelector("#stick-bottom");
 
-
         let autoScroll = true;
 
         function scrollToBottom() {
@@ -210,16 +222,17 @@
         }
 
         function isAtBottom() {
-            return terminal.scrollHeight - terminal.scrollTop <= terminal.clientHeight + 5;
+            return terminal.scrollHeight - terminal.scrollTop
+                <= terminal.clientHeight + 5;
         }
 
         terminal.addEventListener("scroll", () => {
             autoScroll = isAtBottom();
 
             stickBottom.classList.toggle("active", autoScroll);
-            stickBottom.textContent = autoScroll ?
-                "Following" :
-                "Auto-Scroll";
+            stickBottom.textContent = autoScroll
+                ? "Following"
+                : "Auto-Scroll";
         });
 
         stickBottom.addEventListener("click", () => {
@@ -231,73 +244,117 @@
         });
 
         function writeTerminal(text) {
-            terminalBuffer.push(text);
-            terminalLength += text.length;
+            pendingOutput += text;
 
-            while (terminalLength > MAX_TERMINAL_CHARS && terminalBuffer.length > 1) {
-                terminalLength -= terminalBuffer.shift().length;
-            }
+            if (renderScheduled) return;
 
-            terminal.value = terminalBuffer.join("");
+            renderScheduled = true;
 
-            if (autoScroll) {
-                scrollToBottom();
-            }
+            requestAnimationFrame(() => {
+                renderScheduled = false;
+
+                const output = pendingOutput;
+                pendingOutput = "";
+
+                terminalBuffer.push(output);
+                terminalLength += output.length;
+
+                while (
+                    terminalLength > MAX_TERMINAL_CHARS
+                    && terminalBuffer.length > 1
+                ) {
+                    terminalLength -= terminalBuffer.shift().length;
+                }
+
+                if (terminalLength > MAX_TERMINAL_CHARS) {
+                    terminalBuffer[0] = terminalBuffer[0].slice(
+                        terminalLength - MAX_TERMINAL_CHARS
+                    );
+                    terminalLength = MAX_TERMINAL_CHARS;
+                }
+
+                terminal.value = terminalBuffer.join("");
+
+                if (autoScroll) {
+                    scrollToBottom();
+                }
+            });
         }
 
         function writeLine(text) {
-            writeTerminal(text + '\n');
+            writeTerminal(text + "\n");
         }
 
-        setTimeout(() => {
-            const ws = new WebSocket(ws_url)
+        const ws = new WebSocket(ws_url);
 
-            ws.onopen = (event) => {
+        ws.onopen = () => {
+            ws.send(JSON.stringify({
+                isSimpleController: true,
+                type: "history",
+            }));
+
+            command.addEventListener("keydown", (event) => {
+                if (event.key !== "Enter") return;
+                if (ws.readyState !== WebSocket.OPEN) return;
+
+                const raw = command.value + "\n";
+
+                const packet = {
+                    isSimpleController: true,
+                    type: "command",
+                    raw,
+                };
+
+                writeTerminal(raw);
+                command.value = "";
+
+                ws.send(JSON.stringify(packet));
+            });
+
+            start.addEventListener("click", () => {
+                if (ws.readyState !== WebSocket.OPEN) return;
+
                 ws.send(JSON.stringify({
                     isSimpleController: true,
-                    type: "history",
-                }))
-                command.addEventListener("keydown", (event) => {
-                    if (event.key !== "Enter") return;
+                    type: "start",
+                }));
+            });
 
-                    let packet = {
-                        isSimpleController: true,
-                        type: "command",
-                        raw: command.value + "\n"
-                    };
-                    writeTerminal(packet.raw);
-                    command.value = "";
-                    ws.send(JSON.stringify(packet));
-                })
-                start.addEventListener("click", (event) => {
-                    ws.send(JSON.stringify({
-                        isSimpleController: true,
-                        type: "start",
-                    }));
-                })
-                stop.addEventListener("click", (event) => {
-                    ws.send(JSON.stringify({
-                        isSimpleController: true,
-                        type: "stop",
-                    }));
-                })
-                kill.addEventListener("click", (event) => {
-                    ws.send(JSON.stringify({
-                        isSimpleController: true,
-                        type: "kill",
-                    }));
-                })
-            };
+            stop.addEventListener("click", () => {
+                if (ws.readyState !== WebSocket.OPEN) return;
 
-            ws.onmessage = (event) => {
-                event.data.arrayBuffer()
-                    .then((buffer) => {
-                        const text = new TextDecoder().decode(buffer);
-                        writeTerminal(text);
-                    });
+                ws.send(JSON.stringify({
+                    isSimpleController: true,
+                    type: "stop",
+                }));
+            });
+
+            kill.addEventListener("click", () => {
+                if (ws.readyState !== WebSocket.OPEN) return;
+
+                ws.send(JSON.stringify({
+                    isSimpleController: true,
+                    type: "kill",
+                }));
+            });
+        };
+
+        const decoder = new TextDecoder();
+
+        ws.onmessage = async (event) => {
+            console.log(event.data)
+            if (typeof event.data === "string") {
+                console.log("log")
+                writeTerminal(event.data);
+                return;
             }
 
+            const buffer = await event.data.arrayBuffer();
+            writeTerminal(decoder.decode(buffer));
+        };
 
-        }, 1);
+        ws.onerror = (event) => {
+            console.error("WebSocket error:", event);
+        };
     </script>
 </div>

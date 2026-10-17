@@ -9,7 +9,7 @@ import unittest
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, MagicMock
 from datetime import datetime
 
 from flask import Flask
@@ -167,7 +167,11 @@ class TestModuleCommonFunctions(unittest.TestCase):
                         "<div>rendered</div>"
                     )
 
-                    controller = simple_controller_builder("mymodule", websocket_server)
+                    fake_config = MagicMock()
+                    fake_config.web.simple_controller_terminal_buffer = 100_000
+                    controller = simple_controller_builder(
+                        "mymodule", websocket_server, fake_config
+                    )
                     result = controller()
 
                     mock_get_resource.assert_called_once_with(
@@ -179,6 +183,7 @@ class TestModuleCommonFunctions(unittest.TestCase):
                             "module_name": "mymodule",
                             "websocket_host": "192.168.1.98",
                             "websocket_port": 5001,
+                            "terminal_buffer": fake_config.web.simple_controller_terminal_buffer,
                         }
                     )
                     self.assertIsInstance(result, Markup)
@@ -214,7 +219,11 @@ class TestModuleCommonFunctions(unittest.TestCase):
                         "<div>rendered</div>"
                     )
 
-                    controller = simple_controller_builder("mymodule", websocket_server)
+                    fake_config = MagicMock()
+                    fake_config.web.simple_controller_terminal_buffer = 100_000
+                    controller = simple_controller_builder(
+                        "mymodule", websocket_server, config=fake_config
+                    )
                     controller()
 
                     mock_from_string.return_value.render.assert_called_once_with(
@@ -222,6 +231,7 @@ class TestModuleCommonFunctions(unittest.TestCase):
                             "module_name": "mymodule",
                             "websocket_host": "192.168.1.50",
                             "websocket_port": 5001,
+                            "terminal_buffer": fake_config.web.simple_controller_terminal_buffer,
                         }
                     )
 

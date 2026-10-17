@@ -6,10 +6,18 @@ Date: 09/27/2026
 """
 
 from pathlib import Path
-from typing import Union
+from typing import Union, Literal, overload
 
 from QuickServe.Web.module_common import resource_dir
 from QuickServe.Web.module_common.exceptions import ResourceDoesntExistException
+
+
+@overload
+def get_resource(resource_name: str, mode: Literal["r"] = "r") -> str: ...
+
+
+@overload
+def get_resource(resource_name: str, mode: Literal["rb"]) -> bytes: ...
 
 
 def get_resource(resource_name: str, mode: str = "r") -> Union[str, bytes]:

@@ -13,7 +13,11 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from unittest.mock import patch
 
-from QuickServe.FileSystem.exceptions import InvalidModuleError, AssetDoesntExist, UnsupportedModuleError
+from QuickServe.FileSystem.exceptions import (
+    InvalidModuleError,
+    AssetDoesntExist,
+    UnsupportedModuleError,
+)
 from QuickServe.FileSystem.modules import BaseModule
 from QuickServe.FileSystem.path_resolver import Workspace
 from tests.fake.module_dir import setup_modules
@@ -55,6 +59,7 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
+            config=None,  # noqa
         )
 
         module.load_module()
@@ -70,6 +75,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             remove_attr_on_load="NAME",
+            config=None,  # noqa
         )
 
         with self.assertRaises(InvalidModuleError):
@@ -86,6 +92,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             remove_attr_on_load="VERSION",
+            config=None,  # noqa
         )
 
         with self.assertRaises(InvalidModuleError):
@@ -102,6 +109,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             remove_attr_on_load="QUICKSERVE_VERSION",
+            config=None,  # noqa
         )
 
         with self.assertRaises(InvalidModuleError):
@@ -118,6 +126,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             remove_attr_on_load="PAGES",
+            config=None,  # noqa
         )
 
         with self.assertRaises(InvalidModuleError):
@@ -130,6 +139,7 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
+            config=None,  # noqa
         )
         module.load_module()
 
@@ -140,7 +150,8 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
-            remove_attr_on_load="SUPPORTED_OPERATING_SYSTEMS"
+            remove_attr_on_load="SUPPORTED_OPERATING_SYSTEMS",
+            config=None,  # noqa
         )
         with self.assertRaises(InvalidModuleError):
             module.load_module()
@@ -152,9 +163,13 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
+            config=None,  # noqa
         )
 
-        with patch("QuickServe.FileSystem.modules.platform.system", return_value="unsupported_os"):
+        with patch(
+            "QuickServe.FileSystem.modules.platform.system",
+            return_value="unsupported_os",
+        ):
             with self.assertRaises(UnsupportedModuleError):
                 module.load_module()
 
@@ -168,6 +183,7 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
+            config=None,  # noqa
         )
 
         create_path = module.get_resource_path("create.html")
@@ -188,6 +204,7 @@ class TestBaseModule(unittest.TestCase):
             module_path=module_path,
             workspace=self.workspace,
             runtime_manager=None,  # noqa
+            config=None,  # noqa
         )
 
         with self.assertRaises(AssetDoesntExist):

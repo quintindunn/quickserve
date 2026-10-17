@@ -20,7 +20,9 @@ class TestModuleCommonFunctionRegistry(unittest.TestCase):
     """
 
     def setUp(self):
-        self.registry = Registry(MagicMock())
+        fake_config = MagicMock()
+        fake_config.web.simple_controller_terminal_buffer = 100_000
+        self.registry = Registry(MagicMock(), config=fake_config)
 
     def test_default_registrations(self):
         """Test that the default factories are registered correctly."""

@@ -151,8 +151,10 @@ class Module:
             "nogui",
         ]
         process = ManagedProcess(
-            command=command, base_module=self.module, root_dir=instance.working_directory() / "server",
-            history_buffer_flush_interval=20
+            command=command,
+            base_module=self.module,
+            root_dir=instance.working_directory() / "server",
+            history_buffer_flush_interval=20,
         )
         process.on_stderr(send_callback)
         process.on_stdout(send_callback)

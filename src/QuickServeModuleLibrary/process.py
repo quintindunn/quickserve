@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
+    from QuickServe.FileSystem.config import Config
 
 
 class ManagedProcess:
@@ -32,7 +33,13 @@ class ManagedProcess:
     root_dir: Path | None
     base_module: "BaseModule"
 
-    def __init__(self, command, base_module: "BaseModule", root_dir: Path | None = None, history_buffer_flush_interval: int = 20):
+    def __init__(
+        self,
+        command,
+        base_module: "BaseModule",
+        root_dir: Path | None = None,
+        history_buffer_flush_interval: int = 20,
+    ):
         self.command = command
         self.base_module = base_module
         self.proc = None
@@ -42,7 +49,8 @@ class ManagedProcess:
         self.lines_buffer: list[bytes] = []
         self.line_buffer_lock: RLock = RLock()
         self.line_buffer_has_written: bool = False
-        self.history_buffer_flush_interval = history_buffer_flush_interval
+        self.history_buffer_flush_interval: int = history_buffer_flush_interval
+        self.config: "Config" = base_module.config
 
     def get_stdout_callbacks(self) -> list[Callable[[bytes], None]]:
         """
@@ -85,7 +93,7 @@ class ManagedProcess:
         :return: None
         """
 
-        self._save_stdio(b"stdin", stdin)
+        self._save_stdio(b"stdin" b"", stdin)
 
     def _save_stdio(self, io_type: bytes, data: bytes) -> None:
         """
@@ -107,34 +115,71 @@ class ManagedProcess:
         """
 
         if not self.line_buffer_has_written:
-            path = self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory")
+            path = self.base_module.workspace.ensure_directory("tmp") / (
+                str(self.pid) + ".quickservehistory"
+            )
             if path.exists():
                 os.remove(path)
             self.line_buffer_has_written = True
 
-        with open(self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory"), "ab") as f:
+        with open(
+            self.base_module.workspace.ensure_directory("tmp")
+            / (str(self.pid) + ".quickservehistory"),
+            "ab",
+        ) as f:
             f.writelines(self.lines_buffer)
         self.lines_buffer.clear()
 
-    def _get_terminal_history(self) -> list[bytes]:
+    def _get_terminal_history(self) -> Tuple[list[bytes], list[bytes]]:
         """
         Retrieves the raw, unparsed terminal history from the log file, and the line buffer.
         :return: A list of the lines from the history.
         """
 
         if self.proc is None:
-            return self.lines_buffer
+            return self.lines_buffer, []
 
-        history_path = self.base_module.workspace.ensure_directory("tmp") / (str(self.pid) + ".quickservehistory")
+        history_path = self.base_module.workspace.ensure_directory("tmp") / (
+            str(self.pid) + ".quickservehistory"
+        )
         if not history_path.exists():
-            return self.lines_buffer
+            return self.lines_buffer, []
+
+        n = self.config.web.simple_controller_terminal_buffer
+        chars = 0
+        preparsed = []
 
         with open(history_path, "rb") as f:
-            lines = f.readlines()
+            f.seek(0, 2)
+            position = f.tell()
+            buffer = b""
 
-        lines.extend(self.lines_buffer)
+            while position > 0 and chars < n:
+                size = min(8192, position)
+                position -= size
+                f.seek(position)
+                buffer = f.read(size) + buffer
 
-        return lines
+                lines = buffer.split(b"\n")
+                buffer = lines.pop(0)
+
+                for line in reversed(lines):
+                    if b":::" not in line:
+                        continue
+                    line += b"\n"
+                    stdio_type, content = line.split(b":::", 1)
+                    preparsed.insert(0, (stdio_type, content))
+                    chars += len(content)
+
+                    if chars >= n:
+                        break
+
+            if buffer and chars < n and b":::" in buffer:
+                buffer += b"\n"
+                stdio_type, content = buffer.split(b":::", 1)
+                preparsed.insert(0, (stdio_type, content))
+
+        return self.lines_buffer, preparsed
 
     @staticmethod
     def _parse_line_history(lines: list[bytes]) -> list[Tuple[bytes, bytes]]:
@@ -156,8 +201,9 @@ class ManagedProcess:
         :return: A list of tuples with (stdio_type, data)
         """
 
-        raw_history = self._get_terminal_history()
-        return self._parse_line_history(raw_history)
+        raw_history, final = self._get_terminal_history()
+        final.extend(self._parse_line_history(raw_history))
+        return final
 
     def start(self) -> None:
         """
