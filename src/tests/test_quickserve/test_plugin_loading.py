@@ -51,7 +51,7 @@ class TestPluginLoader(unittest.TestCase):
 
         setup_modules(self.workspace)
 
-        plugin_loader = PluginLoader(workspace=self.workspace, runtime_manager=None)
+        plugin_loader = PluginLoader(workspace=self.workspace, runtime_manager=None, config=None)
         catalog = plugin_loader.load_all()
         self.assertEqual(len(list(catalog.items())), 1)
 
@@ -60,7 +60,7 @@ class TestPluginLoader(unittest.TestCase):
         Tests loading with no modules.
         """
 
-        plugin_loader = PluginLoader(workspace=self.workspace, runtime_manager=None)
+        plugin_loader = PluginLoader(workspace=self.workspace, runtime_manager=None, config=None)
         catalog = plugin_loader.load_all()
         self.assertEqual(len(list(catalog.items())), 0)
 
@@ -73,4 +73,4 @@ class TestPluginLoader(unittest.TestCase):
         setup_modules(self.workspace, folder_name_modifier="_duplicate")
 
         with self.assertRaises(ValueError):
-            PluginLoader(workspace=self.workspace, runtime_manager=None).load_all()
+            PluginLoader(workspace=self.workspace, runtime_manager=None, config=None).load_all()

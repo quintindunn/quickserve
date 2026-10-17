@@ -29,6 +29,7 @@ class TestManagedProcess(TestCase):
 
         self.base_module = MagicMock()
         self.base_module.workspace = self.workspace
+        self.base_module.config.web.simple_controller_terminal_buffer = 100_000
 
         self.process = ManagedProcess("test_command", self.base_module)
         self.process.proc = Mock(pid=1234)
@@ -226,8 +227,8 @@ class TestManagedProcess(TestCase):
             b"stdout:::first\nstdout:::second\n",
         )
 
-    def test_get_terminal_history_combines_file_and_buffer(self):
-        """Tests that get_terminal_history combines the buffer and history file."""
+    def test_get_terminal_history_gets_from_file_and_buffer(self):
+        """Tests that get_terminal_history gets from the buffer and history file."""
 
         self.process.lines_buffer = [b"stderr:::buffered\n"]
 
@@ -235,12 +236,18 @@ class TestManagedProcess(TestCase):
         self.process.lines_buffer = [b"stdout:::pending\n"]
         self.process.proc = Mock(pid=self.process.pid)
 
+        raw, preprocessed = self.process._get_terminal_history()
+        print(raw, preprocessed)
         self.assertEqual(
-            self.process._get_terminal_history(),
+            raw,
             [
-                b"stderr:::buffered\n",
-                b"stdout:::pending\n",
+                b'stdout:::pending\n',
             ],
+        )
+
+        self.assertEqual(
+            preprocessed,
+            [(b'stderr', b'buffered\n')]
         )
 
     def test_parse_line_history(self):

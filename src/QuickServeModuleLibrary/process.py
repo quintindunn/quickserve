@@ -163,8 +163,8 @@ class ManagedProcess:
                         break
 
             if buffer and chars < n and b":::" in buffer:
-                line += b"\n"
-                stdio_type, content = line.split(b":::", 1)
+                buffer += b"\n"
+                stdio_type, content = buffer.split(b":::", 1)
                 preparsed.insert(0, (stdio_type, content))
 
         return self.lines_buffer, preparsed
