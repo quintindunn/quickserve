@@ -89,7 +89,7 @@ def _render_module_page(
 
     page = getattr(module, page)
     if "instance_uuid" in context:
-
+        ctx["isInstance"] = True
         def build_callback():
             def callback(message: str):
                 return websocket_server.send_instance(context["instance_uuid"], message)
