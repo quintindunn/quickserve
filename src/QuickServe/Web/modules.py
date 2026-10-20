@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from QuickServe.Application.instances import InstanceManager
+    from QuickServeModuleLibrary.decorators import Page, RegisteredPage
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
@@ -73,10 +74,16 @@ def _render_module_page(
         "quickserve.websocket_server"
     ]
 
+    pages: list[RegisteredPage] = (
+        []
+        if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES")
+        else module.QS_INTERNAL_REGISTERED_PAGES
+    )
+
     ctx = {
         "module_name": module.NAME,
         "module_version": module.VERSION,
-        "module_pages": module.PAGES,
+        "module_pages": pages,
         "websocket_host": websocket_server.host,
         "websocket_port": websocket_server.port,
     }
@@ -84,10 +91,10 @@ def _render_module_page(
     if hasattr(module, "AUTHORS"):
         ctx["module_authors"] = module.AUTHORS
 
-    if not hasattr(module, page):
-        raise ValueError(f"Module {module_name} doesn't have method {page}")
+    if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES") or page not in pages:
+        raise ValueError(f"Module {module_name} doesn't have page {page}")
 
-    page = getattr(module, page)
+    page = module.QS_INTERNAL_REGISTERED_PAGES[page]
     if "instance_uuid" in context:
 
         def build_callback():

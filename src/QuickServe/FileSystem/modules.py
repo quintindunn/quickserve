@@ -83,7 +83,6 @@ class BaseModule:
             "NAME": "Missing module name",
             "VERSION": "Missing module version",
             "QUICKSERVE_VERSION": "Missing QuickServe version",
-            "PAGES": "Missing module pages",
             "SUPPORTED_OPERATING_SYSTEMS": "Missing supported operating systems list",
         }
         self.raise_if_attr_not_exist(

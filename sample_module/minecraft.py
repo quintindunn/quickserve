@@ -33,7 +33,6 @@ class Module:
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
-    PAGES: list[str] = ["about", "create", "start", "filesystem"]
     DESCRIPTION: str = "Create a Minecraft Java Edition Vanilla Server!"
     FS_ROOT: str = "server"
     SUPPORTED_OPERATING_SYSTEMS: list[str] = ["Darwin", "Linux"]
@@ -182,10 +181,9 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    @page(instance_specific=True)
+    @page(instance_specific=True, page_name="fs")
     def filesystem(self, instance: "BaseInstance", *args, **kwargs):
         asset = self.module.get_resource_path("filesystem.html")
 
-        print(getattr(self, "QS_INTERNAL_REGISTERED_PAGES"))
         with open(asset, "r") as f:
             return f.read(), dict()
