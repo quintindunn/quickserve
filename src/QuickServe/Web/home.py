@@ -15,7 +15,9 @@ home = Blueprint("home", __name__)
 def index() -> ResponseReturnValue:
     return render_template("home/home.html", context={})
 
+
 @home.route("/favicon.ico")
 def favicon() -> ResponseReturnValue:
-    return send_from_directory('static',
-                               'core/QuickServe.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(
+        "static", "core/QuickServe.ico", mimetype="image/vnd.microsoft.icon"
+    )

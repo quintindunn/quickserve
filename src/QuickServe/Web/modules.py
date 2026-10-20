@@ -79,6 +79,7 @@ def _render_module_page(
         "module_pages": module.PAGES,
         "websocket_host": websocket_server.host,
         "websocket_port": websocket_server.port,
+        "page_name": page,
     }
 
     if hasattr(module, "AUTHORS"):
@@ -90,6 +91,7 @@ def _render_module_page(
     page = getattr(module, page)
     if "instance_uuid" in context:
         ctx["isInstance"] = True
+
         def build_callback():
             def callback(message: str):
                 return websocket_server.send_instance(context["instance_uuid"], message)

@@ -222,17 +222,17 @@
         }
 
         function isAtBottom() {
-            return terminal.scrollHeight - terminal.scrollTop
-                <= terminal.clientHeight + 5;
+            return terminal.scrollHeight - terminal.scrollTop <=
+                terminal.clientHeight + 5;
         }
 
         terminal.addEventListener("scroll", () => {
             autoScroll = isAtBottom();
 
             stickBottom.classList.toggle("active", autoScroll);
-            stickBottom.textContent = autoScroll
-                ? "Following"
-                : "Auto-Scroll";
+            stickBottom.textContent = autoScroll ?
+                "Following" :
+                "Auto-Scroll";
         });
 
         stickBottom.addEventListener("click", () => {
@@ -260,8 +260,8 @@
                 terminalLength += output.length;
 
                 while (
-                    terminalLength > MAX_TERMINAL_CHARS
-                    && terminalBuffer.length > 1
+                    terminalLength > MAX_TERMINAL_CHARS &&
+                    terminalBuffer.length > 1
                 ) {
                     terminalLength -= terminalBuffer.shift().length;
                 }

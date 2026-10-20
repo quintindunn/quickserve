@@ -1,6 +1,12 @@
 {% extends "core/core.html" %}
 {% block title %}
-    {% block moduletitle %}{% endblock %}
+    {% block moduletitle %}
+        {% if context.isInstance %}
+            {{ context.instance_name }} - {{ context.page_name }}
+        {% else %}
+            {{ context.module_name }} - {{ context.page_name }}
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 {% block head %}
     {% block modulehead %}{% endblock %}
