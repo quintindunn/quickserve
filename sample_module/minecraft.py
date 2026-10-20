@@ -15,7 +15,7 @@ from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 
-from QuickServeModuleLibrary.decorators import instance_specific
+from QuickServeModuleLibrary.decorators import page
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -64,6 +64,7 @@ class Module:
         self.instance_server_map = dict()
         self.instance_callback_map = dict()
 
+    @page
     def about(self, *_, **__) -> str:
         """HTML about for the page"""
 
@@ -71,6 +72,7 @@ class Module:
         with open(asset, "r") as f:
             return f.read()
 
+    @page
     def create(self, *_, **__) -> tuple[str, dict]:
         """HTML create for the page"""
 
@@ -163,7 +165,7 @@ class Module:
     def on_message(self, msg: str, instance: "BaseInstance") -> None:
         self.simple_controller_process_manager.on_message(msg=msg, instance=instance)
 
-    @instance_specific
+    @page(instance_specific=True)
     def start(
         self, instance: "BaseInstance", send_callback: Callable
     ) -> tuple[str, dict]:
@@ -180,9 +182,10 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    @instance_specific
+    @page(instance_specific=True)
     def filesystem(self, instance: "BaseInstance", *args, **kwargs):
         asset = self.module.get_resource_path("filesystem.html")
 
+        print(getattr(self, "QS_INTERNAL_REGISTERED_PAGES"))
         with open(asset, "r") as f:
             return f.read(), dict()
