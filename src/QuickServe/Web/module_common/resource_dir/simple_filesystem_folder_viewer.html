@@ -119,6 +119,47 @@
                 padding: 0.5rem 1rem;
                 cursor: pointer;
             }
+
+            .file-upload-popup {
+                position: fixed;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+            }
+
+            .file-upload-popup[data-show="true"] {
+                display: flex;
+            }
+
+            .file-upload-prompt {
+                width: 30%;
+                height: 30%;
+                background-color: #1e1e1e;
+                border-radius: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .file-upload-prompt:hover {
+                cursor: pointer;
+                font-weight: bold;
+                width: 31%;
+                height: 31%;
+            }
+
+            .file-upload-inner {
+                border: 1px solid #fefefe;
+                border-radius: 50px;
+                padding: 10%;
+            }
+
         }
     </style>
     <div style="margin-bottom: 25px"></div>
@@ -132,6 +173,16 @@
             </div>
         </div>
     </div>
+    <div class="file-upload-popup" data-show="true">
+        <div class="file-upload-prompt" id="file-upload-prompt">
+            <div class="file-upload-inner">
+                <p>Drag and drop to upload a file!</p>
+                <p>or click to browse</p>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="file-upload-input" hidden>
     <div class="file-viewer">
         <span class="file-heading">
             Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
@@ -208,6 +259,9 @@
         <script>
             const create_file_btn = document.getElementById("file-create");
             const create_folder_btn = document.getElementById("folder-create");
+            const fileUploadPopup = document.querySelector(".file-upload-popup");
+            const fileUploadPrompt = document.querySelector("#file-upload-prompt");
+            const fileUploadInput = document.querySelector("#file-upload-input");
 
             function validate_file_name(filename) {
                 if (!filename || filename.trim() !== filename) {
@@ -559,6 +613,32 @@
             function cancel_popup() {
                 const popup = document.querySelector(".file-name-popup");
                 popup.dataset.show = "false";
+            }
+
+            fileUploadPrompt.addEventListener("click", () => {
+                fileUploadInput.click();
+            });
+
+            fileUploadInput.addEventListener("change", () => {
+                if (fileUploadInput.files.length > 0) {
+                    handleFileUpload(fileUploadInput.files[0]);
+                }
+            });
+
+            fileUploadPopup.addEventListener("dragover", (event) => {
+                event.preventDefault();
+            });
+
+            fileUploadPopup.addEventListener("drop", (event) => {
+                event.preventDefault();
+
+                if (event.dataTransfer.files.length > 0) {
+                    handleFileUpload(event.dataTransfer.files[0]);
+                }
+            });
+
+            function handleFileUpload(file) {
+                console.log("Selected file:", file.name, file);
             }
         </script>
     </div>
