@@ -28,11 +28,13 @@ def _redirect(url: str) -> Markup:
     :return: Markup object containing the script tag.
     """
 
-    return Markup(f"""
+    return Markup(
+        f"""
         <script>
             window.location = `{url}`;
         </script>
-    """)
+    """
+    )
 
 
 def simple_filesystem_builder(module_name: str) -> Callable[[], str]:

@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from QuickServe.Application.instances import InstanceManager
+    from QuickServeModuleLibrary.decorators import Page, RegisteredPage
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
@@ -62,7 +63,7 @@ def _render_module_page(
     if module_name not in catalog:
         return (
             "<!DOCTYPE HTML>"
-            "<html><head><title>RMP 404 Not Found!</title></head>"
+            "<html><head><title>404 Not Found!</title></head>"
             "<body><h1>Page not found!</h1></body></html>"
         )
 
@@ -73,10 +74,16 @@ def _render_module_page(
         "quickserve.websocket_server"
     ]
 
+    pages: list[RegisteredPage] = (
+        []
+        if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES")
+        else module.QS_INTERNAL_REGISTERED_PAGES
+    )
+
     ctx = {
         "module_name": module.NAME,
         "module_version": module.VERSION,
-        "module_pages": module.PAGES,
+        "module_pages": pages,
         "websocket_host": websocket_server.host,
         "websocket_port": websocket_server.port,
     }
@@ -84,10 +91,10 @@ def _render_module_page(
     if hasattr(module, "AUTHORS"):
         ctx["module_authors"] = module.AUTHORS
 
-    if not hasattr(module, page):
-        raise ValueError(f"Module {module_name} doesn't have method {page}")
+    if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES") or page not in pages:
+        raise ValueError(f"Module {module_name} doesn't have page {page}")
 
-    page = getattr(module, page)
+    page = module.QS_INTERNAL_REGISTERED_PAGES[page]
     if "instance_uuid" in context:
 
         def build_callback():
@@ -190,16 +197,19 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     :param method: The action being called.
     :return:
     """
-    method = f"action_{method}"
 
     catalog = current_app.extensions["quickserve.catalog"]
     base_module = catalog.require(module_name)
     module: "Module" = base_module.module
 
-    if not hasattr(module, method):
+    if not hasattr(module, "QS_INTERNAL_REGISTERED_ACTIONS"):
         return "500", 500
 
-    method = getattr(module, method)
+    actions = module.QS_INTERNAL_REGISTERED_ACTIONS  # noqa
+    method = actions.get(method)
+
+    if method is None:
+        return "500", 500
 
     instance_manager = current_app.extensions["quickserve.instance_manager"]
     values = method(instance_manager, **request.form.to_dict())

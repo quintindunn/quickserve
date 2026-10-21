@@ -15,7 +15,7 @@ from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 
-from QuickServeModuleLibrary.decorators import instance_specific
+from QuickServeModuleLibrary.decorators import page, action
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -33,7 +33,6 @@ class Module:
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
-    PAGES: list[str] = ["about", "create", "start", "filesystem"]
     DESCRIPTION: str = "Create a Minecraft Java Edition Vanilla Server!"
     FS_ROOT: str = "server"
     SUPPORTED_OPERATING_SYSTEMS: list[str] = ["Darwin", "Linux"]
@@ -64,6 +63,7 @@ class Module:
         self.instance_server_map = dict()
         self.instance_callback_map = dict()
 
+    @page
     def about(self, *_, **__) -> str:
         """HTML about for the page"""
 
@@ -71,6 +71,7 @@ class Module:
         with open(asset, "r") as f:
             return f.read()
 
+    @page
     def create(self, *_, **__) -> tuple[str, dict]:
         """HTML create for the page"""
 
@@ -78,7 +79,8 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    def action_install(self, instances: "InstanceManager", **kwargs):
+    @action
+    def install(self, instances: "InstanceManager", **kwargs):
         """
         Installation action
         :param instances: InstanceManager reference, used for record insertion
@@ -163,7 +165,7 @@ class Module:
     def on_message(self, msg: str, instance: "BaseInstance") -> None:
         self.simple_controller_process_manager.on_message(msg=msg, instance=instance)
 
-    @instance_specific
+    @page(instance_specific=True)
     def start(
         self, instance: "BaseInstance", send_callback: Callable
     ) -> tuple[str, dict]:
@@ -180,7 +182,7 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    @instance_specific
+    @page(instance_specific=True)
     def filesystem(self, instance: "BaseInstance", *args, **kwargs):
         asset = self.module.get_resource_path("filesystem.html")
 
