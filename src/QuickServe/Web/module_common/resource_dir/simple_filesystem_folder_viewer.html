@@ -173,7 +173,7 @@
             </div>
         </div>
     </div>
-    <div class="file-upload-popup" data-show="true">
+    <div class="file-upload-popup" data-show="false">
         <div class="file-upload-prompt" id="file-upload-prompt">
             <div class="file-upload-inner">
                 <p>Drag and drop to upload a file!</p>
@@ -636,8 +636,25 @@
                 }
             });
 
-            function handleFileUpload(file) {
-                console.log("Selected file:", file.name, file);
+            async function handleFileUpload(file) {
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("root", {{ context.root_directory | tojson }})
+
+                try {
+                    const response = await fetch({{ url_for("modules.instancestatic.instance_upload_file", uuid=context.instance.uuid) | tojson }}, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        console.error(`Upload failed: ${response.status}`);
+                    }
+
+                    window.location.reload();
+                } catch (error) {
+                    console.error("Upload error:", error);
+                }
             }
         </script>
     </div>
