@@ -20,6 +20,7 @@ from flask import (
     redirect,
 )
 from flask.typing import ResponseReturnValue
+from werkzeug.utils import secure_filename
 
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
@@ -474,3 +475,28 @@ def instance_create_folder(uuid: str):
     logger.info(f"Folder created: uuid={uuid} path={folder_path}")
 
     return "ok", 200
+
+
+@instance_static.route("/<uuid>/uploadfile/", methods=["POST"])
+def instance_upload_file(uuid: str):
+    file = request.files["file"]
+    root = request.form.get("root")
+    if not root:
+        return {"error": "Missing root"}, 400
+    if not file:
+        return {"error": "Missing file"}, 400
+    instance = _get_instance(uuid)
+
+    path = Path(root)
+
+    path = _get_path(instance, str(path / secure_filename(file.filename)), must_exist=False)
+
+    if path is None:
+        return {"error": ""}, 400
+
+    if path.exists():
+        return {"error": "File already exists"}, 400
+
+    file.save(path)
+
+    return ""
