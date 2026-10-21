@@ -186,6 +186,7 @@
         <span class="file-heading">
             Directory listing for <span class="file-list-directory">{{ context.root_directory }}</span>
             <span class="folder-controls">
+                <button id="file-upload">Upload File</button>
                 <button id="file-create">Create File</button>
                 <button id="folder-create">Create Folder</button>
             </span>
@@ -257,7 +258,9 @@
         </ul>
         <script>
             const create_file_btn = document.getElementById("file-create");
+            const upload_file_btn = document.getElementById("file-upload");
             const create_folder_btn = document.getElementById("folder-create");
+
             const fileUploadPopup = document.querySelector(".file-upload-popup");
             const fileUploadPrompt = document.querySelector("#file-upload-prompt");
             const fileUploadInput = document.querySelector("#file-upload-input");
@@ -304,6 +307,42 @@
                 return folders.every(folder => validate_file_name(folder));
             }
 
+            upload_file_btn.addEventListener("click", () => {
+                fileUploadPopup.dataset.show = "true";
+            })
+
+            let drag_depth = 0;
+
+            document.addEventListener("dragenter", (event) => {
+                event.preventDefault();
+
+                drag_depth++;
+
+                if (event.dataTransfer.types.includes("Files")) {
+                    fileUploadPopup.dataset.show = "true";
+                }
+            });
+
+            document.addEventListener("dragleave", (event) => {
+                event.preventDefault();
+
+                drag_depth = Math.max(0, drag_depth - 1);
+
+                if (drag_depth === 0) {
+                    fileUploadPopup.dataset.show = "false";
+                }
+            });
+
+            document.addEventListener("click", (event) => {
+                if (
+                    fileUploadPopup.dataset.show === "true" &&
+                    !fileUploadPrompt.contains(event.target) &&
+                    !upload_file_btn.contains(event.target)
+                ) {
+                    fileUploadPopup.dataset.show = "false";
+                }
+            });
+
             create_file_btn.addEventListener("click", () => {
                 const {
                     popup,
@@ -343,7 +382,7 @@
                             }
 
                             return response.text().then(text => {
-                                alert(text);
+                                console.log(text);
                             });
                         })
 
@@ -406,7 +445,7 @@
                             }
 
                             return response.text().then(text => {
-                                alert(text);
+                                console.log(text);
                             });
                         })
 
@@ -467,7 +506,7 @@
                         }
 
                         return response.text().then(text => {
-                            alert(text);
+                            console.log(text);
                         });
                     })
             }
@@ -515,7 +554,6 @@
                             }
 
                             return response.text().then(text => {
-                                alert(text);
                             });
                         })
 
@@ -590,7 +628,7 @@
                         }
 
                         return response.text().then(text => {
-                            alert(text);
+                            console.log(text);
                         });
                     })
                     .then(blob => {
