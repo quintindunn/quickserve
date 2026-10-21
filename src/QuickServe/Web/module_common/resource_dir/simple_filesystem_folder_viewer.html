@@ -157,7 +157,11 @@
                     <div class="fs-item">
                         <a href="
                     {% if file.isFile %}
-                        ?file=.{{ file.cwd }}{{ file.filename }}
+                        {% if file.canEdit %}
+                            ?file=.{{ file.cwd }}{{ file.filename }}
+                        {% else %}
+                            #
+                        {% endif %}
                     {% else %}
                         ?directory=.{{ file.cwd }}{{ file.filename }}
                     {% endif %}
@@ -180,7 +184,11 @@
                             {% if file.isFile %}
                                 <input type="hidden" name="filename" value="{{ file.filename }}">
                                 <input type="hidden" name="cwd" value="{{ file.cwd }}">
-                                <button type="button" onclick="fs_edit(this)">Edit</button>
+                                {% if file.canEdit %}
+                                    <button type="button" onclick="fs_edit(this)">Edit</button>
+                                {% else %}
+                                    <span></span>
+                                {% endif %}
                                 <button type="button" onclick="fs_rename(this)">Rename</button>
                                 <button type="button" onclick="fs_delete(this)">Delete</button>
                                 <button type="button" onclick="fs_download(this)">Download</button>
