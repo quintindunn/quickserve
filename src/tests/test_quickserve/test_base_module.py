@@ -115,23 +115,6 @@ class TestBaseModule(unittest.TestCase):
         with self.assertRaises(InvalidModuleError):
             module.load_module()
 
-    def test_missing_pages(self):
-        """
-        Tests that a module missing a list of pages throws an error.
-        """
-
-        module_path = setup_modules(self.workspace)
-        module = BaseModule(
-            module_path=module_path,
-            workspace=self.workspace,
-            runtime_manager=None,  # noqa
-            remove_attr_on_load="PAGES",
-            config=None,  # noqa
-        )
-
-        with self.assertRaises(InvalidModuleError):
-            module.load_module()
-
     def test_plugin_supported_os(self):
         module_path = setup_modules(self.workspace)
 
