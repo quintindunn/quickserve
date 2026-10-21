@@ -87,6 +87,7 @@ def _render_module_page(
         "module_pages": pages,
         "websocket_host": websocket_server.host,
         "websocket_port": websocket_server.port,
+        "page_name": page,
     }
 
     if hasattr(module, "AUTHORS"):
@@ -97,6 +98,7 @@ def _render_module_page(
 
     page = module.QS_INTERNAL_REGISTERED_PAGES[page]
     if "instance_uuid" in context:
+        ctx["isInstance"] = True
 
         def build_callback():
             def callback(message: str):

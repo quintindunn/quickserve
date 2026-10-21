@@ -1,6 +1,12 @@
 {% extends "core/core.html" %}
 {% block title %}
-    {% block moduletitle %}{% endblock %}
+    {% block moduletitle %}
+        {% if context.isInstance %}
+            {{ context.instance_name }} - {{ context.page_name }}
+        {% else %}
+            {{ context.module_name }} - {{ context.page_name }}
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 {% block head %}
     {% block modulehead %}{% endblock %}
@@ -11,7 +17,12 @@
             <a href="{{ link(page='about') }}"
                style="text-decoration: underline;
                       color: inherit">
-                <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
+                {% if context.isInstance %}
+                    <h1>{{ context.instance_name }} - V{{ context.module_version }}</h1>
+                    <p>Instance of <span>{{ context.module_name }}</span></p>
+                {% else %}
+                    <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
+                {% endif %}
             </a>
             {% if context.module_authors %}
                 <span>Module by {% for author in context.module_authors %}<a href="{{ author.github }}">{{ author.name }}</a>, {% endfor %}</span>
