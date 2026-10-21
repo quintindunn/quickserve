@@ -1,3 +1,10 @@
+"""
+Decorators for registering pages and actions
+
+Author: Quintin Dunn
+Date: 10/21/2021
+"""
+
 import dataclasses
 from collections.abc import Callable
 from functools import wraps as _wraps
@@ -44,7 +51,7 @@ class RegisteredCallable:
             raise RuntimeError(f"Callable '{self.name}' is not bound to a module.")
 
         if self.instance_specific:
-            if not hasattr(_request, "instance"):
+            if not hasattr(_request, "instance") or _request.instance is None:
                 return self._not_found()
 
             return self.func(

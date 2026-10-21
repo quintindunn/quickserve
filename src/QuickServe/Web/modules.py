@@ -63,7 +63,7 @@ def _render_module_page(
     if module_name not in catalog:
         return (
             "<!DOCTYPE HTML>"
-            "<html><head><title>RMP 404 Not Found!</title></head>"
+            "<html><head><title>404 Not Found!</title></head>"
             "<body><h1>Page not found!</h1></body></html>"
         )
 
