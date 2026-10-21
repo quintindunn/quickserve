@@ -197,16 +197,19 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     :param method: The action being called.
     :return:
     """
-    method = f"action_{method}"
 
     catalog = current_app.extensions["quickserve.catalog"]
     base_module = catalog.require(module_name)
     module: "Module" = base_module.module
 
-    if not hasattr(module, method):
+    if not hasattr(module, "QS_INTERNAL_REGISTERED_ACTIONS"):
         return "500", 500
 
-    method = getattr(module, method)
+    actions = module.QS_INTERNAL_REGISTERED_ACTIONS  # noqa
+    method = actions.get(method)
+
+    if method is None:
+        return "500", 500
 
     instance_manager = current_app.extensions["quickserve.instance_manager"]
     values = method(instance_manager, **request.form.to_dict())

@@ -15,7 +15,7 @@ from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 
-from QuickServeModuleLibrary.decorators import page
+from QuickServeModuleLibrary.decorators import page, action
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -79,7 +79,8 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    def action_install(self, instances: "InstanceManager", **kwargs):
+    @action
+    def install(self, instances: "InstanceManager", **kwargs):
         """
         Installation action
         :param instances: InstanceManager reference, used for record insertion
@@ -181,7 +182,7 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    @page(instance_specific=True, page_name="fs")
+    @page(instance_specific=True)
     def filesystem(self, instance: "BaseInstance", *args, **kwargs):
         asset = self.module.get_resource_path("filesystem.html")
 
