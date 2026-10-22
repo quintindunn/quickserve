@@ -8,11 +8,16 @@
 {% block content %}
     <div class="module">
         <div>
-            <a href="{{ link(page='about') }}"
-               style="text-decoration: underline;
-                      color: inherit">
-                <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
-            </a>
+            <div class="mod-heading">
+                <a href="{{ link(page='about') }}"
+                   style="text-decoration: underline;
+                          color: inherit">
+                    <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
+                </a>
+                {% if context.instance_uuid %}
+                    <button id="qs-instance-delete">Delete Instance</button>
+                {% endif %}
+            </div>
             {% if context.module_authors %}
                 <span>Module by {% for author in context.module_authors %}<a href="{{ author.github }}">{{ author.name }}</a>, {% endfor %}</span>
                 <div class="pages">
@@ -27,5 +32,25 @@
         <div>
             {% block modulebody %}{% endblock %}
         </div>
+        {% if context.instance_uuid %}
+            <script defer>
+                const delete_instance_btn = document.getElementById("qs-instance-delete");
+                const instance_name = {{ context.instance_name | tojson }}
+
+                delete_instance_btn.addEventListener("click", () => {
+                    const confirmed = confirm(`Delete instance "${instance_name}"? This cannot be undone!`);
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    fetch({{ url_for("modules.instancestatic.instance_delete", uuid=context.instance_uuid) | tojson }}, {
+                        method: "POST"
+                    }).then(() => {
+                        window.location.href = {{ url_for("modules.module_about", module_name=context.module_name) | tojson }}
+                    })
+                });
+            </script>
+        {% endif %}
     </div>
 {% endblock %}

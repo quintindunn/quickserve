@@ -22,6 +22,7 @@ from flask import (
 from flask.typing import ResponseReturnValue
 from werkzeug.utils import secure_filename
 
+from QuickServe.Common.search import Search
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.contracts import Module
@@ -489,7 +490,9 @@ def instance_upload_file(uuid: str):
 
     path = Path(root)
 
-    path = _get_path(instance, str(path / secure_filename(file.filename)), must_exist=False)
+    path = _get_path(
+        instance, str(path / secure_filename(file.filename)), must_exist=False
+    )
 
     if path is None:
         return {"error": ""}, 400
@@ -500,3 +503,20 @@ def instance_upload_file(uuid: str):
     file.save(path)
 
     return ""
+
+
+@instance_static.route("/<uuid>/delete", methods=["POST"])
+def instance_delete(uuid: str):
+    instance_manager: "InstanceManager" = current_app.extensions[
+        "quickserve.instance_manager"
+    ]
+    instance = instance_manager.from_uuid(uuid)
+    working_dir = instance.working_directory()
+    if working_dir.exists():
+        shutil.rmtree(working_dir.resolve())
+    instance_manager.delete_from_uuid(uuid=uuid)
+
+    search: "Search" = current_app.extensions["quickserve.search"]
+    search.reload_instances()
+
+    return "OK", 200
