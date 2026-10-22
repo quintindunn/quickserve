@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Callable
 
 import requests
 
+from QuickServeModuleLibrary.forms.datatypes import String
+from QuickServeModuleLibrary.forms.forms import QSForm
 from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
@@ -24,6 +26,13 @@ if TYPE_CHECKING:
     from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
 logger = logging.getLogger("minecraft-vanilla")
+
+
+class BanPlayer(QSForm):
+    playerName = String(placeholder="Player Name", required=True)
+    banReason = String(placeholder="Ban Reason", required=False)
+
+
 
 
 class Module:
@@ -188,3 +197,12 @@ class Module:
 
         with open(asset, "r") as f:
             return f.read(), dict()
+
+    @page(instance_specific=True, page_name="Ban Player")
+    def ban_player(self, instance: "BaseInstance", *args, **kwargs):
+        asset = self.module.get_resource_path("banPlayer.html")
+
+        form = BanPlayer()
+
+        with open(asset, "r") as f:
+            return f.read(), {"form": form.compile(with_submit=True)}

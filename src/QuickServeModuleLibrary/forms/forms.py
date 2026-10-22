@@ -1,17 +1,21 @@
 from typing import TYPE_CHECKING
+from markupsafe import Markup
+from QuickServeModuleLibrary.forms.datatypes import SubmitButton
 
 if TYPE_CHECKING:
     from QuickServeModuleLibrary.forms.datatypes import *
 
 
 class QSForm:
-    def _generate_form_head(self):
+    @staticmethod
+    def _generate_form_head():
         return f"<form>"
 
-    def _generate_form_foot(self):
+    @staticmethod
+    def _generate_form_foot():
         return f"</form>"
 
-    def compile(self):
+    def compile(self, with_submit: bool = True):
         attr_names = filter(lambda x: not x.startswith("_"), self.__class__.__dict__)
 
         attr_dict: dict[str, BaseDataType] = {
@@ -21,9 +25,12 @@ class QSForm:
         inputs = [self._generate_form_head()]
         for k, v in attr_dict.items():
             inputs.append(v.compile(id=k))
+
+        if with_submit:
+            inputs.append(SubmitButton(default="Submit", label="").compile("submit"))
         inputs.append(self._generate_form_foot())
 
-        return "\n".join(inputs)
+        return Markup("\n".join(inputs))
 
 
 if __name__ == "__main__":
