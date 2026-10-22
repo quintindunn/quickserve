@@ -48,7 +48,7 @@
                     fetch({{ url_for("modules.instancestatic.instance_delete", uuid=context.instance_uuid) | tojson }}, {
                         method: "POST"
                     }).then(() => {
-                        window.location.reload()
+                        window.location.href = {{ url_for("modules.module_about", module_name=context.module_name) | tojson }}
                     })
                 });
             </script>
