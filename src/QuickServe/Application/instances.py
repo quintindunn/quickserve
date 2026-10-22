@@ -93,7 +93,6 @@ class InstanceManager:
         if self._instances[str(uuid)]:
             self._instances.pop(str(uuid))
 
-
     def _build(
         self, module, instance_name: str, module_name: str, identifier: UUID
     ) -> BaseInstance:

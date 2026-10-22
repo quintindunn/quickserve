@@ -489,7 +489,9 @@ def instance_upload_file(uuid: str):
 
     path = Path(root)
 
-    path = _get_path(instance, str(path / secure_filename(file.filename)), must_exist=False)
+    path = _get_path(
+        instance, str(path / secure_filename(file.filename)), must_exist=False
+    )
 
     if path is None:
         return {"error": ""}, 400
@@ -500,6 +502,7 @@ def instance_upload_file(uuid: str):
     file.save(path)
 
     return ""
+
 
 @instance_static.route("/<uuid>/delete", methods=["POST"])
 def instance_delete(uuid: str):

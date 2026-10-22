@@ -4,6 +4,7 @@ Peewee manager for QuickServe data.
 Author: Quintin Dunn
 Date: 09/14/2026
 """
+
 import logging
 from uuid import UUID
 
@@ -12,6 +13,7 @@ from QuickServe.Database.instances import InstanceModel
 
 
 logger = logging.getLogger(__name__)
+
 
 class PeeweeInstanceManager:
     """

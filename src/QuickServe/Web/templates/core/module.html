@@ -18,7 +18,6 @@
                     <button id="qs-instance-delete">Delete Instance</button>
                 {% endif %}
             </div>
-
             {% if context.module_authors %}
                 <span>Module by {% for author in context.module_authors %}<a href="{{ author.github }}">{{ author.name }}</a>, {% endfor %}</span>
                 <div class="pages">
