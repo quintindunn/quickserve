@@ -506,6 +506,10 @@ def instance_delete(uuid: str):
     instance_manager: "InstanceManager" = current_app.extensions[
         "quickserve.instance_manager"
     ]
+    instance = instance_manager.from_uuid(uuid)
+    working_dir = instance.working_directory()
+    if working_dir.exists():
+        shutil.rmtree(working_dir.resolve())
     instance_manager.delete_from_uuid(uuid=uuid)
 
     return "OK", 200

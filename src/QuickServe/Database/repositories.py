@@ -29,7 +29,6 @@ class PeeweeInstanceManager:
             instance_uuid=record.instance_uuid,
             instance_name=record.instance_name,
             module_name=record.module_name,
-            active=True
         )
         return self._record(model)
 
@@ -41,7 +40,7 @@ class PeeweeInstanceManager:
         :return: The matching instance data.
         """
         logger.info("Getting instance %", identifier)
-        model = InstanceModel.get(InstanceModel.instance_uuid == identifier).get(InstanceModel.active == True)
+        model = InstanceModel.get(InstanceModel.instance_uuid == identifier)
         return self._record(model)
 
     def load_all_active(self) -> list[InstanceRecord]:
@@ -50,7 +49,7 @@ class PeeweeInstanceManager:
 
         :return: List of all instance records.
         """
-        models = InstanceModel.select().where(InstanceModel.active == True)
+        models = InstanceModel.select()
         return [self._record(model) for model in models]
 
     @staticmethod

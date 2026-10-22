@@ -19,7 +19,6 @@ class InstanceModel(Model):
     instance_name = CharField(null=False)
     module_name = CharField(null=False)
     created_on = DateTimeField(default=datetime.now)
-    active = BooleanField(default=True)
 
     class Meta:
         database = database_proxy
