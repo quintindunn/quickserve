@@ -33,8 +33,6 @@ class BanPlayer(QSForm):
     banReason = String(placeholder="Ban Reason", required=False)
 
 
-
-
 class Module:
     NAME: str = "Minecraft-Vanilla"
     VERSION: str = "0.0.1"
