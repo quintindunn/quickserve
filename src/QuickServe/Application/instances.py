@@ -81,7 +81,7 @@ class InstanceManager:
         )
 
     def load_all(self) -> Generator[BaseInstance, Any, None]:
-        for record in self.repository.load_all():
+        for record in self.repository.load_all_active():
             module = self.catalog.require(record.module_name)
             yield self._build(
                 module, record.instance_name, record.module_name, record.instance_uuid

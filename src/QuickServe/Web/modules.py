@@ -500,3 +500,9 @@ def instance_upload_file(uuid: str):
     file.save(path)
 
     return ""
+
+@instance_static.route("/<uuid>/delete", methods=["POST"])
+def instance_delete(uuid: str):
+    print(uuid)
+
+    return "", 200

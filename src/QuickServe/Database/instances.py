@@ -5,7 +5,7 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-from peewee import DateTimeField, UUIDField, Model, CharField
+from peewee import DateTimeField, UUIDField, Model, CharField, BooleanField
 
 from datetime import datetime
 
@@ -19,6 +19,7 @@ class InstanceModel(Model):
     instance_name = CharField(null=False)
     module_name = CharField(null=False)
     created_on = DateTimeField(default=datetime.now)
+    active = BooleanField(default=True)
 
     class Meta:
         database = database_proxy
