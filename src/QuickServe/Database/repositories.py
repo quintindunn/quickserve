@@ -54,6 +54,16 @@ class PeeweeInstanceManager:
         return [self._record(model) for model in models]
 
     @staticmethod
+    def delete(uuid: str | UUID) -> None:
+        """
+        Deactivates an instance.
+
+        :param uuid: The instance's uuid to deactivate
+        """
+        model = InstanceModel.get(InstanceModel.instance_uuid == uuid)
+        InstanceModel.delete_by_id(model.get_id())
+
+    @staticmethod
     def _record(model: InstanceModel) -> InstanceRecord:
         """
         Converts a Peewee model into persistence-neutral instance data.

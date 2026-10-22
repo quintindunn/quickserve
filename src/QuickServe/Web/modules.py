@@ -503,6 +503,9 @@ def instance_upload_file(uuid: str):
 
 @instance_static.route("/<uuid>/delete", methods=["POST"])
 def instance_delete(uuid: str):
-    print(uuid)
+    instance_manager: "InstanceManager" = current_app.extensions[
+        "quickserve.instance_manager"
+    ]
+    instance_manager.delete_from_uuid(uuid=uuid)
 
-    return "", 200
+    return "OK", 200
