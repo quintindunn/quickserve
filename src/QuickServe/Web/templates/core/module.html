@@ -38,7 +38,7 @@
                 const instance_name = {{ context.instance_name | tojson }}
 
                 delete_instance_btn.addEventListener("click", () => {
-                    const confirmed = confirm(`Delete instance ${instance_name}`);
+                    const confirmed = confirm(`Delete instance "${instance_name}"? This cannot be undone!`);
 
                     if (!confirmed) {
                         return;

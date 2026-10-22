@@ -22,6 +22,7 @@ from flask import (
 from flask.typing import ResponseReturnValue
 from werkzeug.utils import secure_filename
 
+from QuickServe.Common.search import Search
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.contracts import Module
@@ -514,5 +515,8 @@ def instance_delete(uuid: str):
     if working_dir.exists():
         shutil.rmtree(working_dir.resolve())
     instance_manager.delete_from_uuid(uuid=uuid)
+
+    search: "Search" = current_app.extensions["quickserve.search"]
+    search.reload_instances()
 
     return "OK", 200
