@@ -45,6 +45,7 @@ if __name__ == "__main__":
         userEmail = Email(placeholder="dunnquintin07@gmail.com", required=False, label="User Email")
         userPic = File(accept="image/*", label="Profile Picture")
         age = Number(placeholder="Age", label="User Age", min=18, max=100)
+        password = Password(placeholder="Password123$", minlength=8, maxlength=32, pattern=r"[a-ZA-Z0-9]")
 
     form = SampleForm()
     print(form.compile())

@@ -171,6 +171,30 @@ class Number(BaseInput):
         )
 
 
+class Password(BaseInput):
+    def __init__(
+        self,
+        default: str | None = None,
+        *,
+        required: bool = False,
+        label: str | None = None,
+        placeholder: str | None = None,
+        minlength: int | None = None,
+        maxlength: int | None = None,
+        pattern: str | None = None
+    ):
+        super().__init__(
+            "password",
+            default=default,
+            required=required,
+            label=label,
+            placeholder=placeholder,
+            minlength=minlength,
+            maxlength=maxlength,
+            pattern=pattern
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,
