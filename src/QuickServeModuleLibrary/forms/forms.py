@@ -39,6 +39,7 @@ if __name__ == "__main__":
     class SampleForm(QSForm):
         firstName = String(default="Quintin", placeholder="First Name", required=True)
         lastName = String(default="", placeholder="Last Name", required=False)
+        isAdmin = Checkbox(True, required=True, label="Is Admin")
 
     form = SampleForm()
     print(form.compile())

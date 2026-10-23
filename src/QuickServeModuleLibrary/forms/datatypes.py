@@ -74,6 +74,23 @@ class String(BaseInput):
         )
 
 
+class Checkbox(BaseInput):
+    def __init__(
+        self,
+        default: bool = False,
+        *,
+        required: bool = False,
+        label: str | None = None,
+    ):
+        super().__init__(
+            "checkbox",
+            default=None,
+            required=required,
+            checked=default,
+            label=label,
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,
