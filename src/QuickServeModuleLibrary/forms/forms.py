@@ -44,6 +44,7 @@ if __name__ == "__main__":
         textColor = Color(default=(255, 0, 0), required=True, label="User Color")
         userEmail = Email(placeholder="dunnquintin07@gmail.com", required=False, label="User Email")
         userPic = File(accept="image/*", label="Profile Picture")
+        age = Number(placeholder="Age", label="User Age", min=18, max=100)
 
     form = SampleForm()
     print(form.compile())

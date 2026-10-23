@@ -149,6 +149,28 @@ class File(BaseInput):
         )
 
 
+class Number(BaseInput):
+    def __init__(
+        self,
+        default: str | None = None,
+        *,
+        min: int | None = None,
+        max: int | None = None,
+        required: bool = False,
+        label: str | None = None,
+        placeholder: str | None = None,
+    ):
+        super().__init__(
+            "number",
+            default=default,
+            required=required,
+            min=min,
+            max=max,
+            label=label,
+            placeholder=placeholder
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,
