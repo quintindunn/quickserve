@@ -43,6 +43,7 @@ if __name__ == "__main__":
         userColor = Color(default="#00ff00", required=True, label="User Color")
         textColor = Color(default=(255, 0, 0), required=True, label="User Color")
         userEmail = Email(placeholder="dunnquintin07@gmail.com", required=False, label="User Email")
+        userPic = File(accept="image/*", label="Profile Picture")
 
     form = SampleForm()
     print(form.compile())

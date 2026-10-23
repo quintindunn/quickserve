@@ -112,15 +112,13 @@ class Color(BaseInput):
 class Email(BaseInput):
     def __init__(
         self,
-        default: str | tuple[int, int, int] = (0, 0, 0),
+        default: str | None = None,
         *,
         placeholder: str | None = None,
         required: bool = False,
         label: str | None = None,
         multiple: bool = False,
     ):
-        if isinstance(default, tuple):
-            default = f"#{default[0]:02x}{default[1]:02x}{default[2]:02x}"
         super().__init__(
             "email",
             default=default,
@@ -128,6 +126,26 @@ class Email(BaseInput):
             required=required,
             label=label,
             multiple=multiple
+        )
+
+
+class File(BaseInput):
+    def __init__(
+        self,
+        default: str | None = None,
+        *,
+        accept: str | None = None,
+        required: bool = False,
+        label: str | None = None,
+        multiple: bool = False,
+    ):
+        super().__init__(
+            "file",
+            default=default,
+            required=required,
+            multiple=multiple,
+            accept=accept,
+            label=label,
         )
 
 
