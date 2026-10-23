@@ -42,7 +42,7 @@ if __name__ == "__main__":
         isAdmin = Checkbox(default=True, required=True, label="Is Admin")
         userColor = Color(default="#00ff00", required=True, label="User Color")
         textColor = Color(default=(255, 0, 0), required=True, label="User Color")
-
+        userEmail = Email(placeholder="dunnquintin07@gmail.com", required=False, label="User Email")
 
     form = SampleForm()
     print(form.compile())

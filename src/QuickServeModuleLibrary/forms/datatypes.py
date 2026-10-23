@@ -109,6 +109,28 @@ class Color(BaseInput):
         )
 
 
+class Email(BaseInput):
+    def __init__(
+        self,
+        default: str | tuple[int, int, int] = (0, 0, 0),
+        *,
+        placeholder: str | None = None,
+        required: bool = False,
+        label: str | None = None,
+        multiple: bool = False,
+    ):
+        if isinstance(default, tuple):
+            default = f"#{default[0]:02x}{default[1]:02x}{default[2]:02x}"
+        super().__init__(
+            "email",
+            default=default,
+            placeholder=placeholder,
+            required=required,
+            label=label,
+            multiple=multiple
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,
