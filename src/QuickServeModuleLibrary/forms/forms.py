@@ -39,7 +39,10 @@ if __name__ == "__main__":
     class SampleForm(QSForm):
         firstName = String(default="Quintin", placeholder="First Name", required=True)
         lastName = String(default="", placeholder="Last Name", required=False)
-        isAdmin = Checkbox(True, required=True, label="Is Admin")
+        isAdmin = Checkbox(default=True, required=True, label="Is Admin")
+        userColor = Color(default="#00ff00", required=True, label="User Color")
+        textColor = Color(default=(255, 0, 0), required=True, label="User Color")
+
 
     form = SampleForm()
     print(form.compile())

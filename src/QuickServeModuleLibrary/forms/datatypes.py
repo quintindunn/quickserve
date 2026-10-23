@@ -91,6 +91,24 @@ class Checkbox(BaseInput):
         )
 
 
+class Color(BaseInput):
+    def __init__(
+        self,
+        default: str | tuple[int, int, int] = (0, 0, 0),
+        *,
+        required: bool = False,
+        label: str | None = None,
+    ):
+        if isinstance(default, tuple):
+            default = f"#{default[0]:02x}{default[1]:02x}{default[2]:02x}"
+        super().__init__(
+            "color",
+            default=default,
+            required=required,
+            label=label,
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,
