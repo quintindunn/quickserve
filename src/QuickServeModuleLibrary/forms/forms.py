@@ -47,5 +47,27 @@ if __name__ == "__main__":
         age = Number(placeholder="Age", label="User Age", min=18, max=100)
         password = Password(placeholder="Password123$", minlength=8, maxlength=32, pattern=r"[a-ZA-Z0-9]")
 
-    form = SampleForm()
-    print(form.compile())
+    from flask import Flask
+
+    app = Flask(__name__)
+
+    @app.route("/")
+    def index():
+        form = SampleForm()
+        form_html = form.compile()
+        css = """
+        <style>
+        body, body > * {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        form > * {
+            margin-top: 1vh;
+        }
+        </style>
+        """
+        return f"<html><head>{css}</head><body>{form_html}</body></html>"
+
+    app.run(host="0.0.0.0", port=8085, debug=True)
