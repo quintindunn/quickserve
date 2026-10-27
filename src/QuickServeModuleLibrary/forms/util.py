@@ -67,6 +67,7 @@ def _build_element(tag: str, attrs: dict[str, Any], content: Any = None) -> Mark
 def build_input(
     input_type: str | None = None,
     id: str | None = None,
+    name: str | None = None,
     value: Any = None,
     required: bool | None = None,
     **other,
@@ -74,6 +75,7 @@ def build_input(
     attrs = {
         "type": input_type,
         "id": id,
+        "name": name or id,
         "value": value,
         "required": required,
         **other,
@@ -107,6 +109,7 @@ def build_button(
     button_type: str | None = None,
     id: str | None = None,
     value: Any = None,
+    name: str | None = None,
     **other,
 ) -> Markup:
     return _build_element(
@@ -114,6 +117,7 @@ def build_button(
         {
             "type": button_type,
             "id": id,
+            "name": name or id,
             **other,
         },
         content=value,
@@ -124,13 +128,14 @@ def build_input_with_label(
     label: str | None,
     input_type: str | None = None,
     id: str | None = None,
+    name: str | None = None,
     value: Any = None,
     required: bool | None = None,
     **other,
 ) -> Markup:
     return Markup(
         f"<label>{escape(label or '')}"
-        f"{build_input(input_type, id, value, required, **other)}</label>"
+        f"{build_input(input_type, id, name, value, required, **other)}</label>"
     )
 
 
@@ -138,10 +143,11 @@ def build_button_with_label(
     label: str | None,
     button_type: str | None = None,
     id: str | None = None,
+    name: str | None = None,
     value: Any = None,
     **other,
 ) -> Markup:
     return Markup(
         f"<label>{escape(label or '')}"
-        f"{build_button(button_type, id, value, **other)}</label>"
+        f"{build_button(button_type, id, name, value, **other)}</label>"
     )

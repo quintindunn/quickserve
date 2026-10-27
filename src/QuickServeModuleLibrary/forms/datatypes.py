@@ -1,10 +1,11 @@
 import logging
-from typing import Any
-from markupsafe import Markup
+from typing import Any, Tuple
+from markupsafe import Markup, escape
 
 from QuickServeModuleLibrary.forms.util import (
     build_input_with_label,
     build_button_with_label,
+    build_input,
     _generate_label,
 )
 
@@ -22,7 +23,7 @@ class BaseDataType:
         self.required: bool = required
         self.label: str | None = label
 
-    def compile(self, id: str) -> Markup:
+    def compile(self, id: str, name: str | None = None) -> Markup:
         raise NotImplementedError
 
 
@@ -42,17 +43,27 @@ class BaseInput(BaseDataType):
         self.placeholder = placeholder
         self.other = other
 
-    def compile(self, id: str) -> Markup:
-        fallback_label = self.label if self.label is not None else _generate_label(id)
-
-        return build_input_with_label(
-            fallback_label,
-            self.input_type,
-            id,
-            self.default,
-            self.required,
+    def compile(self, id: str, name: str | None = None, use_label: bool = True) -> Markup:
+        if use_label:
+            fallback_label = self.label if self.label is not None else _generate_label(id)
+            return build_input_with_label(
+                label=fallback_label,
+                input_type=self.input_type,
+                id=id,
+                name=name,
+                value=self.default,
+                required=self.required,
+                placeholder=self.placeholder,
+                **self.other,
+            )
+        return build_input(
+            input_type=self.input_type,
+            id=id,
+            name=name,
+            value=self.default,
+            required=self.required,
             placeholder=self.placeholder,
-            **self.other,
+            **self.other
         )
 
 
@@ -195,6 +206,39 @@ class Password(BaseInput):
         )
 
 
+class Radio(BaseInput):
+    def __init__(
+        self,
+        value: str,
+        *,
+        required: bool = False,
+        label: str | None = None,
+        selected: bool = False
+    ):
+        super().__init__(
+            "radio",
+            required=required,
+            label=label,
+            default=value,
+            checked=selected
+        )
+
+
+class RadioSelector(BaseDataType):
+    def __init__(self, default, options: list[str], *, label: str | None = None):
+        super().__init__(default, False, label)
+
+        self._radios: list[Radio] = list()
+        for value in options:
+            self._radios.append(Radio(value, selected=value==default, label=value))
+
+    def compile(self, id: str, name: str | None = None) -> Markup:
+        radios = '\n'.join(radio.compile(id=id, name=name) for radio in self._radios)
+        return Markup(f"<label>{escape(_generate_label(id) or '')}{radios}</label>")
+
+
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,
@@ -209,14 +253,15 @@ class BaseButton(BaseDataType):
         self.button_type = button_type
         self.other = other
 
-    def compile(self, id: str) -> Markup:
+    def compile(self, id: str, name: str | None = None) -> Markup:
         fallback_label = self.label if self.label is not None else _generate_label(id)
 
         return build_button_with_label(
-            fallback_label,
-            self.button_type,
-            id,
-            self.default,
+            label=fallback_label,
+            button_type=self.button_type,
+            id=id,
+            name=name,
+            value=self.default,
             **self.other,
         )
 

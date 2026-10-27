@@ -46,6 +46,7 @@ if __name__ == "__main__":
         userPic = File(accept="image/*", label="Profile Picture")
         age = Number(placeholder="Age", label="User Age", min=18, max=100)
         password = Password(placeholder="Password123$", minlength=8, maxlength=32, pattern=r"[a-ZA-Z0-9]")
+        userType = RadioSelector("developer", ["developer", "user"])
 
     from flask import Flask
 
@@ -55,6 +56,7 @@ if __name__ == "__main__":
     def index():
         form = SampleForm()
         form_html = form.compile()
+        print(form_html)
         css = """
         <style>
         body, body > * {
