@@ -276,10 +276,7 @@ class URL(BaseInput):
 
 
 class Reset(BaseInput):
-    def __init__(
-        self,
-        label: str | None = None
-    ):
+    def __init__(self, label: str | None = None):
         super().__init__(
             "reset",
             label=label,
@@ -304,8 +301,9 @@ class Time(BaseInput):
             min=min,
             max=max,
             step=step,
-            label=label
+            label=label,
         )
+
 
 class BaseButton(BaseDataType):
     def __init__(
@@ -372,4 +370,55 @@ class SubmitButton(BaseButton):
             label=label,
             inner_text=inner_text,
             **other,
+        )
+
+
+class Textarea(BaseDataType):
+    def __init__(
+        self,
+        default: str | None = None,
+        *,
+        placeholder: str | None = None,
+        required: bool = False,
+        label: str | None = None,
+        rows: int | None = None,
+        cols: int | None = None,
+        minlength: int | None = None,
+        maxlength: int | None = None,
+        **other,
+    ):
+        super().__init__(default, required, label)
+        self.placeholder = placeholder
+        self.rows = rows
+        self.cols = cols
+        self.minlength = minlength
+        self.maxlength = maxlength
+        self.other = other
+
+    def compile(self, id: str, name: str | None = None) -> Markup:
+        fallback_label = self.label if self.label is not None else _generate_label(id)
+
+        attrs = {
+            "id": id,
+            "name": name or id,
+            "placeholder": self.placeholder,
+            "required": self.required,
+            "rows": self.rows,
+            "cols": self.cols,
+            "minlength": self.minlength,
+            "maxlength": self.maxlength,
+            **self.other,
+        }
+
+        attrs_string = "".join(
+            f' {key}="{escape(value)}"' if value is not True else f" {key}"
+            for key, value in attrs.items()
+            if value is not None and value is not False
+        )
+
+        return Markup(
+            f"<label>{escape(fallback_label or '')}"
+            f"<textarea{attrs_string}>"
+            f"{escape(self.default) if self.default is not None else ''}"
+            f"</textarea></label>"
         )

@@ -55,7 +55,14 @@ if __name__ == "__main__":
         rating = Range(9, max=10, min=1, label="How Good Is This Form")
         githubUrl = URL(placeholder="Github URL", required=True)
         accountExpiration = Time(default="12:00", min="02:30", max="22:30", step=30)
-
+        bio = Textarea(
+            default="I Like Trains",
+            placeholder="Enter your bio",
+            rows=5,
+            cols=40,
+            maxlength=500,
+            required=True,
+        )
         resetForm = Reset(label="Clear")
 
     from flask import Flask
