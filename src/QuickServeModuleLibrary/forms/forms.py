@@ -54,6 +54,7 @@ if __name__ == "__main__":
             pattern=r"[a-ZA-Z0-9]",
         )
         userType = RadioSelector("developer", ["developer", "user"])
+        rating = Range(9, max=10, min=1, label="How Good Is This Form")
 
     from flask import Flask
 

@@ -237,6 +237,28 @@ class RadioSelector(BaseDataType):
         return Markup(f"<label>{escape(_generate_label(id) or '')}{radios}</label>")
 
 
+class Range(BaseInput):
+    def __init__(
+        self,
+        default: int | None = None,
+        *,
+        min: int | None = None,
+        max: int | None = None,
+        required: bool = False,
+        label: str | None = None,
+        placeholder: str | None = None,
+    ):
+        super().__init__(
+            "range",
+            default=default,
+            required=required,
+            min=min,
+            max=max,
+            label=label,
+            placeholder=placeholder,
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,
