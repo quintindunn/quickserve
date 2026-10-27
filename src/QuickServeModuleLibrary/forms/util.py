@@ -35,7 +35,6 @@ def _generate_label(original: str) -> str:
 
 def _build_element(tag: str, attrs: dict[str, Any], content: Any = None) -> Markup:
     output = f"<{tag}"
-
     for key, value in attrs.items():
         if value is None or value is False:
             continue
@@ -110,6 +109,7 @@ def build_button(
     id: str | None = None,
     value: Any = None,
     name: str | None = None,
+    content: str | None = None,
     **other,
 ) -> Markup:
     return _build_element(
@@ -120,7 +120,7 @@ def build_button(
             "name": name or id,
             **other,
         },
-        content=value,
+        content=content,
     )
 
 
@@ -145,9 +145,10 @@ def build_button_with_label(
     id: str | None = None,
     name: str | None = None,
     value: Any = None,
+    inner_text: str | None = None,
     **other,
 ) -> Markup:
     return Markup(
         f"<label>{escape(label or '')}"
-        f"{build_button(button_type, id, name, value, **other)}</label>"
+        f"{build_button(button_type, id, name, value, inner_text, **other)}</label>"
     )

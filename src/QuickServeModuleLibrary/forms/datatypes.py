@@ -43,9 +43,13 @@ class BaseInput(BaseDataType):
         self.placeholder = placeholder
         self.other = other
 
-    def compile(self, id: str, name: str | None = None, use_label: bool = True) -> Markup:
+    def compile(
+        self, id: str, name: str | None = None, use_label: bool = True
+    ) -> Markup:
         if use_label:
-            fallback_label = self.label if self.label is not None else _generate_label(id)
+            fallback_label = (
+                self.label if self.label is not None else _generate_label(id)
+            )
             return build_input_with_label(
                 label=fallback_label,
                 input_type=self.input_type,
@@ -63,7 +67,7 @@ class BaseInput(BaseDataType):
             value=self.default,
             required=self.required,
             placeholder=self.placeholder,
-            **self.other
+            **self.other,
         )
 
 
@@ -136,7 +140,7 @@ class Email(BaseInput):
             placeholder=placeholder,
             required=required,
             label=label,
-            multiple=multiple
+            multiple=multiple,
         )
 
 
@@ -178,7 +182,7 @@ class Number(BaseInput):
             min=min,
             max=max,
             label=label,
-            placeholder=placeholder
+            placeholder=placeholder,
         )
 
 
@@ -192,7 +196,7 @@ class Password(BaseInput):
         placeholder: str | None = None,
         minlength: int | None = None,
         maxlength: int | None = None,
-        pattern: str | None = None
+        pattern: str | None = None,
     ):
         super().__init__(
             "password",
@@ -202,7 +206,7 @@ class Password(BaseInput):
             placeholder=placeholder,
             minlength=minlength,
             maxlength=maxlength,
-            pattern=pattern
+            pattern=pattern,
         )
 
 
@@ -213,14 +217,10 @@ class Radio(BaseInput):
         *,
         required: bool = False,
         label: str | None = None,
-        selected: bool = False
+        selected: bool = False,
     ):
         super().__init__(
-            "radio",
-            required=required,
-            label=label,
-            default=value,
-            checked=selected
+            "radio", required=required, label=label, default=value, checked=selected
         )
 
 
@@ -230,13 +230,11 @@ class RadioSelector(BaseDataType):
 
         self._radios: list[Radio] = list()
         for value in options:
-            self._radios.append(Radio(value, selected=value==default, label=value))
+            self._radios.append(Radio(value, selected=value == default, label=value))
 
     def compile(self, id: str, name: str | None = None) -> Markup:
-        radios = '\n'.join(radio.compile(id=id, name=name) for radio in self._radios)
+        radios = "\n".join(radio.compile(id=id, name=name) for radio in self._radios)
         return Markup(f"<label>{escape(_generate_label(id) or '')}{radios}</label>")
-
-
 
 
 class BaseButton(BaseDataType):
@@ -247,11 +245,13 @@ class BaseButton(BaseDataType):
         button_type: str = "button",
         required: bool = False,
         label: str | None = None,
+        inner_text: str | None = None,
         **other,
     ):
         super().__init__(default, required, label)
         self.button_type = button_type
         self.other = other
+        self.inner_text = inner_text
 
     def compile(self, id: str, name: str | None = None) -> Markup:
         fallback_label = self.label if self.label is not None else _generate_label(id)
@@ -262,6 +262,7 @@ class BaseButton(BaseDataType):
             id=id,
             name=name,
             value=self.default,
+            inner_text=self.inner_text,
             **self.other,
         )
 
@@ -291,6 +292,7 @@ class SubmitButton(BaseButton):
         *,
         required: bool = False,
         label: str | None = None,
+        inner_text: str | None = "Submit",
         **other,
     ):
         super().__init__(
@@ -298,5 +300,6 @@ class SubmitButton(BaseButton):
             button_type="submit",
             required=required,
             label=label,
+            inner_text=inner_text,
             **other,
         )
