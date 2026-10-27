@@ -55,6 +55,8 @@ if __name__ == "__main__":
         rating = Range(9, max=10, min=1, label="How Good Is This Form")
         githubUrl = URL(placeholder="Github URL", required=True)
 
+        resetForm = Reset(label="Clear")
+
     from flask import Flask
 
     app = Flask(__name__)

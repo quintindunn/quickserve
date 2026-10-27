@@ -277,6 +277,17 @@ class URL(BaseInput):
         )
 
 
+class Reset(BaseInput):
+    def __init__(
+        self,
+        label: str | None = None
+    ):
+        super().__init__(
+            "reset",
+            label=label,
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,
