@@ -34,27 +34,77 @@ class QSForm:
 if __name__ == "__main__":
     from QuickServeModuleLibrary.forms.datatypes import *
 
+
     class SampleForm(QSForm):
-        firstName = String(default="Quintin", placeholder="First Name", required=True)
-        lastName = String(default="", placeholder="Last Name", required=False)
-        isAdmin = Checkbox(default=True, required=True, label="Is Admin")
-        userColor = Color(default="#00ff00", required=True, label="User Color")
-        textColor = Color(default=(255, 0, 0), required=True, label="User Color")
-        userEmail = Email(
-            placeholder="dunnquintin07@gmail.com", required=False, label="User Email"
+        firstName = String(
+            default="Quintin",
+            placeholder="First Name",
+            required=True,
         )
-        userPic = File(accept="image/*", label="Profile Picture")
-        age = Number(placeholder="Age", label="User Age", min=18, max=100)
+        lastName = String(
+            default="",
+            placeholder="Last Name",
+        )
+        isAdmin = Checkbox(
+            default=True,
+            required=True,
+            label="Is Admin",
+        )
+        userColor = Color(
+            default="#00ff00",
+            required=True,
+            label="User Color",
+        )
+        textColor = Color(
+            default=(255, 0, 0),
+            required=True,
+            label="Text Color",
+        )
+        userEmail = Email(
+            placeholder="dunnquintin07@gmail.com",
+            label="User Email",
+        )
+        userPic = File(
+            accept="image/*",
+            label="Profile Picture",
+        )
+        age = Number(
+            placeholder="Age",
+            label="User Age",
+            min=18,
+            max=100,
+            step=1,
+        )
         password = Password(
             placeholder="Password123$",
             minlength=8,
             maxlength=32,
-            pattern=r"[a-ZA-Z0-9]",
+            pattern=r"[a-zA-Z0-9]+",
         )
-        userType = RadioSelector("developer", ["developer", "user"])
-        rating = Range(9, max=10, min=1, label="How Good Is This Form")
-        githubUrl = URL(placeholder="Github URL", required=True)
-        accountExpiration = Time(default="12:00", min="02:30", max="22:30", step=30)
+        userType = RadioSelector(
+            default="developer",
+            options=["developer", "user"],
+            label="User Type",
+            required=True,
+        )
+        rating = Range(
+            default=9,
+            min=1,
+            max=10,
+            step=1,
+            label="How Good Is This Form",
+        )
+        githubUrl = URL(
+            placeholder="GitHub URL",
+            required=True,
+        )
+        accountExpiration = Time(
+            default=datetime.time(12, 0),
+            min=datetime.time(2, 30),
+            max=datetime.time(22, 30),
+            step=30,
+            label="Account Expiration",
+        )
         bio = Textarea(
             default="I Like Trains",
             placeholder="Enter your bio",
@@ -64,8 +114,8 @@ if __name__ == "__main__":
             required=True,
         )
         createdAt = DateTime(
-            default="2026-10-27T14:30",
-            min="2026-10-27T00:00",
+            default=datetime.datetime(2026, 10, 27, 14, 30),
+            min=datetime.datetime(2026, 10, 27, 0, 0),
             required=True,
             label="Created At",
             step=1,

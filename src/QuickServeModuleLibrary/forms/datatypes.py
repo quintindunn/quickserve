@@ -1,15 +1,26 @@
+import datetime
 import logging
-from typing import Any, Tuple
+from typing import Any
+
 from markupsafe import Markup, escape
 
 from QuickServeModuleLibrary.forms.util import (
     build_input_with_label,
     build_button_with_label,
     build_input,
+    _build_attrs,
     _generate_label,
 )
 
+
 logger = logging.getLogger(__name__)
+
+
+def _format_default(value: Any) -> Any:
+    if isinstance(value, (datetime.datetime, datetime.date, datetime.time)):
+        return value.isoformat()
+
+    return value
 
 
 class BaseDataType:
@@ -46,29 +57,26 @@ class BaseInput(BaseDataType):
     def compile(
         self, id: str, name: str | None = None, use_label: bool = True
     ) -> Markup:
+        fallback_label = self.label if self.label is not None else _generate_label(id)
+        value = None if self.input_type == "file" else _format_default(self.default)
+
+        attrs = {
+            "input_type": self.input_type,
+            "id": id,
+            "name": id if name is None else name,
+            "value": value,
+            "required": self.required,
+            "placeholder": self.placeholder,
+            **self.other,
+        }
+
         if use_label:
-            fallback_label = (
-                self.label if self.label is not None else _generate_label(id)
-            )
             return build_input_with_label(
                 label=fallback_label,
-                input_type=self.input_type,
-                id=id,
-                name=name,
-                value=self.default,
-                required=self.required,
-                placeholder=self.placeholder,
-                **self.other,
+                **attrs,
             )
-        return build_input(
-            input_type=self.input_type,
-            id=id,
-            name=name,
-            value=self.default,
-            required=self.required,
-            placeholder=self.placeholder,
-            **self.other,
-        )
+
+        return build_input(**attrs)
 
 
 class String(BaseInput):
@@ -79,6 +87,9 @@ class String(BaseInput):
         placeholder: str | None = None,
         required: bool = False,
         label: str | None = None,
+        minlength: int | None = None,
+        maxlength: int | None = None,
+        pattern: str | None = None,
     ):
         super().__init__(
             "text",
@@ -86,6 +97,9 @@ class String(BaseInput):
             placeholder=placeholder,
             required=required,
             label=label,
+            minlength=minlength,
+            maxlength=maxlength,
+            pattern=pattern,
         )
 
 
@@ -99,10 +113,9 @@ class Checkbox(BaseInput):
     ):
         super().__init__(
             "checkbox",
-            default=None,
             required=required,
-            checked=default,
             label=label,
+            checked=default,
         )
 
 
@@ -115,7 +128,14 @@ class Color(BaseInput):
         label: str | None = None,
     ):
         if isinstance(default, tuple):
-            default = f"#{default[0]:02x}{default[1]:02x}{default[2]:02x}"
+            if len(default) != 3 or any(
+                not isinstance(channel, int) or not 0 <= channel <= 255
+                for channel in default
+            ):
+                raise ValueError("Color must be an RGB tuple with values from 0 to 255")
+
+            default = "#{:02x}{:02x}{:02x}".format(*default)
+
         super().__init__(
             "color",
             default=default,
@@ -167,10 +187,11 @@ class File(BaseInput):
 class Number(BaseInput):
     def __init__(
         self,
-        default: str | None = None,
+        default: int | float | str | None = None,
         *,
-        min: int | None = None,
-        max: int | None = None,
+        min: int | float | None = None,
+        max: int | float | None = None,
+        step: int | float | None = None,
         required: bool = False,
         label: str | None = None,
         placeholder: str | None = None,
@@ -181,6 +202,7 @@ class Number(BaseInput):
             required=required,
             min=min,
             max=max,
+            step=step,
             label=label,
             placeholder=placeholder,
         )
@@ -220,30 +242,73 @@ class Radio(BaseInput):
         selected: bool = False,
     ):
         super().__init__(
-            "radio", required=required, label=label, default=value, checked=selected
+            "radio",
+            default=value,
+            required=required,
+            label=label,
+            checked=selected,
         )
 
 
 class RadioSelector(BaseDataType):
-    def __init__(self, default, options: list[str], *, label: str | None = None):
-        super().__init__(default, False, label)
+    def __init__(
+        self,
+        default: str | None = None,
+        options: list[str] | None = None,
+        *,
+        label: str | None = None,
+        required: bool = False,
+    ):
+        super().__init__(default, required, label)
 
-        self._radios: list[Radio] = list()
-        for value in options:
-            self._radios.append(Radio(value, selected=value == default, label=value))
+        self._radios = [
+            Radio(
+                value,
+                selected=value == default,
+                required=required,
+                label=value,
+            )
+            for value in (options or [])
+        ]
 
     def compile(self, id: str, name: str | None = None) -> Markup:
-        radios = "\n".join(radio.compile(id=id, name=name) for radio in self._radios)
-        return Markup(f"<label>{escape(_generate_label(id) or '')}{radios}</label>")
+        fallback_label = self.label if self.label is not None else _generate_label(id)
+        field_name = id if name is None else name
+        radios = []
+
+        for index, radio in enumerate(self._radios):
+            radio_id = f"{id}_{index}"
+            input_html = radio.compile(
+                id=radio_id,
+                name=field_name,
+                use_label=False,
+            )
+
+            radio_label = radio.label or _generate_label(radio_id)
+            radios.append(
+                Markup("<label>")
+                + input_html
+                + escape(radio_label)
+                + Markup("</label>")
+            )
+
+        return (
+            Markup("<fieldset><legend>")
+            + escape(fallback_label or "")
+            + Markup("</legend>")
+            + Markup("\n").join(radios)
+            + Markup("</fieldset>")
+        )
 
 
 class Range(BaseInput):
     def __init__(
         self,
-        default: int | None = None,
+        default: int | float | None = None,
         *,
-        min: int | None = None,
-        max: int | None = None,
+        min: int | float | None = None,
+        max: int | float | None = None,
+        step: int | float | None = None,
         required: bool = False,
         label: str | None = None,
     ):
@@ -253,6 +318,7 @@ class Range(BaseInput):
             required=required,
             min=min,
             max=max,
+            step=step,
             label=label,
         )
 
@@ -268,7 +334,7 @@ class URL(BaseInput):
     ):
         super().__init__(
             "url",
-            default,
+            default=default,
             placeholder=placeholder,
             required=required,
             label=label,
@@ -277,8 +343,25 @@ class URL(BaseInput):
 
 class Reset(BaseInput):
     def __init__(self, label: str | None = None):
+        super().__init__("reset", label=label)
+
+
+class Date(BaseInput):
+    def __init__(
+        self,
+        default: datetime.date | str | None = None,
+        *,
+        min: datetime.date | str | None = None,
+        max: datetime.date | str | None = None,
+        required: bool = False,
+        label: str | None = None,
+    ):
         super().__init__(
-            "reset",
+            "date",
+            default=default,
+            min=_format_default(min),
+            max=_format_default(max),
+            required=required,
             label=label,
         )
 
@@ -286,10 +369,10 @@ class Reset(BaseInput):
 class Time(BaseInput):
     def __init__(
         self,
-        default: str | None = None,
+        default: datetime.time | str | None = None,
         *,
-        min: str | None = None,
-        max: str | None = None,
+        min: datetime.time | str | None = None,
+        max: datetime.time | str | None = None,
         step: int | None = None,
         required: bool = False,
         label: str | None = None,
@@ -297,10 +380,10 @@ class Time(BaseInput):
         super().__init__(
             "time",
             default=default,
-            required=required,
-            min=min,
-            max=max,
+            min=_format_default(min),
+            max=_format_default(max),
             step=step,
+            required=required,
             label=label,
         )
 
@@ -308,10 +391,10 @@ class Time(BaseInput):
 class DateTime(BaseInput):
     def __init__(
         self,
-        default: str | None = None,
+        default: datetime.datetime | str | None = None,
         *,
-        min: str | None = None,
-        max: str | None = None,
+        min: datetime.datetime | str | None = None,
+        max: datetime.datetime | str | None = None,
         step: int | None = None,
         required: bool = False,
         label: str | None = None,
@@ -319,10 +402,10 @@ class DateTime(BaseInput):
         super().__init__(
             "datetime-local",
             default=default,
-            required=required,
-            min=min,
-            max=max,
+            min=_format_default(min),
+            max=_format_default(max),
             step=step,
+            required=required,
             label=label,
         )
 
@@ -422,7 +505,7 @@ class Textarea(BaseDataType):
 
         attrs = {
             "id": id,
-            "name": name or id,
+            "name": id if name is None else name,
             "placeholder": self.placeholder,
             "required": self.required,
             "rows": self.rows,
@@ -432,15 +515,15 @@ class Textarea(BaseDataType):
             **self.other,
         }
 
-        attrs_string = "".join(
-            f' {key}="{escape(value)}"' if value is not True else f" {key}"
-            for key, value in attrs.items()
-            if value is not None and value is not False
-        )
+        attrs_string = _build_attrs(attrs)
+
+        content = self.default
+        if callable(content):
+            content = content()
 
         return Markup(
             f"<label>{escape(fallback_label or '')}"
             f"<textarea{attrs_string}>"
-            f"{escape(self.default) if self.default is not None else ''}"
+            f"{escape(content) if content is not None else ''}"
             f"</textarea></label>"
         )
