@@ -33,6 +33,7 @@ class BaseDataType:
         self.default: Any = default
         self.required: bool = required
         self.label: str | None = label
+        self.response: Any | None = None
 
     def compile(self, id: str, name: str | None = None) -> Markup:
         raise NotImplementedError

@@ -29,6 +29,9 @@ logger = logging.getLogger("minecraft-vanilla")
 
 
 class BanPlayer(QSForm):
+    def __init__(self, action_name: str):
+        super().__init__(action_name)
+
     playerName = String(placeholder="Player Name", required=True)
     banReason = String(placeholder="Ban Reason", required=False)
 
@@ -200,7 +203,16 @@ class Module:
     def ban_player(self, instance: "BaseInstance", *args, **kwargs):
         asset = self.module.get_resource_path("banPlayer.html")
 
-        form = BanPlayer()
+        form = BanPlayer(action_name="ban-player-action")
 
         with open(asset, "r") as f:
             return f.read(), {"form": form.compile(with_submit=True)}
+
+    @action(action_name="ban-player-action")
+    def ban_player_action(self, instances: "InstanceManager", **kwargs):
+        form = BanPlayer.response_from_request(kwargs)
+        print(form)
+
+        print(form.playerName.response)
+        print(form.banReason.response)
+        return ""
