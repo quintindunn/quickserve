@@ -305,6 +305,28 @@ class Time(BaseInput):
         )
 
 
+class DateTime(BaseInput):
+    def __init__(
+        self,
+        default: str | None = None,
+        *,
+        min: str | None = None,
+        max: str | None = None,
+        step: int | None = None,
+        required: bool = False,
+        label: str | None = None,
+    ):
+        super().__init__(
+            "datetime-local",
+            default=default,
+            required=required,
+            min=min,
+            max=max,
+            step=step,
+            label=label,
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,

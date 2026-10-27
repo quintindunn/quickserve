@@ -63,6 +63,13 @@ if __name__ == "__main__":
             maxlength=500,
             required=True,
         )
+        createdAt = DateTime(
+            default="2026-10-27T14:30",
+            min="2026-10-27T00:00",
+            required=True,
+            label="Created At",
+            step=1,
+        )
         resetForm = Reset(label="Clear")
 
     from flask import Flask
