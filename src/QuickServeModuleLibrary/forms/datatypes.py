@@ -259,6 +259,24 @@ class Range(BaseInput):
         )
 
 
+class URL(BaseInput):
+    def __init__(
+        self,
+        default: str | None = None,
+        *,
+        placeholder: str | None = None,
+        required: bool = False,
+        label: str | None = None,
+    ):
+        super().__init__(
+            "url",
+            default,
+            placeholder=placeholder,
+            required=required,
+            label=label,
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,

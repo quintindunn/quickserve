@@ -1,6 +1,4 @@
 from typing import TYPE_CHECKING
-from markupsafe import Markup
-from QuickServeModuleLibrary.forms.datatypes import SubmitButton
 
 if TYPE_CHECKING:
     from QuickServeModuleLibrary.forms.datatypes import *
@@ -55,6 +53,7 @@ if __name__ == "__main__":
         )
         userType = RadioSelector("developer", ["developer", "user"])
         rating = Range(9, max=10, min=1, label="How Good Is This Form")
+        githubUrl = URL(placeholder="Github URL", required=True)
 
     from flask import Flask
 
