@@ -246,7 +246,6 @@ class Range(BaseInput):
         max: int | None = None,
         required: bool = False,
         label: str | None = None,
-        placeholder: str | None = None,
     ):
         super().__init__(
             "range",
@@ -255,7 +254,6 @@ class Range(BaseInput):
             min=min,
             max=max,
             label=label,
-            placeholder=placeholder,
         )
 
 
@@ -287,6 +285,27 @@ class Reset(BaseInput):
             label=label,
         )
 
+
+class Time(BaseInput):
+    def __init__(
+        self,
+        default: str | None = None,
+        *,
+        min: str | None = None,
+        max: str | None = None,
+        step: int | None = None,
+        required: bool = False,
+        label: str | None = None,
+    ):
+        super().__init__(
+            "time",
+            default=default,
+            required=required,
+            min=min,
+            max=max,
+            step=step,
+            label=label
+        )
 
 class BaseButton(BaseDataType):
     def __init__(

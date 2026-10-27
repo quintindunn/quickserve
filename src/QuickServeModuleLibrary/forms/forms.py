@@ -54,6 +54,7 @@ if __name__ == "__main__":
         userType = RadioSelector("developer", ["developer", "user"])
         rating = Range(9, max=10, min=1, label="How Good Is This Form")
         githubUrl = URL(placeholder="Github URL", required=True)
+        accountExpiration = Time(default="12:00", min="02:30", max="22:30", step=30)
 
         resetForm = Reset(label="Clear")
 
