@@ -164,10 +164,47 @@
                     flex: 1;
                 }
             }
+
+            .terminal >.terminal-parent > #process-status {
+                font-size: 3rem;
+                font-weight: bold;
+            }
+
+            .terminal > .terminal-parent > #process-status[data-process-status="dead"] {
+                color: #991b1b;
+                text-shadow: #ef4444 0 0 3px;
+            ;
+            }
+
+            .terminal > .terminal-parent > #process-status[data-process-status="alive"] {
+                color: #22c55e;
+                text-shadow: #22c55e 0 0 3px;
+            }
+
+            .terminal-parent {
+                position: relative;
+            }
+
+            #terminal {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            #process-status {
+                position: absolute;
+                top: 0;
+                right: 18px;
+                z-index: 1;
+                pointer-events: none;
+            }
         }
     </style>
     <div class="terminal" id="simple-controller">
-        <textarea id="terminal" readonly></textarea>
+        <div class="terminal-parent">
+            <span id="process-status" data-process-status="dead">&bullet;</span>
+            <textarea id="terminal" readonly></textarea>
+        </div>
+
         <div class="command-row">
             <input type="text" id="command" placeholder="Enter a command...">
             <div class="controls">
