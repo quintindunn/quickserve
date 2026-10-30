@@ -1,6 +1,12 @@
 {% extends "core/core.html" %}
 {% block title %}
-    {% block moduletitle %}{% endblock %}
+    {% block moduletitle %}
+        {% if context.isInstance %}
+            {{ context.instance_name }} - {{ context.page_name }}
+        {% else %}
+            {{ context.module_name }} - {{ context.page_name }}
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 {% block head %}
     {% block modulehead %}{% endblock %}
@@ -8,16 +14,25 @@
 {% block content %}
     <div class="module">
         <div>
-            <div class="mod-heading">
-                <a href="{{ link(page='about') }}"
-                   style="text-decoration: underline;
-                          color: inherit">
+            <a href="{{ link(page='about') }}"
+               style="text-decoration: underline;
+                      color: inherit">
+                {% if context.isInstance %}
+                    <h1>{{ context.instance_name }} - V{{ context.module_version }}</h1>
+                    <p>Instance of <span>{{ context.module_name }}</span></p>
+                {% else %}
                     <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
-                </a>
-                {% if context.instance_uuid %}
-                    <button id="qs-instance-delete">Delete Instance</button>
                 {% endif %}
-            </div>
+            </a>
+            {% if context.isInstance %}
+                <div class="module-size-parent">
+                    <div class="module-size">
+                        <img src="{{ url_for('static', filename="core/hard-drive-svgrepo-com.svg") }}"
+                             alt="Size on Filesystem">
+                        <p>{{ context.instance_size_formatted }}</p>
+                    </div>
+                </div>
+            {% endif %}
             {% if context.module_authors %}
                 <span>Module by {% for author in context.module_authors %}<a href="{{ author.github }}">{{ author.name }}</a>, {% endfor %}</span>
                 <div class="pages">
