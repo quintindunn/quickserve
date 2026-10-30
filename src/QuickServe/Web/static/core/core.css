@@ -248,6 +248,7 @@ body {
 
 .module-size > p {
     margin: 0;
+}
 .mod-heading {
     display: grid;
     grid-template-columns: 1fr 1fr;
