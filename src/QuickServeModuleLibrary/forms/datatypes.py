@@ -411,6 +411,18 @@ class DateTime(BaseInput):
         )
 
 
+class Hidden(BaseInput):
+    def __init__(
+        self,
+        value: str | None = None,
+    ):
+        super().__init__(
+            "hidden",
+            default=value,
+            label="",
+        )
+
+
 class BaseButton(BaseDataType):
     def __init__(
         self,

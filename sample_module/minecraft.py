@@ -4,7 +4,8 @@ Module main class for generating Minecraft Vanilla servers.
 Author: Quintin Dunn
 Date: 09/09/2026
 """
-
+import datetime
+import json
 import logging
 
 from typing import TYPE_CHECKING, Callable
@@ -29,8 +30,8 @@ logger = logging.getLogger("minecraft-vanilla")
 
 
 class BanPlayer(QSForm):
-    def __init__(self, action_name: str):
-        super().__init__(action_name)
+    def __init__(self, action_name: str, instance_uuid: str):
+        super().__init__(action_name, instance_uuid)
 
     playerName = String(placeholder="Player Name", required=True)
     banReason = String(placeholder="Ban Reason", required=False)
@@ -73,7 +74,7 @@ class Module:
         self.instance_server_map = dict()
         self.instance_callback_map = dict()
 
-    @page
+    @page(page_name="About")
     def about(self, *_, **__) -> str:
         """HTML about for the page"""
 
@@ -81,7 +82,7 @@ class Module:
         with open(asset, "r") as f:
             return f.read()
 
-    @page
+    @page(page_name="Create")
     def create(self, *_, **__) -> tuple[str, dict]:
         """HTML create for the page"""
 
@@ -175,7 +176,7 @@ class Module:
     def on_message(self, msg: str, instance: "BaseInstance") -> None:
         self.simple_controller_process_manager.on_message(msg=msg, instance=instance)
 
-    @page(instance_specific=True)
+    @page(instance_specific=True, page_name="Start")
     def start(
         self, instance: "BaseInstance", send_callback: Callable
     ) -> tuple[str, dict]:
@@ -192,7 +193,7 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), {"versions": self.versions}
 
-    @page(instance_specific=True)
+    @page(instance_specific=True, page_name="File Manager")
     def filesystem(self, instance: "BaseInstance", *args, **kwargs):
         asset = self.module.get_resource_path("filesystem.html")
 
@@ -203,7 +204,7 @@ class Module:
     def ban_player(self, instance: "BaseInstance", *args, **kwargs):
         asset = self.module.get_resource_path("banPlayer.html")
 
-        form = BanPlayer(action_name="ban-player-action")
+        form = BanPlayer(action_name="ban-player-action", instance_uuid=str(instance.uuid))
 
         with open(asset, "r") as f:
             return f.read(), {"form": form.compile(with_submit=True)}
@@ -211,8 +212,44 @@ class Module:
     @action(action_name="ban-player-action")
     def ban_player_action(self, instances: "InstanceManager", **kwargs):
         form = BanPlayer.response_from_request(kwargs)
-        print(form)
+        instance = instances.from_uuid(form.instance_uuid.response)
 
-        print(form.playerName.response)
-        print(form.banReason.response)
-        return ""
+        server_dir = instance.working_directory() / "server"
+
+        if not server_dir.exists():
+            return "Server files missing!", 500
+
+        banned_players_file = server_dir / "banned-players.json"
+
+        with banned_players_file.open(mode="r") as f:
+            ban_list = list(json.load(f))
+
+        endpoint = f"https://api.mojang.com/users/profiles/minecraft/{form.playerName.response}"
+        request = requests.get(endpoint)
+
+        if request.status_code != 200:
+            return "About"
+
+        data = request.json()
+
+        obj = {
+            "uuid": data.get("id"),
+            "name": data.get("name"),
+            "created": datetime.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z"),
+            "source": "Server",
+            "expires": "forever"
+        }
+
+        for ban in ban_list:
+            if ban["uuid"] == data.get("id"):
+                ban_list.remove(ban)
+                break
+
+        if form.banReason.response:
+            obj["reason"] = form.banReason.response
+
+        ban_list.append(obj)
+        with banned_players_file.open(mode="w") as f:
+            json.dump(ban_list, f, indent=1)
+
+        return "start"
