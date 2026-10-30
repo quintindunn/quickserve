@@ -24,7 +24,7 @@ class QSForm:
         self._action_name = action_name
         self._instance_uuid = instance_uuid
 
-    def compile(self, with_submit: bool = True):
+    def compile(self, submit_text: str = "submit", with_submit: bool = True):
         attr_names = filter(lambda x: not x.startswith("_"), self.__class__.__dict__)
 
         attr_dict: dict[str, BaseDataType] = {
@@ -37,7 +37,7 @@ class QSForm:
         inputs.append(Hidden(value=self._instance_uuid).compile("instance-uuid"))
 
         if with_submit:
-            inputs.append(SubmitButton(default="Submit", label="").compile("submit"))
+            inputs.append(SubmitButton(default="Submit", label="", inner_text=submit_text).compile("submit"))
         inputs.append(self._generate_form_foot())
 
         return Markup("\n".join(inputs))

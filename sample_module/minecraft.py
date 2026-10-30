@@ -196,14 +196,14 @@ class Module:
 
         context = {
             "forms": {
-                "ban_player": BanPlayer(action_name="ban-player-action", instance_uuid=str(instance.uuid)).compile(),
-                "ban_ip": BanIp(action_name="ban-ip-action", instance_uuid=str(instance.uuid)).compile(),
-                "unban_player": UnBanPlayer(action_name="unban-player-action", instance_uuid=str(instance.uuid)).compile(),
-                "unban_ip": UnBanIP(action_name="unban-ip-action", instance_uuid=str(instance.uuid)).compile(),
-                "whitelist_add": WhitelistPlayer(action_name="whitelist-add-action", instance_uuid=str(instance.uuid)).compile(),
-                "whitelist_remove": WhitelistRemove(action_name="whitelist-remove-action", instance_uuid=str(instance.uuid)).compile(),
-                "op": OpPlayer(action_name="op-action", instance_uuid=str(instance.uuid)).compile(),
-                "deop": DeOpPlayer(action_name="deop-action", instance_uuid=str(instance.uuid)).compile(),
+                "ban_player": BanPlayer(action_name="ban-player-action", instance_uuid=str(instance.uuid)).compile(submit_text="Ban Player"),
+                "ban_ip": BanIp(action_name="ban-ip-action", instance_uuid=str(instance.uuid)).compile(submit_text="Ban IP"),
+                "unban_player": UnBanPlayer(action_name="unban-player-action", instance_uuid=str(instance.uuid)).compile(submit_text="Unban Player"),
+                "unban_ip": UnBanIP(action_name="unban-ip-action", instance_uuid=str(instance.uuid)).compile(submit_text="Unban IP"),
+                "whitelist_add": WhitelistPlayer(action_name="whitelist-add-action", instance_uuid=str(instance.uuid)).compile(submit_text="Whitelist Player"),
+                "whitelist_remove": WhitelistRemove(action_name="whitelist-remove-action", instance_uuid=str(instance.uuid)).compile(submit_text="Unwhitelist Player"),
+                "op": OpPlayer(action_name="op-action", instance_uuid=str(instance.uuid)).compile(submit_text="OP player"),
+                "deop": DeOpPlayer(action_name="deop-action", instance_uuid=str(instance.uuid)).compile(submit_text="DeOP player"),
             }
         }
 
