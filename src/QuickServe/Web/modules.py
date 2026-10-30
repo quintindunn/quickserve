@@ -22,8 +22,10 @@ from flask import (
 from flask.typing import ResponseReturnValue
 from werkzeug.utils import secure_filename
 
+from QuickServe.Common.search import Search
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
+from QuickServe.FileSystem.plugins import ModuleCatalog
 from QuickServe.contracts import Module
 
 from pathlib import Path
@@ -504,3 +506,37 @@ def instance_upload_file(uuid: str):
     file.save(path)
 
     return ""
+
+
+@instance_static.route("/<uuid>/delete", methods=["POST"])
+def instance_delete(uuid: str):
+    instance_manager: "InstanceManager" = current_app.extensions[
+        "quickserve.instance_manager"
+    ]
+    catalog: "ModuleCatalog" = current_app.extensions["quickserve.catalog"]
+
+    instance = instance_manager.from_uuid(uuid)
+    working_dir = instance.working_directory()
+
+    module = catalog.get(instance.module_name)
+
+    if hasattr(module, "module") and hasattr(module.module, "QS_INTERNAL_DELETE_INSTANCE"):
+        logger.info("Running module on_delete_instance")
+        module.module.QS_INTERNAL_DELETE_INSTANCE(instance)
+    else:
+        logger.info("No module on_delete_instance")
+
+    if hasattr(module, "module") and hasattr(module.module, "QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE"):
+        logger.info("Running module simple process manager instance delete routine")
+        module.module.QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE(instance)
+    else:
+        logger.info("No module simple process manager registered.")
+
+    if working_dir.exists():
+        shutil.rmtree(working_dir.resolve())
+    instance_manager.delete_from_uuid(uuid=uuid)
+
+    search: "Search" = current_app.extensions["quickserve.search"]
+    search.reload_instances()
+
+    return "OK", 200

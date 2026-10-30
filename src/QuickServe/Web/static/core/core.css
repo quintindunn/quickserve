@@ -226,6 +226,24 @@ body {
     border-left: 1px solid var(--border);
 }
 
+.mod-heading {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.mod-heading > a {
+    float: left;
+}
+
+.mod-heading > button {
+    float: right;
+    width: max-content;
+    height: min-content;
+    margin-left: auto;
+}
+
+.mod-heading > button:hover {
+    cursor: pointer;
 
 .qs-form {
     max-width: 650px;

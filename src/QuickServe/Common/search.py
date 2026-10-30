@@ -49,6 +49,12 @@ class Search:
         title = f"{instance.instance_name} {instance.module_name} {instance.uuid}"
         return title, "", ""
 
+    def reload_instances(self):
+        logger.info("Reloading all instances into search!")
+        self.instance_registrar.clear()
+        self.instance_tfidf.clear()
+        self.update_instances()
+
     def register_module(self, module: "Module"):
         if module.NAME in self.module_registrar:
             logger.debug(f"Module {module.NAME!r} is already registered")

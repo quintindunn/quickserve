@@ -17,9 +17,10 @@ from QuickServeModuleLibrary.forms.datatypes import String
 from QuickServeModuleLibrary.forms.forms import QSForm
 from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
+from QuickServeModuleLibrary.decorators import page, action
+
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 
-from QuickServeModuleLibrary.decorators import page, action
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -78,10 +79,7 @@ class Module:
         self.downloader.get_release_manifest("1.8.9")
         self.runtime_manager = runtime_manager
 
-        self.simple_controller_process_manager = SimpleControllerProcessManager()
-
-        self.instance_server_map = dict()
-        self.instance_callback_map = dict()
+        self.simple_controller_process_manager = SimpleControllerProcessManager(self)
 
     @page(page_name="about")
     def about(self, *_, **__) -> str:
@@ -190,7 +188,6 @@ class Module:
         self, instance: "BaseInstance", send_callback: Callable
     ) -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
-        self.instance_callback_map[instance.uuid] = send_callback
 
         if not self.simple_controller_process_manager.has_instance(instance=instance):
             self.simple_controller_process_manager.register(

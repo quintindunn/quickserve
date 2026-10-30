@@ -24,7 +24,6 @@ class Module(Protocol):
     NAME: str
     VERSION: str
     QUICKSERVE_VERSION: str
-    PAGES: list[str]
     DESCRIPTION: str
     SUPPORTED_OPERATING_SYSTEMS: list[str]
 
@@ -71,4 +70,6 @@ class InstanceRepository(Protocol):
 
     def get(self, identifier: str | UUID) -> InstanceRecord: ...
 
-    def load_all(self) -> list[InstanceRecord]: ...
+    def load_all_active(self) -> list[InstanceRecord]: ...
+
+    def delete(self, uuid: str | UUID) -> InstanceRecord: ...

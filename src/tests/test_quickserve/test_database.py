@@ -150,7 +150,7 @@ class TestDatabase(unittest.TestCase):
                 module_name="test_database.py",
             )
 
-        records = instance_manager.load_all()
+        records = instance_manager.load_all_active()
 
         self.assertEqual(len(records), 50)
         self.assertEqual(
