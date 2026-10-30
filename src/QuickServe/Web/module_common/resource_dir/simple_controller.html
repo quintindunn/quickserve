@@ -96,12 +96,16 @@
                     transform 0.1s;
             }
 
-            button[type="button"]:hover {
+            button[type="button"]:not(:disabled):hover {
                 transform: translateY(-1px);
             }
 
-            button[type="button"]:active {
+            button[type="button"]:not(:disabled):active {
                 transform: translateY(1px);
+            }
+
+            button[type="button"][disabled]:hover {
+                cursor: default;
             }
 
             #start {
@@ -118,8 +122,18 @@
                 border-color: #eab308;
             }
 
-            #stop:hover {
+            #stop[disabled] {
+            }
+
+            #stop:not(:disabled):hover {
                 background: #a16207;
+            }
+
+            #stop[disabled],
+            #kill[disabled],
+            #start[disabled] {
+                background: gray;
+                border: 1px solid darkgray;
             }
 
             #kill {
@@ -127,7 +141,7 @@
                 border-color: #ef4444;
             }
 
-            #kill:hover {
+            #kill:not(:disabled):hover {
                 background: #b91c1c;
             }
 
@@ -173,7 +187,6 @@
             .terminal > .terminal-parent > #process-status[data-process-status="dead"] {
                 color: #991b1b;
                 text-shadow: #ef4444 0 0 3px;
-            ;
             }
 
             .terminal > .terminal-parent > #process-status[data-process-status="alive"] {
@@ -206,11 +219,11 @@
         </div>
 
         <div class="command-row">
-            <input type="text" id="command" placeholder="Enter a command...">
+            <input type="text" id="command" placeholder="Start the server to enter a command.">
             <div class="controls">
                 <button type="button" id="start">Start</button>
-                <button type="button" id="stop">Stop</button>
-                <button type="button" id="kill">Kill</button>
+                <button type="button" id="stop" disabled>Stop</button>
+                <button type="button" id="kill" disabled>Kill</button>
                 <button type="button" id="stick-bottom">Auto-Scroll</button>
             </div>
         </div>
@@ -387,6 +400,20 @@
 
         function setStatus(value) {
             process_status.dataset["processStatus"] = value;
+
+            if (value === "alive") {
+                kill.disabled = false;
+                stop.disabled = false;
+                command.disabled = false;
+                command.placeholder = "Enter a command..."
+                start.disabled = true;
+            } else {
+                kill.disabled = true;
+                stop.disabled = true;
+                command.disabled = true;
+                command.placeholder = "Start the server to enter a command."
+                start.disabled = false;
+            }
         }
 
         const decoder = new TextDecoder();
