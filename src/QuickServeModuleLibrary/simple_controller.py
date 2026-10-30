@@ -10,6 +10,8 @@ import logging
 
 from typing import TYPE_CHECKING, Callable
 
+from QuickServe.contracts import Module
+
 if TYPE_CHECKING:
     from .process import ManagedProcess
     from QuickServe.Driver.instance.base_instance import BaseInstance
@@ -32,6 +34,12 @@ class SimpleControllerProcessManager:
         """
 
         self._instance_process_map = dict()
+
+    def get_process(self, instance: "BaseInstance") -> ManagedProcess | None:
+        if not self.has_instance(instance):
+            return None
+
+        return self._instance_process_map[instance.uuid]
 
     def has_instance(self, instance: "BaseInstance") -> bool:
         """

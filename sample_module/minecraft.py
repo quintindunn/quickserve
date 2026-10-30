@@ -15,7 +15,7 @@ from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 
-from QuickServeModuleLibrary.decorators import page, action
+from QuickServeModuleLibrary.decorators import page, action, on_instance_delete
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -60,8 +60,15 @@ class Module:
 
         self.simple_controller_process_manager = SimpleControllerProcessManager()
 
-        self.instance_server_map = dict()
-        self.instance_callback_map = dict()
+    @on_instance_delete
+    def on_instance_delete(self, instance: "BaseInstance"):
+        process = self.simple_controller_process_manager.get_process(instance)
+
+        if not process:
+            return
+
+        logger.info("Killing process %d", process.pid)
+        process.kill()
 
     @page
     def about(self, *_, **__) -> str:
@@ -170,7 +177,6 @@ class Module:
         self, instance: "BaseInstance", send_callback: Callable
     ) -> tuple[str, dict]:
         asset = self.module.get_resource_path("start.html")
-        self.instance_callback_map[instance.uuid] = send_callback
 
         if not self.simple_controller_process_manager.has_instance(instance=instance):
             self.simple_controller_process_manager.register(
