@@ -1,0 +1,55 @@
+{% extends "core/module.html" %}
+{% block moduletitle %}
+    Test
+{% endblock %}
+{% block modulehead %}
+    <link rel="stylesheet" href="{{ resource(filename='management.css') }}">
+{% endblock %}
+{% block modulebody %}
+    <div class="management-forms">
+        <div class="banning">
+            <div class="forms">
+                <div>
+                    <h1>Ban Player</h1>
+                    {{ context.param_forms.ban_player }}
+                </div>
+                <div>
+                    <h1>Unban Player</h1>
+                    {{ context.param_forms.unban_player }}
+                </div>
+                <div>
+                    <h1>Ban IP</h1>
+                    {{ context.param_forms.ban_ip }}
+                </div>
+                <div>
+                    <h1>Unban IP</h1>
+                    {{ context.param_forms.unban_ip }}
+                </div>
+            </div>
+        </div>
+        <div class="whitelisting">
+            <div class="forms">
+                <div>
+                    <h1>Whitelist Add</h1>
+                    {{ context.param_forms.whitelist_add }}
+                </div>
+                <div>
+                    <h1>Whitelist Remove</h1>
+                    {{ context.param_forms.whitelist_remove }}
+                </div>
+            </div>
+        </div>
+        <div class="operators">
+            <div class="forms">
+                <div>
+                    <h1>Op Player</h1>
+                    {{ context.param_forms.op }}
+                </div>
+                <div>
+                    <h1>De-OP Player</h1>
+                    {{ context.param_forms.deop }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

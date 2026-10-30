@@ -1,0 +1,107 @@
+.management-forms {
+    padding: 1.5rem;
+    color: #e5e7eb;
+}
+
+.management-forms > div > .forms {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    align-items: stretch;
+}
+
+.management-forms > div > .forms > div {
+    min-width: 0;
+    padding: 1.5rem;
+    border: 2px solid var(--accent-bg);
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.management-forms > div > .forms > div:hover {
+    border: 3px solid var(--accent-bg);
+}
+
+.management-forms h1 {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 650;
+    color: #f3f4f6;
+}
+
+.management-forms form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin: 0;
+}
+
+.management-forms form > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.management-forms input,
+.management-forms select,
+.management-forms textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 0.75rem 0.875rem;
+    color: #e5e7eb;
+    background: #111722;
+    border: 1px solid #39475c;
+    border-radius: 7px;
+    box-sizing: border-box;
+    font: inherit;
+}
+
+.management-forms input:focus,
+.management-forms select:focus,
+.management-forms textarea:focus {
+    outline: none;
+    border-color: #6489d5;
+    box-shadow: 0 0 0 3px rgb(100 137 213 / 15%);
+}
+
+.management-forms textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.management-forms button,
+.management-forms input[type="submit"] {
+    align-self: flex-start;
+    width: auto;
+    min-width: 150px;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 7px;
+    color: white;
+    background: #374151;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 150ms ease, transform 150ms ease;
+}
+
+.management-forms button:hover,
+.management-forms input[type="submit"]:hover {
+    filter: brightness(1.15);
+}
+
+.management-forms button:active,
+.management-forms input[type="submit"]:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 700px) {
+    .management-forms > .banning > .forms {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .management-forms {
+        padding: 1rem;
+    }
+}
