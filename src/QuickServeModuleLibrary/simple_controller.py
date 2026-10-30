@@ -25,7 +25,6 @@ class SimpleControllerProcessManager:
     Helper class to aid in routing websocket messages between ManagedProcess and the websocket.
     """
 
-    start_callback: Callable[["ManagedProcess"], bool]
     _instance_process_map: dict["UUID", "ManagedProcess"]
 
     def __init__(self, module: "Module"):
@@ -105,6 +104,8 @@ class SimpleControllerProcessManager:
             self._on_start(instance=instance)
         elif msg_type == "history":
             self._on_history(instance=instance)
+        elif msg_type == "queryAlive":
+            self._on_query_alive(instance=instance)
         elif (process is None) or (not process.is_alive()):
             logger.debug("Not continuing checks, process it dead or non-existent.")
             return True
@@ -118,6 +119,23 @@ class SimpleControllerProcessManager:
             logger.warning(f"Unknown message type {msg_type}")
 
         return True
+
+    def _on_query_alive(self, instance: "BaseInstance"):
+        """
+        Called when the websocket sends the process a `queryAlive` command, responds with if the process is alive.
+
+        :param instance: The instance which holds the process.
+        :return: None
+        """
+
+        process: "ManagedProcess" = self._instance_process_map[instance.uuid]
+        message = "alive" if process.is_alive() else "dead"
+
+        for callback in process.get_stdout_callbacks():
+            callback(json.dumps({
+                "type": "process-status",
+                "value": message
+            }).encode())
 
     def _on_start(self, instance: "BaseInstance") -> None:
         """
@@ -151,7 +169,7 @@ class SimpleControllerProcessManager:
         logger.info(f"Stopping process for {instance.uuid}")
         if process.is_alive():
             process.terminate()
-        logger.info(f"Proces already dead {instance.uuid}")
+        logger.info(f"Process already dead {instance.uuid}")
 
     def _on_kill(self, instance: "BaseInstance"):
         """
@@ -200,7 +218,13 @@ class SimpleControllerProcessManager:
         for stdio_type, line in terminal_history:
             if stdio_type == b"stdout" or stdio_type == b"stdin":
                 for callback in process.get_stdout_callbacks():
-                    callback(line)
+                    callback(json.dumps({
+                        "type": "stdout",
+                        "value": line.decode()
+                    }).encode())
             elif stdio_type == b"stderr":
                 for callback in process.get_stderr_callbacks():
-                    callback(line)
+                    callback(json.dumps({
+                        "type": "stderr",
+                        "value": line.decode()
+                    }).encode())
