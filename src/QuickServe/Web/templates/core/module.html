@@ -14,16 +14,22 @@
 {% block content %}
     <div class="module">
         <div>
-            <a href="{{ link(page='about') }}"
-               style="text-decoration: underline;
-                      color: inherit">
-                {% if context.isInstance %}
-                    <h1>{{ context.instance_name }} - V{{ context.module_version }}</h1>
-                    <p>Instance of <span>{{ context.module_name }}</span></p>
-                {% else %}
-                    <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
+            <div class="mod-heading">
+                <a href="{{ link(page='about') }}"
+                   style="text-decoration: underline;
+                          color: inherit">
+                    {% if context.isInstance %}
+                        <h1>{{ context.instance_name }} - V{{ context.module_version }}</h1>
+                        <p>Instance of <span>{{ context.module_name }}</span></p>
+                    {% else %}
+                        <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
+                    {% endif %}
+                </a>
+                 {% if context.instance_uuid %}
+                    <button id="qs-instance-delete">Delete Instance</button>
                 {% endif %}
-            </a>
+            </div>
+
             {% if context.isInstance %}
                 <div class="module-size-parent">
                     <div class="module-size">
