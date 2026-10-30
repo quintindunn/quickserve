@@ -60,6 +60,8 @@ def _render_module_page(
     """
     catalog = current_app.extensions["quickserve.catalog"]
 
+    request.module = module_name
+
     if context is None:
         context = dict()
 

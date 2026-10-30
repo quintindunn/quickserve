@@ -23,7 +23,7 @@
                 <div class="pages">
                     <span>|</span>
                     {% for page in context.module_pages %}
-                        <a href="{{ link(page=page) }}">{{ page }}</a>
+                        <a href="{{ link(page=page) }}">{{ page | title }}</a>
                         <span>|</span>
                     {% endfor %}
                 </div>
