@@ -24,7 +24,6 @@ class Module(Protocol):
     NAME: str
     VERSION: str
     QUICKSERVE_VERSION: str
-    PAGES: list[str]
     DESCRIPTION: str
     SUPPORTED_OPERATING_SYSTEMS: list[str]
 

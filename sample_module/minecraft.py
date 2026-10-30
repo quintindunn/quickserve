@@ -17,9 +17,10 @@ from QuickServeModuleLibrary.forms.datatypes import String
 from QuickServeModuleLibrary.forms.forms import QSForm
 from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
+from QuickServeModuleLibrary.decorators import page, action
+
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 
-from QuickServeModuleLibrary.decorators import page, action, on_instance_delete
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -78,17 +79,7 @@ class Module:
         self.downloader.get_release_manifest("1.8.9")
         self.runtime_manager = runtime_manager
 
-        self.simple_controller_process_manager = SimpleControllerProcessManager()
-
-    @on_instance_delete
-    def on_instance_delete(self, instance: "BaseInstance"):
-        process = self.simple_controller_process_manager.get_process(instance)
-
-        if not process:
-            return
-
-        logger.info("Killing process %d", process.pid)
-        process.kill()
+        self.simple_controller_process_manager = SimpleControllerProcessManager(self)
 
     @page(page_name="about")
     def about(self, *_, **__) -> str:

@@ -526,6 +526,12 @@ def instance_delete(uuid: str):
     else:
         logger.info("No module on_delete_instance")
 
+    if hasattr(module, "module") and hasattr(module.module, "QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE"):
+        logger.info("Running module simple process manager instance delete routine")
+        module.module.QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE(instance)
+    else:
+        logger.info("No module simple process manager registered.")
+
     if working_dir.exists():
         shutil.rmtree(working_dir.resolve())
     instance_manager.delete_from_uuid(uuid=uuid)
