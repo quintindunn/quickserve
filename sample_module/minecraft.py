@@ -5,11 +5,7 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-import datetime
-import json
 import logging
-from ipaddress import IPv4Address, AddressValueError
-from pathlib import Path
 
 from typing import TYPE_CHECKING, Callable
 
@@ -263,7 +259,7 @@ class Module:
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
 
-        return "start"  # TODO - Better action returns
+        return "Player Management", 302, instance
 
     @action(action_name="ban-ip-action")
     def ban_ip_action(self, instances: "InstanceManager", **kwargs):
@@ -278,7 +274,7 @@ class Module:
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
 
-        return "about"  # TODO - Better action returns
+        return "Player Management", 302, instance
 
     @action(action_name="unban-player-action")
     def unban_player_action(self, instances: "InstanceManager", **kwargs):
@@ -290,7 +286,7 @@ class Module:
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
 
-        return "about"  # TODO - Better action returns
+        return "Player Management", 302, instance
 
     @action(action_name="unban-ip-action")
     def unban_ip_action(self, instances: "InstanceManager", **kwargs):
@@ -302,7 +298,7 @@ class Module:
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
 
-        return "about"  # TODO - Better action returns
+        return "Player Management", 302, instance
 
     @action(action_name="whitelist-add-action")
     def whitelist_add_action(self, instances: "InstanceManager", **kwargs):
@@ -314,7 +310,7 @@ class Module:
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
 
-        return "about"  # TODO - Better action returns
+        return "Player Management", 302, instance
 
     @action(action_name="whitelist-remove-action")
     def whitelist_remove_action(self, instances: "InstanceManager", **kwargs):
@@ -326,7 +322,7 @@ class Module:
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
 
-        return "about"  # TODO - Better action returns
+        return "Player Management", 302, instance
 
     @action(action_name="op-action")
     def op_player_action(self, instances: "InstanceManager", **kwargs):
@@ -338,7 +334,7 @@ class Module:
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
 
-        return "about"  # TODO - Better action returns
+        return "Player Management", 302, instance
 
     @action(action_name="deop-action")
     def deop_player_action(self, instances: "InstanceManager", **kwargs):
@@ -350,4 +346,4 @@ class Module:
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
 
-        return "about"  # TODO - Better action returns
+        return "Player Management", 302, instance
