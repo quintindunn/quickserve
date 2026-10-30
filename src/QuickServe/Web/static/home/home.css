@@ -54,14 +54,31 @@
     border-radius: 10px;
 }
 
+.home > .heading > .heading-links > .heading-link:not(:first-child) {
+    margin-left: 1vw;
+}
+
+.home > .heading > .heading-links > .heading-link:hover {
+    padding: .95rem 1.4rem;
+}
+
 .home > .heading > .heading-links > .heading-link-marketplace {
     background-color: var(--accent);
-    color: #17121f;
     border: 1px solid var(--border);
+    color: var(--accent-bg);
+    font-weight: bold;
+}
+
+.home > .heading > .heading-links > .heading-link-marketplace:hover {
+    box-shadow: 0 0 3px 0 var(--accent-bg) ;
 }
 
 .home > .heading > .heading-links > .heading-link-github {
     background: transparent;
     color: var(--text-h);
     border: 1px solid var(--border);
+}
+
+.home > .heading > .heading-links > .heading-link-github:hover {
+    box-shadow: 0 0 3px 0 var(--border) ;
 }
