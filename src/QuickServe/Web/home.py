@@ -13,7 +13,7 @@ home = Blueprint("home", __name__)
 
 @home.route("/")
 def index() -> ResponseReturnValue:
-    return render_template("home/home.html", context={})
+    return render_template("home/home-first-time.html", context={})
 
 
 @home.route("/favicon.ico")
