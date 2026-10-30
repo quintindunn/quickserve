@@ -228,6 +228,7 @@
         const ws_host = document.getElementById("websocket-host").value;
         const ws_port = document.getElementById("websocket-port").value;
         const terminal_buffer = +document.getElementById("terminal-buffer").value;
+        const process_status = document.getElementById("process-status");
 
         const instance_uuid = document.location.pathname
             .split("/module/instance/")[1]
@@ -348,6 +349,14 @@
                 ws.send(JSON.stringify(packet));
             });
 
+            setInterval(() => {
+                const packet = {
+                    isSimpleController: true,
+                    type: "queryAlive"
+                };
+                ws.send(JSON.stringify(packet))
+            }, 500);
+
             start.addEventListener("click", () => {
                 if (ws.readyState !== WebSocket.OPEN) return;
 
@@ -376,18 +385,28 @@
             });
         };
 
+        function setStatus(value) {
+            process_status.dataset["processStatus"] = value;
+        }
+
         const decoder = new TextDecoder();
 
         ws.onmessage = async (event) => {
-            console.log(event.data)
+
             if (typeof event.data === "string") {
-                console.log("log")
-                writeTerminal(event.data);
+                writeTerminal(parsed.value);
                 return;
             }
 
             const buffer = await event.data.arrayBuffer();
-            writeTerminal(decoder.decode(buffer));
+            const decoded = decoder.decode(buffer);
+            const parsed = JSON.parse(decoded);
+            if (parsed.type === "process-status") {
+                setStatus(parsed.value);
+            } else {
+                writeTerminal(parsed.value);
+            }
+
         };
 
         ws.onerror = (event) => {
