@@ -29,7 +29,7 @@ class UnBanIP(QSForm):
     def __init__(self, action_name: str, instance_uuid: str):
         super().__init__(action_name, instance_uuid)
 
-    playerName = String(placeholder="IP Address", required=True)
+    ip = String(placeholder="IP Address", required=True)
 
 
 class OpPlayer(QSForm):

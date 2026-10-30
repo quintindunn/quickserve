@@ -9,6 +9,7 @@ import datetime
 import json
 import logging
 from ipaddress import IPv4Address, AddressValueError
+from pathlib import Path
 
 from typing import TYPE_CHECKING, Callable
 
@@ -210,50 +211,30 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), context
 
+    def execute_command(self, instance: "BaseInstance", args: list[str]) -> bool:
+        process = self.simple_controller_process_manager.get_process(instance=instance)
+        if process is None:
+            logger.warning("No process for instance %s!", instance.uuid)
+            return False
+        for arg in args:
+            if " " in arg:
+                logger.warning("Space in argument!")
+                return False
+
+        command = ' '.join(args) + "\n"
+        process.write(command.encode())
+        return True
+
     @action(action_name="ban-player-action")
     def ban_player_action(self, instances: "InstanceManager", **kwargs):
         form = BanPlayer.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
 
-        server_dir = instance.working_directory() / "server"
-
-        if not server_dir.exists():
-            return "about"  # TODO - Better action returns
-
-        banned_players_file = server_dir / "banned-players.json"
-
-        with banned_players_file.open(mode="r") as f:
-            ban_list = list(json.load(f))
-
-        endpoint = f"https://api.mojang.com/users/profiles/minecraft/{form.playerName.response}"
-        request = requests.get(endpoint)
-
-        if request.status_code != 200:
-            return "about"  # TODO - Better action returns
-
-        data = request.json()
-
-        obj = {
-            "uuid": data.get("id"),
-            "name": data.get("name"),
-            "created": datetime.datetime.now()
-            .astimezone()
-            .strftime("%Y-%m-%d %H:%M:%S %z"),
-            "source": "Server",
-            "expires": "forever",
-        }
-
-        for ban in ban_list:
-            if ban["uuid"] == data.get("id"):
-                ban_list.remove(ban)
-                break
-
+        command = ["ban", form.playerName.response]
         if form.banReason.response:
-            obj["reason"] = form.banReason.response
+            command.append(form.banReason.response)
 
-        ban_list.append(obj)
-        with banned_players_file.open(mode="w") as f:
-            json.dump(ban_list, f, indent=1)
+        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
 
         return "start"  # TODO - Better action returns
 
@@ -262,41 +243,11 @@ class Module:
         form = BanIp.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
 
-        server_dir = instance.working_directory() / "server"
-
-        if not server_dir.exists():
-            return "about"  # TODO - Better action returns
-
-        banned_players_file = server_dir / "banned-ips.json"
-
-        with banned_players_file.open(mode="r") as f:
-            ban_list = list(json.load(f))
-
-        try:
-            IPv4Address(form.ip.response)
-        except AddressValueError:
-            return "about"  # TODO - Better action returns
-
-        obj = {
-            "ip": form.ip.response,
-            "created": datetime.datetime.now()
-            .astimezone()
-            .strftime("%Y-%m-%d %H:%M:%S %z"),
-            "source": "Server",
-            "expires": "forever",
-        }
-
-        for ban in ban_list:
-            if ban["ip"] == form.ip.response:
-                ban_list.remove(ban)
-                break
-
+        command = ["ban-ip", form.ip.response]
         if form.banReason.response:
-            obj["reason"] = form.banReason.response
+            command.append(form.banReason.response)
 
-        ban_list.append(obj)
-        with banned_players_file.open(mode="w") as f:
-            json.dump(ban_list, f, indent=1)
+        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
 
         return "about"  # TODO - Better action returns
 
@@ -305,27 +256,57 @@ class Module:
         form = UnBanPlayer.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
 
+        command = ["pardon", form.playerName.response]
+        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+
+        return "about"  # TODO - Better action returns
+
     @action(action_name="unban-ip-action")
     def unban_ip_action(self, instances: "InstanceManager", **kwargs):
         form = UnBanIP.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
+
+        command = ["pardon-ip", form.ip.response]
+        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+
+        return "about"  # TODO - Better action returns
 
     @action(action_name="whitelist-add-action")
     def whitelist_add_action(self, instances: "InstanceManager", **kwargs):
         form = WhitelistPlayer.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
 
+        command = ["whitelist", "add", form.username.response]
+        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+
+        return "about"  # TODO - Better action returns
+
     @action(action_name="whitelist-remove-action")
     def whitelist_remove_action(self, instances: "InstanceManager", **kwargs):
         form = WhitelistRemove.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
+
+        command = ["whitelist", "remove", form.username.response]
+        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+
+        return "about"  # TODO - Better action returns
 
     @action(action_name="op-action")
     def op_player_action(self, instances: "InstanceManager", **kwargs):
         form = OpPlayer.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
 
+        command = ["op", form.username.response]
+        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+
+        return "about"  # TODO - Better action returns
+
     @action(action_name="deop-action")
     def deop_player_action(self, instances: "InstanceManager", **kwargs):
         form = DeOpPlayer.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
+
+        command = ["deop", form.username.response]
+        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+
+        return "about"  # TODO - Better action returns
