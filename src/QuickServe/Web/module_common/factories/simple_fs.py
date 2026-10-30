@@ -7,6 +7,10 @@ from markupsafe import Markup
 from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.Web.module_common.resources import get_resource
 from flask import current_app, request
+from QuickServe.Common.file_signatures import SIGNATURES
+
+max_signature_length = max([len(s) // 2 for s in SIGNATURES])
+max_file_size = 102400
 
 
 def is_child(instance_root: Path, requested_path: Path) -> bool:
@@ -18,6 +22,72 @@ def is_child(instance_root: Path, requested_path: Path) -> bool:
     """
     requested_path = requested_path.resolve()
     return requested_path.is_relative_to(instance_root.resolve())
+
+
+def is_file_editable(requested_path: Path) -> bool:
+    """
+    Checks if the requested path's file should be editable.
+    :param requested_path: The requested path.
+    :return: True if the file should be editable, otherwise False.
+    """
+
+    path = requested_path.resolve()
+
+    if not path.is_file():
+        return False
+
+    file_size = path.stat().st_size
+    if file_size > max_file_size:
+        return False
+
+    with path.open("rb") as f:
+        magic_number = f.read(max_signature_length)
+
+    for signature in SIGNATURES:
+        if signature_matches(signature, magic_number):
+            return False
+
+    with path.open("rb") as f:
+        first_4kb = f.read(4096)
+
+        try:
+            first_4kb.decode("utf-8")
+            return True
+        except UnicodeDecodeError:
+            return False
+
+
+def signature_matches(signature: str, heading: bytes) -> bool:
+    """
+    Checks whether a file signature matches the beginning of a file.
+
+    Signatures are hexadecimal strings, optionally containing ?? wildcards
+    that match any single byte.
+
+    Examples:
+        4E555255494D474E55525550414C
+        FFD8FFE1????457869660000
+
+    Signatures can be shorter than heading.
+    :param signature: The hexadecimal file signature to match.
+    :param heading: The beginning of the file.
+    :return: Whether the signature matches the heading.
+    """
+    if len(signature) % 2 != 0:
+        return False
+
+    signature_bytes = bytes.fromhex(signature.replace("??", "00"))
+    wildcard_bytes = {
+        i // 2 for i in range(0, len(signature), 2) if signature[i : i + 2] == "??"
+    }
+
+    if len(signature_bytes) > len(heading):
+        return False
+
+    return all(
+        i in wildcard_bytes or signature_bytes[i] == heading[i]
+        for i in range(len(signature_bytes))
+    )
 
 
 def _redirect(url: str) -> Markup:
@@ -85,6 +155,11 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
                     "isDir": os.path.isdir(file_path),
                     "isEmptyDir": os.path.isdir(file_path)
                     and not any(os.scandir(file_path)),
+                    "canEdit": (
+                        False
+                        if os.path.isdir(file_path)
+                        else is_file_editable(file_path)
+                    ),
                 }
             )
 

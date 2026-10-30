@@ -20,9 +20,12 @@ from flask import (
     redirect,
 )
 from flask.typing import ResponseReturnValue
+from werkzeug.utils import secure_filename
 
+from QuickServe.Common.search import Search
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
+from QuickServe.FileSystem.plugins import ModuleCatalog
 from QuickServe.contracts import Module
 from QuickServe.Common.file_size_conversion import convert_size
 
@@ -32,6 +35,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from QuickServe.Application.instances import InstanceManager
+    from QuickServeModuleLibrary.decorators import Page, RegisteredPage
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
@@ -57,13 +61,15 @@ def _render_module_page(
     """
     catalog = current_app.extensions["quickserve.catalog"]
 
+    request.module = module_name
+
     if context is None:
         context = dict()
 
     if module_name not in catalog:
         return (
             "<!DOCTYPE HTML>"
-            "<html><head><title>RMP 404 Not Found!</title></head>"
+            "<html><head><title>404 Not Found!</title></head>"
             "<body><h1>Page not found!</h1></body></html>"
         )
 
@@ -74,10 +80,16 @@ def _render_module_page(
         "quickserve.websocket_server"
     ]
 
+    pages: list[RegisteredPage] = (
+        []
+        if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES")
+        else module.QS_INTERNAL_REGISTERED_PAGES
+    )
+
     ctx = {
         "module_name": module.NAME,
         "module_version": module.VERSION,
-        "module_pages": module.PAGES,
+        "module_pages": pages,
         "websocket_host": websocket_server.host,
         "websocket_port": websocket_server.port,
         "page_name": page,
@@ -86,10 +98,10 @@ def _render_module_page(
     if hasattr(module, "AUTHORS"):
         ctx["module_authors"] = module.AUTHORS
 
-    if not hasattr(module, page):
-        raise ValueError(f"Module {module_name} doesn't have method {page}")
+    if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES") or page not in pages:
+        raise ValueError(f"Module {module_name} doesn't have page {page}")
 
-    page = getattr(module, page)
+    page = module.QS_INTERNAL_REGISTERED_PAGES[page]
     if "instance_uuid" in context:
         ctx["isInstance"] = True
 
@@ -204,16 +216,19 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     :param method: The action being called.
     :return:
     """
-    method = f"action_{method}"
 
     catalog = current_app.extensions["quickserve.catalog"]
     base_module = catalog.require(module_name)
     module: "Module" = base_module.module
 
-    if not hasattr(module, method):
+    if not hasattr(module, "QS_INTERNAL_REGISTERED_ACTIONS"):
         return "500", 500
 
-    method = getattr(module, method)
+    actions = module.QS_INTERNAL_REGISTERED_ACTIONS  # noqa
+    method = actions.get(method)
+
+    if method is None:
+        return "500", 500
 
     instance_manager = current_app.extensions["quickserve.instance_manager"]
     values = method(instance_manager, **request.form.to_dict())
@@ -478,3 +493,64 @@ def instance_create_folder(uuid: str):
     logger.info(f"Folder created: uuid={uuid} path={folder_path}")
 
     return "ok", 200
+
+
+@instance_static.route("/<uuid>/uploadfile/", methods=["POST"])
+def instance_upload_file(uuid: str):
+    file = request.files["file"]
+    root = request.form.get("root")
+    if not root:
+        return {"error": "Missing root"}, 400
+    if not file:
+        return {"error": "Missing file"}, 400
+    instance = _get_instance(uuid)
+
+    path = Path(root)
+
+    path = _get_path(
+        instance, str(path / secure_filename(file.filename)), must_exist=False
+    )
+
+    if path is None:
+        return {"error": ""}, 400
+
+    if path.exists():
+        return {"error": "File already exists"}, 400
+
+    file.save(path)
+
+    return ""
+
+
+@instance_static.route("/<uuid>/delete", methods=["POST"])
+def instance_delete(uuid: str):
+    instance_manager: "InstanceManager" = current_app.extensions[
+        "quickserve.instance_manager"
+    ]
+    catalog: "ModuleCatalog" = current_app.extensions["quickserve.catalog"]
+
+    instance = instance_manager.from_uuid(uuid)
+    working_dir = instance.working_directory()
+
+    module = catalog.get(instance.module_name)
+
+    if hasattr(module, "module") and hasattr(module.module, "QS_INTERNAL_DELETE_INSTANCE"):
+        logger.info("Running module on_delete_instance")
+        module.module.QS_INTERNAL_DELETE_INSTANCE(instance)
+    else:
+        logger.info("No module on_delete_instance")
+
+    if hasattr(module, "module") and hasattr(module.module, "QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE"):
+        logger.info("Running module simple process manager instance delete routine")
+        module.module.QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE(instance)
+    else:
+        logger.info("No module simple process manager registered.")
+
+    if working_dir.exists():
+        shutil.rmtree(working_dir.resolve())
+    instance_manager.delete_from_uuid(uuid=uuid)
+
+    search: "Search" = current_app.extensions["quickserve.search"]
+    search.reload_instances()
+
+    return "OK", 200

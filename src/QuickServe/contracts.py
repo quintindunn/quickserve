@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from uuid import UUID
 from typing import Any, Protocol, TypeAlias
 
+from QuickServeModuleLibrary.decorators import RegisteredPage, RegisteredAction
+
 PageResult: TypeAlias = str | tuple[str, dict[str, Any]]
 
 
@@ -22,9 +24,12 @@ class Module(Protocol):
     NAME: str
     VERSION: str
     QUICKSERVE_VERSION: str
-    PAGES: list[str]
     DESCRIPTION: str
     SUPPORTED_OPERATING_SYSTEMS: list[str]
+
+    # Hidden values added by quickserve
+    QS_INTERNAL_REGISTERED_PAGES: list[RegisteredPage]
+    QS_INTERNAL_REGISTERED_ACTIONS: list[RegisteredAction]
 
     def about(self, *args: Any, **kwargs: Any) -> PageResult: ...
 
@@ -65,4 +70,6 @@ class InstanceRepository(Protocol):
 
     def get(self, identifier: str | UUID) -> InstanceRecord: ...
 
-    def load_all(self) -> list[InstanceRecord]: ...
+    def load_all_active(self) -> list[InstanceRecord]: ...
+
+    def delete(self, uuid: str | UUID) -> InstanceRecord: ...

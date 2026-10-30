@@ -7,6 +7,7 @@ Date: 09/14/2026
 
 from __future__ import annotations
 
+from enum import STRICT
 from typing import TYPE_CHECKING, Any, Generator
 from uuid import UUID, uuid4
 
@@ -81,11 +82,16 @@ class InstanceManager:
         )
 
     def load_all(self) -> Generator[BaseInstance, Any, None]:
-        for record in self.repository.load_all():
+        for record in self.repository.load_all_active():
             module = self.catalog.require(record.module_name)
             yield self._build(
                 module, record.instance_name, record.module_name, record.instance_uuid
             )
+
+    def delete_from_uuid(self, uuid: str | UUID):
+        self.repository.delete(uuid=uuid)
+        if self._instances[str(uuid)]:
+            self._instances.pop(str(uuid))
 
     def _build(
         self, module, instance_name: str, module_name: str, identifier: UUID

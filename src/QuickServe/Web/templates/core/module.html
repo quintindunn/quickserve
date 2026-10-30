@@ -38,7 +38,7 @@
                 <div class="pages">
                     <span>|</span>
                     {% for page in context.module_pages %}
-                        <a href="{{ link(page=page) }}">{{ page }}</a>
+                        <a href="{{ link(page=page) }}">{{ page | title }}</a>
                         <span>|</span>
                     {% endfor %}
                 </div>
@@ -47,5 +47,25 @@
         <div>
             {% block modulebody %}{% endblock %}
         </div>
+        {% if context.instance_uuid %}
+            <script defer>
+                const delete_instance_btn = document.getElementById("qs-instance-delete");
+                const instance_name = {{ context.instance_name | tojson }}
+
+                delete_instance_btn.addEventListener("click", () => {
+                    const confirmed = confirm(`Delete instance "${instance_name}"? This cannot be undone!`);
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    fetch({{ url_for("modules.instancestatic.instance_delete", uuid=context.instance_uuid) | tojson }}, {
+                        method: "POST"
+                    }).then(() => {
+                        window.location.href = {{ url_for("modules.module_about", module_name=context.module_name) | tojson }}
+                    })
+                });
+            </script>
+        {% endif %}
     </div>
 {% endblock %}

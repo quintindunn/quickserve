@@ -5,10 +5,14 @@ Author: Quintin Dunn
 Date: 09/14/2026
 """
 
+import logging
 from uuid import UUID
 
 from QuickServe.contracts import InstanceRecord
 from QuickServe.Database.instances import InstanceModel
+
+
+logger = logging.getLogger(__name__)
 
 
 class PeeweeInstanceManager:
@@ -37,10 +41,11 @@ class PeeweeInstanceManager:
         :param identifier: The UUID of the requested instance.
         :return: The matching instance data.
         """
+        logger.info("Getting instance %", identifier)
         model = InstanceModel.get(InstanceModel.instance_uuid == identifier)
         return self._record(model)
 
-    def load_all(self) -> list[InstanceRecord]:
+    def load_all_active(self) -> list[InstanceRecord]:
         """
         Gets all instances from the database.
 
@@ -48,6 +53,16 @@ class PeeweeInstanceManager:
         """
         models = InstanceModel.select()
         return [self._record(model) for model in models]
+
+    @staticmethod
+    def delete(uuid: str | UUID) -> None:
+        """
+        Deactivates an instance.
+
+        :param uuid: The instance's uuid to deactivate
+        """
+        model = InstanceModel.get(InstanceModel.instance_uuid == uuid)
+        InstanceModel.delete_by_id(model.get_id())
 
     @staticmethod
     def _record(model: InstanceModel) -> InstanceRecord:

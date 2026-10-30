@@ -86,6 +86,11 @@ class TfIDF:
             f"and minor weight {minor_weight}"
         )
 
+    def clear(self):
+        logger.info("Clearing corpus and vocabulary.")
+        self.corpus.clear()
+        self._vocabulary.clear()
+
     def add_result(
         self,
         identifier: str,

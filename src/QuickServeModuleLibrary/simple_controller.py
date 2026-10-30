@@ -10,6 +10,8 @@ import logging
 
 from typing import TYPE_CHECKING, Callable
 
+from QuickServe.contracts import Module
+
 if TYPE_CHECKING:
     from .process import ManagedProcess
     from QuickServe.Driver.instance.base_instance import BaseInstance
@@ -26,12 +28,30 @@ class SimpleControllerProcessManager:
     start_callback: Callable[["ManagedProcess"], bool]
     _instance_process_map: dict["UUID", "ManagedProcess"]
 
-    def __init__(self):
+    def __init__(self, module: "Module"):
         """
         Instantiated the SimpleControllerProcessManager
         """
 
         self._instance_process_map = dict()
+
+        def module_cleanup(instance: "BaseInstance"):
+            process = self.get_process(instance)
+
+            if not process:
+                return
+
+            logger.info("Killing process %d", process.pid)
+            process.kill()
+
+        setattr(module, "QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE", staticmethod(module_cleanup))
+
+
+    def get_process(self, instance: "BaseInstance") -> ManagedProcess | None:
+        if not self.has_instance(instance):
+            return None
+
+        return self._instance_process_map[instance.uuid]
 
     def has_instance(self, instance: "BaseInstance") -> bool:
         """
