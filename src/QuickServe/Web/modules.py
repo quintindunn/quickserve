@@ -520,7 +520,7 @@ def instance_delete(uuid: str):
 
     module = catalog.get(instance.module_name)
 
-    if hasattr(module.module, "QS_INTERNAL_DELETE_INSTANCE"):
+    if hasattr(module, "module") and hasattr(module.module, "QS_INTERNAL_DELETE_INSTANCE"):
         logger.info("Running module on_delete_instance")
         module.module.QS_INTERNAL_DELETE_INSTANCE(instance)
     else:
