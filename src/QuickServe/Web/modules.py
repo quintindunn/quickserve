@@ -24,6 +24,7 @@ from flask.typing import ResponseReturnValue
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.contracts import Module
+from QuickServe.Common.file_size_conversion import convert_size
 
 from pathlib import Path
 
@@ -153,15 +154,26 @@ def module_page(module_name: str, page: str) -> ResponseReturnValue:
     return _render_module_page(module_name, page=page)
 
 
-def get_instance_from_db(uuid: str):
+def get_instance_from_db(uuid: str) -> "BaseInstance":
     return current_app.extensions["quickserve.instance_manager"].from_uuid(uuid)
 
 
 @instances.route("/<uuid>/<page>")
 def module_instance(uuid: str, page: str) -> ResponseReturnValue:
     instance = get_instance_from_db(uuid=uuid)
+    working_dir = instance.working_directory()
+
+    instance_size_raw = sum(
+            f.stat().st_size for f in Path(working_dir).rglob("*") if f.is_file()
+        )
+
     setattr(request, "instance", instance)
-    ctx = {"instance_uuid": instance.uuid, "instance_name": instance.instance_name}
+    ctx = {
+        "instance_uuid": instance.uuid,
+        "instance_name": instance.instance_name,
+        "instance_size_raw": instance_size_raw,
+        "instance_size_formatted": convert_size(instance_size_raw)
+    }
     return _render_module_page(module_name=instance.module_name, page=page, context=ctx)
 
 

@@ -28,7 +28,7 @@
             <div class="module-size-parent">
                 <div class="module-size">
                     <img src="{{ url_for('static', filename="core/hard-drive-svgrepo-com.svg") }}" alt="Size on Filesystem">
-                    <p>1.2GB</p>
+                    <p>{{ context.instance_size_formatted }}</p>
                 </div>
             </div>
             {% endif %}

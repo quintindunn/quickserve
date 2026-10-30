@@ -220,3 +220,5 @@ __marimo__/
 .streamlit/secrets.toml
 
 .DS_Store
+
+devtools/file_signatures.py
