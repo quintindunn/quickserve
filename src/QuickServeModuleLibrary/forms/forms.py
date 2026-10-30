@@ -36,7 +36,6 @@ class QSForm:
             inputs.append(v.compile(id=k))
         inputs.append(Hidden(value=self._instance_uuid).compile("instance-uuid"))
 
-
         if with_submit:
             inputs.append(SubmitButton(default="Submit", label="").compile("submit"))
         inputs.append(self._generate_form_foot())

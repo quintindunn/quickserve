@@ -4,6 +4,7 @@ Module main class for generating Minecraft Vanilla servers.
 Author: Quintin Dunn
 Date: 09/09/2026
 """
+
 import datetime
 import json
 import logging
@@ -13,14 +14,12 @@ from typing import TYPE_CHECKING, Callable
 
 import requests
 
-from QuickServeModuleLibrary.forms.datatypes import String
-from QuickServeModuleLibrary.forms.forms import QSForm
 from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from QuickServeModuleLibrary.decorators import page, action
 
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
-
+from .forms import BanIp, BanPlayer, UnBanIP, UnBanPlayer, OpPlayer, DeOpPlayer, WhitelistPlayer, WhitelistRemove
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -30,21 +29,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("minecraft-vanilla")
 
-
-class BanPlayer(QSForm):
-    def __init__(self, action_name: str, instance_uuid: str):
-        super().__init__(action_name, instance_uuid)
-
-    playerName = String(placeholder="Player Name", required=True)
-    banReason = String(placeholder="Ban Reason", required=False)
-
-
-class BanIp(QSForm):
-    def __init__(self, action_name: str, instance_uuid: str):
-        super().__init__(action_name, instance_uuid)
-
-    ip = String(placeholder="IP Address", required=True)
-    banReason = String(placeholder="Ban Reason", required=False)
 
 
 class Module:
@@ -206,15 +190,25 @@ class Module:
         with open(asset, "r") as f:
             return f.read(), dict()
 
-    @page(instance_specific=True, page_name="ban player")
-    def ban_player(self, instance: "BaseInstance", *args, **kwargs):
-        asset = self.module.get_resource_path("banPlayer.html")
+    @page(instance_specific=True, page_name="Player Management")
+    def player_management(self, instance: "BaseInstance", *args, **kwargs):
+        asset = self.module.get_resource_path("management.html")
 
-        player_form = BanPlayer(action_name="ban-player-action", instance_uuid=str(instance.uuid))
-        ip_form = BanIp(action_name="ban-ip-action", instance_uuid=str(instance.uuid))
+        context = {
+            "forms": {
+                "ban_player": BanPlayer(action_name="ban-player-action", instance_uuid=str(instance.uuid)).compile(),
+                "ban_ip": BanIp(action_name="ban-ip-action", instance_uuid=str(instance.uuid)).compile(),
+                "unban_player": UnBanPlayer(action_name="unban-player-action", instance_uuid=str(instance.uuid)).compile(),
+                "unban_ip": UnBanIP(action_name="unban-ip-action", instance_uuid=str(instance.uuid)).compile(),
+                "whitelist_add": WhitelistPlayer(action_name="whitelist-add-action", instance_uuid=str(instance.uuid)).compile(),
+                "whitelist_remove": WhitelistRemove(action_name="whitelist-remove-action", instance_uuid=str(instance.uuid)).compile(),
+                "op": OpPlayer(action_name="op-action", instance_uuid=str(instance.uuid)).compile(),
+                "deop": DeOpPlayer(action_name="deop-action", instance_uuid=str(instance.uuid)).compile(),
+            }
+        }
 
         with open(asset, "r") as f:
-            return f.read(), {"player_form": player_form.compile(), "ip_form": ip_form.compile()}
+            return f.read(), context
 
     @action(action_name="ban-player-action")
     def ban_player_action(self, instances: "InstanceManager", **kwargs):
@@ -224,7 +218,7 @@ class Module:
         server_dir = instance.working_directory() / "server"
 
         if not server_dir.exists():
-            return "about" # TODO - Better action returns
+            return "about"  # TODO - Better action returns
 
         banned_players_file = server_dir / "banned-players.json"
 
@@ -235,16 +229,18 @@ class Module:
         request = requests.get(endpoint)
 
         if request.status_code != 200:
-            return "about" # TODO - Better action returns
+            return "about"  # TODO - Better action returns
 
         data = request.json()
 
         obj = {
             "uuid": data.get("id"),
             "name": data.get("name"),
-            "created": datetime.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z"),
+            "created": datetime.datetime.now()
+            .astimezone()
+            .strftime("%Y-%m-%d %H:%M:%S %z"),
             "source": "Server",
-            "expires": "forever"
+            "expires": "forever",
         }
 
         for ban in ban_list:
@@ -259,7 +255,7 @@ class Module:
         with banned_players_file.open(mode="w") as f:
             json.dump(ban_list, f, indent=1)
 
-        return "start" # TODO - Better action returns
+        return "start"  # TODO - Better action returns
 
     @action(action_name="ban-ip-action")
     def ban_ip_action(self, instances: "InstanceManager", **kwargs):
@@ -283,9 +279,11 @@ class Module:
 
         obj = {
             "ip": form.ip.response,
-            "created": datetime.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z"),
+            "created": datetime.datetime.now()
+            .astimezone()
+            .strftime("%Y-%m-%d %H:%M:%S %z"),
             "source": "Server",
-            "expires": "forever"
+            "expires": "forever",
         }
 
         for ban in ban_list:
@@ -300,4 +298,34 @@ class Module:
         with banned_players_file.open(mode="w") as f:
             json.dump(ban_list, f, indent=1)
 
-        return "about" # TODO - Better action returns
+        return "about"  # TODO - Better action returns
+
+    @action(action_name="unban-player-action")
+    def unban_player_action(self, instances: "InstanceManager", **kwargs):
+        form = UnBanPlayer.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+
+    @action(action_name="unban-ip-action")
+    def unban_ip_action(self, instances: "InstanceManager", **kwargs):
+        form = UnBanIP.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+
+    @action(action_name="whitelist-add-action")
+    def whitelist_add_action(self, instances: "InstanceManager", **kwargs):
+        form = WhitelistPlayer.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+
+    @action(action_name="whitelist-remove-action")
+    def whitelist_remove_action(self, instances: "InstanceManager", **kwargs):
+        form = WhitelistRemove.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+
+    @action(action_name="op-action")
+    def op_player_action(self, instances: "InstanceManager", **kwargs):
+        form = OpPlayer.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+
+    @action(action_name="deop-action")
+    def deop_player_action(self, instances: "InstanceManager", **kwargs):
+        form = DeOpPlayer.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)

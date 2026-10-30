@@ -1,0 +1,8 @@
+.management-forms > div > .forms {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.management-forms > div > .forms > div {
+    scale: 0.9;
+}

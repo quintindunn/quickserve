@@ -44,8 +44,11 @@ class SimpleControllerProcessManager:
             logger.info("Killing process %d", process.pid)
             process.kill()
 
-        setattr(module, "QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE", staticmethod(module_cleanup))
-
+        setattr(
+            module,
+            "QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE",
+            staticmethod(module_cleanup),
+        )
 
     def get_process(self, instance: "BaseInstance") -> ManagedProcess | None:
         if not self.has_instance(instance):
