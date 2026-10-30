@@ -58,6 +58,8 @@ def _render_module_page(
     """
     catalog = current_app.extensions["quickserve.catalog"]
 
+    request.module = module_name
+
     if context is None:
         context = dict()
 
@@ -489,7 +491,9 @@ def instance_upload_file(uuid: str):
 
     path = Path(root)
 
-    path = _get_path(instance, str(path / secure_filename(file.filename)), must_exist=False)
+    path = _get_path(
+        instance, str(path / secure_filename(file.filename)), must_exist=False
+    )
 
     if path is None:
         return {"error": ""}, 400
