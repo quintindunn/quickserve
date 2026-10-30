@@ -37,7 +37,7 @@ class SimpleControllerProcessManager:
         def module_cleanup(instance: "BaseInstance"):
             process = self.get_process(instance)
 
-            if not process:
+            if process is None or not process.is_alive():
                 return
 
             logger.info("Killing process %d", process.pid)
