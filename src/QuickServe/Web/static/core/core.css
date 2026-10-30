@@ -266,6 +266,7 @@ body {
 
 .mod-heading > button:hover {
     cursor: pointer;
+}
 
 .qs-form {
     max-width: 650px;
