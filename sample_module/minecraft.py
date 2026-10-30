@@ -20,7 +20,16 @@ from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessMan
 from QuickServeModuleLibrary.decorators import page, action
 
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
-from .forms import BanIp, BanPlayer, UnBanIP, UnBanPlayer, OpPlayer, DeOpPlayer, WhitelistPlayer, WhitelistRemove
+from .forms import (
+    BanIp,
+    BanPlayer,
+    UnBanIP,
+    UnBanPlayer,
+    OpPlayer,
+    DeOpPlayer,
+    WhitelistPlayer,
+    WhitelistRemove,
+)
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -29,7 +38,6 @@ if TYPE_CHECKING:
     from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
 logger = logging.getLogger("minecraft-vanilla")
-
 
 
 class Module:
@@ -197,14 +205,31 @@ class Module:
 
         context = {
             "forms": {
-                "ban_player": BanPlayer(action_name="ban-player-action", instance_uuid=str(instance.uuid)).compile(submit_text="Ban Player"),
-                "ban_ip": BanIp(action_name="ban-ip-action", instance_uuid=str(instance.uuid)).compile(submit_text="Ban IP"),
-                "unban_player": UnBanPlayer(action_name="unban-player-action", instance_uuid=str(instance.uuid)).compile(submit_text="Unban Player"),
-                "unban_ip": UnBanIP(action_name="unban-ip-action", instance_uuid=str(instance.uuid)).compile(submit_text="Unban IP"),
-                "whitelist_add": WhitelistPlayer(action_name="whitelist-add-action", instance_uuid=str(instance.uuid)).compile(submit_text="Whitelist Player"),
-                "whitelist_remove": WhitelistRemove(action_name="whitelist-remove-action", instance_uuid=str(instance.uuid)).compile(submit_text="Unwhitelist Player"),
-                "op": OpPlayer(action_name="op-action", instance_uuid=str(instance.uuid)).compile(submit_text="OP player"),
-                "deop": DeOpPlayer(action_name="deop-action", instance_uuid=str(instance.uuid)).compile(submit_text="DeOP player"),
+                "ban_player": BanPlayer(
+                    action_name="ban-player-action", instance_uuid=str(instance.uuid)
+                ).compile(submit_text="Ban Player"),
+                "ban_ip": BanIp(
+                    action_name="ban-ip-action", instance_uuid=str(instance.uuid)
+                ).compile(submit_text="Ban IP"),
+                "unban_player": UnBanPlayer(
+                    action_name="unban-player-action", instance_uuid=str(instance.uuid)
+                ).compile(submit_text="Unban Player"),
+                "unban_ip": UnBanIP(
+                    action_name="unban-ip-action", instance_uuid=str(instance.uuid)
+                ).compile(submit_text="Unban IP"),
+                "whitelist_add": WhitelistPlayer(
+                    action_name="whitelist-add-action", instance_uuid=str(instance.uuid)
+                ).compile(submit_text="Whitelist Player"),
+                "whitelist_remove": WhitelistRemove(
+                    action_name="whitelist-remove-action",
+                    instance_uuid=str(instance.uuid),
+                ).compile(submit_text="Unwhitelist Player"),
+                "op": OpPlayer(
+                    action_name="op-action", instance_uuid=str(instance.uuid)
+                ).compile(submit_text="OP player"),
+                "deop": DeOpPlayer(
+                    action_name="deop-action", instance_uuid=str(instance.uuid)
+                ).compile(submit_text="DeOP player"),
             }
         }
 
@@ -221,7 +246,7 @@ class Module:
                 logger.warning("Space in argument!")
                 return False
 
-        command = ' '.join(args) + "\n"
+        command = " ".join(args) + "\n"
         process.write(command.encode())
         return True
 
@@ -234,7 +259,9 @@ class Module:
         if form.banReason.response:
             command.append(form.banReason.response)
 
-        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
 
         return "start"  # TODO - Better action returns
 
@@ -247,7 +274,9 @@ class Module:
         if form.banReason.response:
             command.append(form.banReason.response)
 
-        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
 
         return "about"  # TODO - Better action returns
 
@@ -257,7 +286,9 @@ class Module:
         instance = instances.from_uuid(form.instance_uuid.response)
 
         command = ["pardon", form.playerName.response]
-        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
 
         return "about"  # TODO - Better action returns
 
@@ -267,7 +298,9 @@ class Module:
         instance = instances.from_uuid(form.instance_uuid.response)
 
         command = ["pardon-ip", form.ip.response]
-        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
 
         return "about"  # TODO - Better action returns
 
@@ -277,7 +310,9 @@ class Module:
         instance = instances.from_uuid(form.instance_uuid.response)
 
         command = ["whitelist", "add", form.username.response]
-        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
 
         return "about"  # TODO - Better action returns
 
@@ -287,7 +322,9 @@ class Module:
         instance = instances.from_uuid(form.instance_uuid.response)
 
         command = ["whitelist", "remove", form.username.response]
-        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
 
         return "about"  # TODO - Better action returns
 
@@ -297,7 +334,9 @@ class Module:
         instance = instances.from_uuid(form.instance_uuid.response)
 
         command = ["op", form.username.response]
-        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
 
         return "about"  # TODO - Better action returns
 
@@ -307,6 +346,8 @@ class Module:
         instance = instances.from_uuid(form.instance_uuid.response)
 
         command = ["deop", form.username.response]
-        logger.info("Command %s - %s", repr(command), self.execute_command(instance, command))
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
 
         return "about"  # TODO - Better action returns
