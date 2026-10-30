@@ -164,15 +164,15 @@ def module_instance(uuid: str, page: str) -> ResponseReturnValue:
     working_dir = instance.working_directory()
 
     instance_size_raw = sum(
-            f.stat().st_size for f in Path(working_dir).rglob("*") if f.is_file()
-        )
+        f.stat().st_size for f in Path(working_dir).rglob("*") if f.is_file()
+    )
 
     setattr(request, "instance", instance)
     ctx = {
         "instance_uuid": instance.uuid,
         "instance_name": instance.instance_name,
         "instance_size_raw": instance_size_raw,
-        "instance_size_formatted": convert_size(instance_size_raw)
+        "instance_size_formatted": convert_size(instance_size_raw),
     }
     return _render_module_page(module_name=instance.module_name, page=page, context=ctx)
 
