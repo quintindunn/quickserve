@@ -225,3 +225,27 @@ body {
 .search-results > div:nth-child(2) {
     border-left: 1px solid var(--border);
 }
+
+.module-size-parent {
+    position: relative;
+}
+
+.module-size {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.module-size > img {
+    width: 1.5rem;
+    height: 100%;
+    filter: brightness(0) saturate(100%) invert(35%) sepia(90%) saturate(1500%) hue-rotate(200deg);
+}
+
+.module-size > p {
+    margin: 0;
+}
