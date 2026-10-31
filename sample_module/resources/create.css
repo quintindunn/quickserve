@@ -66,16 +66,15 @@
     display: block;
     padding: 1rem;
     margin-top: 0.25rem;
-    background: #181818;
-    border: 1px solid #333;
+    background: var(--accent-bg-dark);
+    border: 1px solid var(--border);
     border-radius: 6px;
-    color: #bbb;
+    color: var(--min-text);
     font-size: 0.85rem;
     line-height: 1.5;
 }
 
 .create label[for="eula"] a {
-    color: #6ea8fe;
     text-decoration: none;
 }
 
@@ -111,10 +110,4 @@
 
 .create button[type="submit"]:active {
     transform: translateY(1px);
-}
-
-.create button[type="submit"]:disabled {
-    background: #444;
-    color: #888;
-    cursor: not-allowed;
 }

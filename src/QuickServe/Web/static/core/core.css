@@ -1,17 +1,17 @@
 :root {
     --text: #9ca3af;
     --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
+    --min-text: #BBBBBB;
+
+    --background: #16171d;
+    --code-background: #202029;
+    --border: #30303a;
+
     --accent: #c084fc;
     --accent-radial-gradient: rgba(192, 132, 252, 0.05);
-    --accent-bg: rgb(31, 32, 41);
+    --accent-bg: #202029;
+    --accent-bg-dark: #181818;
     --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
-      rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 
     --btn-large-size: .875rem 1.325rem;
     --btn-large-hover-size: .95rem 1.4rem;
@@ -19,19 +19,23 @@
     --btn-medium-size: .7rem 1.1rem;
     --btn-medium-hover-size: .75rem 1.15rem;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+    --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+    --trebuchet: "Trebuchet MS", sans-serif;
+    --serif: 18px/145% Georgia, serif;
+    --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    --font: var(--trebuchet);
+
+    font: 18px/145% var(--font);
+    letter-spacing: 0.18px;
+    color-scheme: dark;
+    color: var(--text);
+    background: var(--background);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .unstyled-anchor {
@@ -78,7 +82,7 @@
 }
 
 body {
-    background-color: var(--bg);
+    background-color: var(--background);
 }
 
 .content {
