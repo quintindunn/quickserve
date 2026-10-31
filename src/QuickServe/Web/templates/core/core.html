@@ -30,20 +30,21 @@
                 <img class="quickserve-logo" src="{{ url_for('static', filename="core/QuickServe.webp") }}" alt="QuickServe logo featuring a Q with a server rack inside and four horizontal lines extending from the left.">
         </a>
         <div class="main">
-
             <div class="sidebar">
-                <div class="sub1">
-                    <span>Instances</span>
-                    <div class="sub2">
+                <div class="sidebar-section">
+                    <span>INSTANCES</span>
+                    <div class="sidebar-subsection">
                         {% for instance in instances %}
-                            <div class="instance-entry"><a href="{{ instance.url }}">{{ instance.name }}</a></div>
+                            <span>
+                                <a href="{{ instance.url }}">{{ instance.name }}</a>
+                            </span>
                         {% endfor %}
                     </div>
                 </div>
-                <div class="sub1">
-                    <span>Modules</span>
+                <div class="sidebar-section">
+                    <span>MODULES</span>
                     {% for module in modules %}
-                        <div class="sub2">
+                        <div class="sidebar-subsection">
                             <span>
                                 <a href="{{ url_for('modules.module_about', module_name=module) }}">{{ module }}</a>
                             </span>

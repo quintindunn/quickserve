@@ -1,54 +1,67 @@
 .sidebar {
-  box-sizing: border-box;
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 1.5rem 0.85rem;
 
-  padding: 5vh 1rem 0;
-
-  border-right: 1px solid var(--border);
-
-  min-width: 0;
+    border-right: 1px solid var(--border);
 }
 
-.sub1 {
-  width: 100%;
+.sidebar-section {
+    width: 100%;
+    margin-bottom: 2rem;
 }
 
-.sub1 > span {
-  display: block;
+.sidebar-section > span {
+    display: block;
+    padding: 0 0.65rem 0.6rem;
+    margin-bottom: 0.5rem;
 
-  padding: 0 0 0.5rem;
-  margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
 
-  border-bottom: 1px solid var(--border);
-
-  color: var(--text-h);
-  font-weight: 500;
+    color: var(--text-h);
+    font-size: .85rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
 }
 
-.sub1 > span > a {
-  text-decoration: none;
-  color:#e5e4e7;
-  font-size: 1.5rem;
+.sidebar-section > span > a {
+    color: var(--text-h);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
-.sub1 > div {
-  text-align: left;
-
-  padding: 0.35rem 0;
-
-  font-size: 0.8rem;
-  line-height: 1.4;
-
-  overflow-wrap: break-word;
+.sidebar-section > span > a:hover {
+    color: var(--accent);
 }
 
-.sub1 > div > a {
-  color: var(--accent);
-
-  text-decoration: none;
-
-  transition: opacity 0.15s ease;
+.sidebar-section > .sidebar-subsection {
+    margin: 0.15rem 0;
 }
 
-.sub1 > div > a:hover {
-  opacity: 0.7;
+.sidebar-section > div > span > a {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+
+    padding: 0.5rem;
+    border-radius: 7px;
+
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1;
+    text-decoration: none;
+
+    overflow-wrap: anywhere;
+
+    transition:
+        color .2s ease,
+        background-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.sidebar-section > div > span > a:hover {
+    color: var(--text-h);
+    background-color: var(--accent-bg);
+    box-shadow: inset 2px 0 0 var(--accent);
 }
