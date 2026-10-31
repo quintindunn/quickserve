@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Callable
 from markupsafe import Markup
 
+from QuickServe.Common.file_size_conversion import convert_size
 from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.Web.module_common.resources import get_resource
 from flask import current_app, request
@@ -150,7 +151,7 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
                     "modified": format_date(
                         datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
                     ),
-                    "size": f"{os.stat(file_path).st_size / 1000:.1f}kb",
+                    "size": convert_size(os.stat(file_path).st_size, precision=1),
                     "isFile": os.path.isfile(file_path),
                     "isDir": os.path.isdir(file_path),
                     "isEmptyDir": os.path.isdir(file_path)
