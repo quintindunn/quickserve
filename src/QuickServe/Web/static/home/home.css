@@ -164,3 +164,7 @@
     border: 1px solid var(--border);
     color: var(--accent-bg);
 }
+
+.home > .getting-started > .getting-started-marketplace-link:hover {
+    padding: .95rem 1.4rem;
+}
