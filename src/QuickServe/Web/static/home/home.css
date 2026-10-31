@@ -7,7 +7,7 @@
     border: 1px solid var(--border);
     height: clamp(300px, 10vh, 30vh);
     border-radius: 25px;
-    background-color: var(--accent-bg);
+    background: radial-gradient(ellipse at 85% 15%, var(--accent-radial-gradient), transparent 55%), var(--accent-bg);
     padding: clamp(2rem, 6vw, 4rem);
     max-width: 1100px;
     margin: 0 auto;
