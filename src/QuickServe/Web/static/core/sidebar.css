@@ -1,0 +1,54 @@
+.sidebar {
+  box-sizing: border-box;
+
+  padding: 5vh 1rem 0;
+
+  border-right: 1px solid var(--border);
+
+  min-width: 0;
+}
+
+.sub1 {
+  width: 100%;
+}
+
+.sub1 > span {
+  display: block;
+
+  padding: 0 0 0.5rem;
+  margin-bottom: 0.5rem;
+
+  border-bottom: 1px solid var(--border);
+
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.sub1 > span > a {
+  text-decoration: none;
+  color:#e5e4e7;
+  font-size: 1.5rem;
+}
+
+.sub1 > div {
+  text-align: left;
+
+  padding: 0.35rem 0;
+
+  font-size: 0.8rem;
+  line-height: 1.4;
+
+  overflow-wrap: break-word;
+}
+
+.sub1 > div > a {
+  color: var(--accent);
+
+  text-decoration: none;
+
+  transition: opacity 0.15s ease;
+}
+
+.sub1 > div > a:hover {
+  opacity: 0.7;
+}

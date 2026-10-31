@@ -4,6 +4,14 @@
         <title>{% block title %}QuickServe{% endblock %}</title>
         <link rel="stylesheet"
               href="{{ url_for('static', filename='core/core.css') }}">
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='core/forms.css') }}">
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='core/search.css') }}">
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='core/modules.css') }}">
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='core/sidebar.css') }}">
         <script src="{{ url_for('static', filename='core/search.js') }}" defer></script>
         {% block head %}{% endblock %}
     </head>
