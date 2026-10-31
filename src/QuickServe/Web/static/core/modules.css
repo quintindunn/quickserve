@@ -70,6 +70,7 @@
     padding: 0;
 
     background-color: var(--accent-bg);
+    border-top-right-radius: 15px;
 }
 
 .tab {
@@ -86,6 +87,12 @@
     border-top: 1px solid var(--border);
     border-right: transparent;
     border-left: 1px solid var(--border);
+
+    font-size: .6rem;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .tab:hover,
@@ -97,6 +104,10 @@
 
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
+}
+
+.tab {
+    transition: height .25s ease;
 }
 
 .tab:last-child {
@@ -114,4 +125,14 @@
     padding-top: 0.5rem;
 
     border-top: 1px solid var(--border);
+}
+
+@media (max-width: 800px) {
+    .module-size-parent {
+        bottom: 2rem;
+    }
+
+    .module > .module-head > a > .module-heading {
+        font-size: 2rem;
+    }
 }
