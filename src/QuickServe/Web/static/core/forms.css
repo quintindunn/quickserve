@@ -1,0 +1,239 @@
+
+.qs-form {
+    max-width: 650px;
+    margin: 2rem auto;
+    padding: 2rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #eee;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.qs-form > label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.qs-form input[type="text"],
+.qs-form input[type="email"],
+.qs-form input[type="password"],
+.qs-form input[type="number"],
+.qs-form input[type="url"],
+.qs-form input[type="date"],
+.qs-form input[type="datetime-local"],
+.qs-form input[type="time"],
+.qs-form input[type="month"],
+.qs-form input[type="week"],
+.qs-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #151515;
+    color: #eee;
+    font: inherit;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.qs-form input[type="text"]:focus,
+.qs-form input[type="email"]:focus,
+.qs-form input[type="password"]:focus,
+.qs-form input[type="number"]:focus,
+.qs-form input[type="url"]:focus,
+.qs-form input[type="date"]:focus,
+.qs-form input[type="datetime-local"]:focus,
+.qs-form input[type="time"]:focus,
+.qs-form input[type="month"]:focus,
+.qs-form input[type="week"]:focus,
+.qs-form textarea:focus {
+    border-color: #6ea8fe;
+    box-shadow: 0 0 0 2px rgba(110, 168, 254, 0.15);
+}
+
+.qs-form textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.qs-form input::placeholder,
+.qs-form textarea::placeholder {
+    color: #777;
+    opacity: 1;
+}
+
+.qs-form input[type="date"],
+.qs-form input[type="datetime-local"],
+.qs-form input[type="time"],
+.qs-form input[type="month"],
+.qs-form input[type="week"] {
+    color-scheme: dark;
+}
+
+.qs-form input[type="file"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #151515;
+    color: #bbb;
+    font: inherit;
+    cursor: pointer;
+}
+
+.qs-form input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #2a2a2a;
+    color: #eee;
+    font: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.qs-form input[type="file"]::file-selector-button:hover {
+    background: #383838;
+}
+
+.qs-form input[type="color"] {
+    width: 100%;
+    height: 42px;
+    padding: 0.3rem;
+    box-sizing: border-box;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #151515;
+    cursor: pointer;
+}
+
+.qs-form input[type="checkbox"],
+.qs-form input[type="radio"] {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: #3b82f6;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.qs-form > label:has(input[type="checkbox"]) {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.65rem;
+    cursor: pointer;
+}
+
+.qs-form fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    border: 1px solid #333;
+    border-radius: 6px;
+}
+
+.qs-form legend {
+    padding: 0 0.4rem;
+    color: #eee;
+    font-weight: 600;
+}
+
+.qs-form fieldset label {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.qs-form input[type="range"] {
+    width: 100%;
+    margin: 0.4rem 0;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+.qs-form input[type="reset"],
+.qs-form button[type="submit"],
+.qs-form input[type="submit"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.qs-form input[type="reset"] {
+    border: 1px solid #444;
+    background: #2a2a2a;
+    color: #ddd;
+}
+
+.qs-form input[type="reset"]:hover {
+    background: #383838;
+}
+
+.qs-form button[type="submit"],
+.qs-form input[type="submit"] {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.qs-form button[type="submit"]:hover,
+.qs-form input[type="submit"]:hover {
+    background: #2563eb;
+}
+
+.qs-form input[type="reset"]:active,
+.qs-form button[type="submit"]:active,
+.qs-form input[type="submit"]:active {
+    transform: translateY(1px);
+}
+
+.qs-form input[type="reset"]:disabled,
+.qs-form button[type="submit"]:disabled,
+.qs-form input[type="submit"]:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.qs-form input:focus-visible,
+.qs-form textarea:focus-visible,
+.qs-form button:focus-visible {
+    outline: 2px solid #6ea8fe;
+    outline-offset: 2px;
+}
+
+.qs-form input:invalid:not(:placeholder-shown),
+.qs-form textarea:invalid:not(:placeholder-shown) {
+    border-color: #e06c75;
+}
+
+@media (max-width: 600px) {
+    .qs-form {
+        margin: 1rem auto;
+        padding: 1.25rem;
+        gap: 1rem;
+        border-radius: 8px;
+    }
+}

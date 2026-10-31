@@ -105,11 +105,16 @@
     margin-left: 5px;
 }
 
-.feature-cards {
+.home >.features > .feature-cards {
     display: grid;
     gap: 2vw;
     grid-template-columns: 1fr 1fr 1fr;
     padding: .25rem 1rem;
+}
+
+.home > .features > .feature-cards > a.feature-card {
+    text-decoration: none;
+    color: inherit;
 }
 
 .feature-card {
@@ -163,4 +168,8 @@
     background-color: var(--accent);
     border: 1px solid var(--border);
     color: var(--accent-bg);
+}
+
+.home > .getting-started > .getting-started-marketplace-link:hover {
+    padding: .95rem 1.4rem;
 }
