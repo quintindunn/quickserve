@@ -52,6 +52,7 @@
     padding: .875rem 1.325rem;
     text-decoration: none;
     border-radius: 10px;
+    font-weight: 550;
 }
 
 .home > .heading > .heading-links > .heading-link:not(:first-child) {
@@ -66,7 +67,6 @@
     background-color: var(--accent);
     border: 1px solid var(--border);
     color: var(--accent-bg);
-    font-weight: bold;
 }
 
 .home > .heading > .heading-links > .heading-link-marketplace:hover {
@@ -81,4 +81,44 @@
 
 .home > .heading > .heading-links > .heading-link-github:hover {
     box-shadow: 0 0 3px 0 var(--border) ;
+}
+
+.home > .features {
+    margin-top: 6vh;
+}
+
+.home > .features > .features-heading {
+    color: var(--text-h);
+    margin-left: 5px;
+}
+
+.feature-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2vw;
+    padding: .25rem 1rem;
+}
+
+.feature-card {
+    background-color: var(--accent-bg);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    padding: .875rem 1.325rem;
+}
+
+.feature-card:hover {
+    scale: 1.02;
+    border-color: var(--accent-border);
+}
+
+.home > .features > .feature-cards > .feature-card > .feature-card-heading {
+    color: var(--text-h);
+}
+
+.home > .features > .feature-cards > .feature-card > .feature-card-content {
+    text-indent: 25px;
+}
+
+.home > .features > .feature-cards > .feature-card > .feature-card-content > .feature-card-bold {
+    font-weight: 600;
 }
