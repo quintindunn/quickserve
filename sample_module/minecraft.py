@@ -25,6 +25,7 @@ from .forms import (
     DeOpPlayer,
     WhitelistPlayer,
     WhitelistRemove,
+    ExampleForm
 )
 
 if TYPE_CHECKING:
@@ -347,3 +348,10 @@ class Module:
         )
 
         return "Player Management", 302, instance
+
+    @page(page_name="test")
+    def test(self, *_, **__):
+        form = ExampleForm("test-action", "").compile()
+        asset = self.module.get_resource_path("test_forms.html")
+        with open(asset, "r") as f:
+            return f.read(), {"form": form}
