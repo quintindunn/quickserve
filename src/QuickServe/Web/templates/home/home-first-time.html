@@ -1,27 +1,26 @@
 {% extends "core/core.html" %}
-
 {% block title %}
     QuickServe
 {% endblock %}
-
 {% block head %}
-    <link rel="stylesheet"  href="{{ url_for('static', filename="home/home.css") }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename="home/home.css") }}">
 {% endblock %}
-
 {% block content %}
     <div class="home">
-        <div class="heading"> {# Heading #}
+        <div class="heading">
+            {# Heading #}
             <h1 class="heading-text">QuickServe</h1>
             <p class="heading-tagline">Self-Hosting made easy.</p>
             <p class="heading-description">&emsp;QuickServe is an easy-to-use, modular, and open-source video game server manager. Create, manage, and monitor your servers from one place.</p>
-
             <div class="heading-links">
                 <a class="heading-link heading-link-marketplace" href="#marketplace">Marketplace</a>
-                <a class="heading-link heading-link-github" href="https://github.com/quintindunn/quickserve">View on GitHub</a>
+                <a class="heading-link heading-link-github"
+                   href="https://github.com/quintindunn/quickserve">View on GitHub</a>
             </div>
         </div>
-
-        <div class="features"> {# Features #}
+        <div class="features">
+            {# Features #}
             <h2 class="features-heading">What else could you need?</h2>
             <div class="feature-cards">
                 <div class="feature-card">
@@ -38,8 +37,8 @@
                 </div>
             </div>
         </div>
-
-        <div> {# Getting started #}
+        <div class="getting-started">
+            {# Getting started #}
             <h2>Ready to get started?</h2>
             <p>Head to the marketplace to install modules,</p>
             <a href="#marketplace">Marketplace</a>

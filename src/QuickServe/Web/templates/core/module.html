@@ -25,11 +25,10 @@
                         <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
                     {% endif %}
                 </a>
-                 {% if context.instance_uuid %}
+                {% if context.instance_uuid %}
                     <button id="qs-instance-delete">Delete Instance</button>
                 {% endif %}
             </div>
-
             {% if context.isInstance %}
                 <div class="module-size-parent">
                     <div class="module-size">
