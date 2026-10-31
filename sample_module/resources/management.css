@@ -6,7 +6,7 @@
 .management-forms > div > .forms {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
+    column-gap: 1.25rem;
     align-items: stretch;
 }
 
@@ -16,6 +16,7 @@
     border: 2px solid var(--accent-bg);
     border-radius: 10px;
     box-sizing: border-box;
+    margin-bottom: 1rem;
 }
 
 .management-forms > div > .forms > div:hover {
@@ -97,7 +98,7 @@
 }
 
 @media (max-width: 700px) {
-    .management-forms > .banning > .forms {
+    .management-forms > div > .forms {
         grid-template-columns: minmax(0, 1fr);
     }
 
