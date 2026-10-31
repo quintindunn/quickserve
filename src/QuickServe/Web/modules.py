@@ -83,8 +83,10 @@ def _render_module_page(
     pages: list[dict] = []
 
     if hasattr(module, "QS_INTERNAL_REGISTERED_PAGES"):
-        for page_name in module.QS_INTERNAL_REGISTERED_PAGES:
-            pages.append({"name": str(page_name), "selected": str(page_name) == page})
+        for page_name, registered_page in module.QS_INTERNAL_REGISTERED_PAGES.items():
+            if registered_page.instance_specific and "instance_uuid" not in context:
+                continue
+            pages.append({"name": page_name, "selected": page_name == page})
 
     ctx = {
         "module_name": module.NAME,
