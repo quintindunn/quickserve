@@ -1,3 +1,37 @@
 {% extends 'home/home-base.html' %}
 
 {% block home_content %}
+<div class="features">
+    {# Features #}
+    {% if context.instances | length > 0 %}
+    <h2 class="features-heading">Your instances</h2>
+    <div class="feature-cards">
+        {% for instance in context.instances %}
+            <a class="feature-card" href="{{ url_for("modules.instances.module_instance", uuid=instance.uuid, page="about") }}">
+                <h3 class="feature-card-heading">{{ instance.instance_name }}</h3>
+                <p class="feature-card-content">Instance of {{ instance.module_name }}</p>
+            </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if context.modules | length > 0 %}
+    <h2 class="features-heading">Your modules</h2>
+    <div class="feature-cards">
+        {% for module in context.modules %}
+            <a class="feature-card" href="{{ url_for('modules.module_about', module_name=module.0) }}">
+                <h3 class="feature-card-heading">{{ module.0 }}</h3>
+                <p class="feature-card-content">{{ module.1.module.DESCRIPTION }}</p>
+            </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="getting-started">
+    {# Getting started #}
+    <h2 class="getting-started-heading">Ready to get started?</h2>
+    <p>Head to the marketplace to install modules.</p>
+    <a class="getting-started-marketplace-link" href="#marketplace">Marketplace</a>
+</div>
+{% endblock home_content %}
