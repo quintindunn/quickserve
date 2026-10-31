@@ -19,7 +19,9 @@ home = Blueprint("home", __name__)
 
 @home.route("/")
 def index() -> ResponseReturnValue:
-    instance_manager: "InstanceManager" = current_app.extensions["quickserve.instance_manager"]
+    instance_manager: "InstanceManager" = current_app.extensions[
+        "quickserve.instance_manager"
+    ]
     module_catalog: "ModuleCatalog" = current_app.extensions["quickserve.catalog"]
 
     instances = list(instance_manager.load_all())
@@ -28,10 +30,10 @@ def index() -> ResponseReturnValue:
     if (len(instances) + len(modules)) == 0:
         return render_template("home/home-first-time.html", context={})
 
-    return render_template("home/home-has-instances.html", context={
-        "instances": instances,
-        "modules": modules
-    })
+    return render_template(
+        "home/home-has-instances.html",
+        context={"instances": instances, "modules": modules},
+    )
 
 
 @home.route("/favicon.ico")
