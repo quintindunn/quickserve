@@ -136,3 +136,31 @@
 .home > .features > .feature-cards > .feature-card > .feature-card-content > .feature-card-bold {
     font-weight: 600;
 }
+
+/* Getting Started */
+.home > .getting-started {
+    margin: 6vh 1vw;
+    padding: 1rem 2rem 2rem;
+
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    background-color: var(--accent-bg);
+
+}
+
+.home > .getting-started > .getting-started-heading {
+    color: var(--text-h);
+}
+
+.home > .getting-started > .getting-started-marketplace-link {
+    padding: .875rem 1.325rem;
+    border-radius: 10px;
+
+    text-decoration: none;
+    font-size: .9rem;
+    font-weight: 550;
+
+    background-color: var(--accent);
+    border: 1px solid var(--border);
+    color: var(--accent-bg);
+}
