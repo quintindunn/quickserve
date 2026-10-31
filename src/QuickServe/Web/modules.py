@@ -80,11 +80,11 @@ def _render_module_page(
         "quickserve.websocket_server"
     ]
 
-    pages: list[RegisteredPage] = (
-        []
-        if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES")
-        else module.QS_INTERNAL_REGISTERED_PAGES
-    )
+    pages: list[dict] = []
+
+    if hasattr(module, "QS_INTERNAL_REGISTERED_PAGES"):
+        for page_name in module.QS_INTERNAL_REGISTERED_PAGES:
+            pages.append({"name": str(page_name), "selected": str(page_name) == page})
 
     ctx = {
         "module_name": module.NAME,
@@ -98,7 +98,7 @@ def _render_module_page(
     if hasattr(module, "AUTHORS"):
         ctx["module_authors"] = module.AUTHORS
 
-    if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES") or page not in pages:
+    if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES") or page not in module.QS_INTERNAL_REGISTERED_PAGES:
         raise ValueError(f"Module {module_name} doesn't have page {page}")
 
     page = module.QS_INTERNAL_REGISTERED_PAGES[page]

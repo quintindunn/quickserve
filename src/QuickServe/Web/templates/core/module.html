@@ -62,8 +62,8 @@
             <div class="pages">
                 {% for page in context.module_pages %}
                     <a class="tab unstyled-anchor"
-                       href="{{ link(page=page) }}"
-                       data-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ page | title }}</a>
+                       href="{{ link(page=page.name) }}"
+                       data-selected="{% if page.selected %}true{% else %}false{% endif %}">{{ page.name | title }}</a>
                 {% endfor %}
             </div>
         </div>
