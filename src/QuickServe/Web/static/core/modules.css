@@ -1,54 +1,117 @@
+.module > .module-head {
+    position: relative;
 
-.pages {
-    display: flex;
-    flex-direction: row;
-    padding-top: 20px;
+    margin-bottom: 1.5rem;
+    padding: 1rem 2rem;
+
+    background: radial-gradient(ellipse at 15% 15%, var(--accent-radial-gradient), transparent 55%), var(--accent-bg);
+    border: 1px solid var(--border);
+    border-radius: 25px;
 }
 
-.pages > span {
-    margin-left: .25rem;
-    margin-right: .25rem;
+.module > .module-head > a > .module-heading {
+    color: var(--text-h);
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.module > .module-head > p > .module-instance-module-anchor {
+    color: var(--text-h);
+}
+
+.module > .module-head > .instance-delete-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 2px solid rgba(255, 0, 0, 0.25);
+}
+
+.module > .module-head > .instance-delete-button:hover {
+    background-color: rgba(255, 0, 0, 0.3);
+    border: 2px solid rgba(255, 0, 0, 0.45);
 }
 
 .module-size-parent {
-    position: relative;
+    position: absolute;
+    right: 1rem;
+    bottom: 0;
 }
 
 .module-size {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 1.5rem;
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 0.5rem;
 }
 
-.module-size > img {
+.module-size > svg {
     width: 1.5rem;
-    height: 100%;
-    filter: brightness(0) saturate(100%) invert(35%) sepia(90%) saturate(1500%) hue-rotate(200deg);
+    height: 1.5rem;
+
+    color: var(--accent);
 }
 
-.module-size > p {
+.spacer {
+    height: 1rem;
+    margin-top: 1rem;
+}
+
+.pages {
+    position: absolute;
+    bottom: -1px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 0.1rem;
+
     margin: 0;
-}
-.mod-heading {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    padding: 0;
+
+    background-color: var(--accent-bg);
 }
 
-.mod-heading > a {
-    float: left;
+.tab {
+    position: relative;
+    bottom: calc(-0.4rem + 6px);
+
+    height: 1rem;
+    margin-top: 0;
+    margin-bottom: -4px;
+    padding: 0.4rem;
+
+    background-color: var(--accent-bg);
+
+    border-top: 1px solid var(--border);
+    border-right: transparent;
+    border-left: 1px solid var(--border);
 }
 
-.mod-heading > button {
-    float: right;
-    width: max-content;
-    height: min-content;
-    margin-left: auto;
+.tab:hover,
+.tab[data-selected="true"] {
+    height: 1.3rem;
+
+    background-color: #292A35FF;
+    color: var(--text-h);
+
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
-.mod-heading > button:hover {
-    cursor: pointer;
+.tab:last-child {
+    margin-right: 0;
+
+    border-top-right-radius: 15px;
+    border-right: 1px solid var(--border);
+}
+
+.tab:first-child {
+    border-top-left-radius: 15px;
+}
+
+.module-content {
+    padding-top: 0.5rem;
+
+    border-top: 1px solid var(--border);
 }

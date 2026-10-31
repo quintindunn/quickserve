@@ -13,6 +13,12 @@
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
       rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 
+    --btn-large-size: .875rem 1.325rem;
+    --btn-large-hover-size: .95rem 1.4rem;
+
+    --btn-medium-size: .7rem 1.1rem;
+    --btn-medium-hover-size: .75rem 1.15rem;
+
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -26,6 +32,33 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.unstyled-anchor {
+    color: inherit;
+    text-decoration: none;
+}
+
+.btn-large {
+    padding: var(--btn-large-size);
+}
+
+.btn-large:hover:not(:disabled) {
+    padding: var(--btn-large-hover-size);
+    cursor: pointer;
+}
+
+.btn-medium {
+    padding: var(--btn-medium-size);
+}
+
+.btn-medium:hover:not(:disabled) {
+    padding: var(--btn-medium-hover-size);
+    cursor: pointer;
+}
+
+.btn-fillet {
+    border-radius: 10px;
 }
 
 * > a {

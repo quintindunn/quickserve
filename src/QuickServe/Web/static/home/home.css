@@ -42,8 +42,6 @@
 
 .home > .heading > .heading-links > .heading-link {
     background-color: var(--accent);
-    padding: .875rem 1.325rem;
-    border-radius: 10px;
 
     text-decoration: none;
     font-size: .9rem;
@@ -52,10 +50,6 @@
 
 .home > .heading > .heading-links > .heading-link:not(:first-child) {
     margin-left: 1vw;
-}
-
-.home > .heading > .heading-links > .heading-link:hover {
-    padding: .95rem 1.4rem;
 }
 
 .home > .heading > .heading-links > .heading-link-marketplace {
@@ -149,9 +143,6 @@
 }
 
 .home > .getting-started > .getting-started-marketplace-link {
-    padding: .875rem 1.325rem;
-    border-radius: 10px;
-
     text-decoration: none;
     font-size: .9rem;
     font-weight: 550;
@@ -159,8 +150,4 @@
     background-color: var(--accent);
     border: 1px solid var(--border);
     color: var(--accent-bg);
-}
-
-.home > .getting-started > .getting-started-marketplace-link:hover {
-    padding: .95rem 1.4rem;
 }
