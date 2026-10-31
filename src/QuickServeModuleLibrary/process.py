@@ -4,6 +4,7 @@ ManagedProcesses for easy integration with modules
 Author: Quintin Dunn
 Date: 10/10/2026
 """
+
 import json
 from pathlib import Path
 from subprocess import Popen, PIPE
@@ -228,10 +229,9 @@ class ManagedProcess:
             for callback in self._on_stdout:
                 with self.line_buffer_lock:
                     self.save_stdout(line)
-                callback(json.dumps({
-                        "type": "stdout",
-                        "value": line.decode()
-                    }).encode())
+                callback(
+                    json.dumps({"type": "stdout", "value": line.decode()}).encode()
+                )
 
     def _handle_stderr(self):
         """
@@ -244,10 +244,9 @@ class ManagedProcess:
             for callback in self._on_stderr:
                 with self.line_buffer_lock:
                     self.save_stderr(line)
-                callback(json.dumps({
-                        "type": "stdout",
-                        "value": line.decode()
-                    }).encode())
+                callback(
+                    json.dumps({"type": "stdout", "value": line.decode()}).encode()
+                )
 
     @property
     def pid(self) -> int:

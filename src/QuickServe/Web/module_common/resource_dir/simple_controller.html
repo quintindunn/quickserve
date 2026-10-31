@@ -122,8 +122,7 @@
                 border-color: #eab308;
             }
 
-            #stop[disabled] {
-            }
+            #stop[disabled] {}
 
             #stop:not(:disabled):hover {
                 background: #a16207;
@@ -179,17 +178,17 @@
                 }
             }
 
-            .terminal >.terminal-parent > #process-status {
+            .terminal>.terminal-parent>#process-status {
                 font-size: 3rem;
                 font-weight: bold;
             }
 
-            .terminal > .terminal-parent > #process-status[data-process-status="dead"] {
+            .terminal>.terminal-parent>#process-status[data-process-status="dead"] {
                 color: #991b1b;
                 text-shadow: #ef4444 0 0 3px;
             }
 
-            .terminal > .terminal-parent > #process-status[data-process-status="alive"] {
+            .terminal>.terminal-parent>#process-status[data-process-status="alive"] {
                 color: #22c55e;
                 text-shadow: #22c55e 0 0 3px;
             }
@@ -214,12 +213,13 @@
     </style>
     <div class="terminal" id="simple-controller">
         <div class="terminal-parent">
-            <span id="process-status" data-process-status="dead">&bullet;</span>
+            <span id="process-status" data-process-status="dead">•</span>
             <textarea id="terminal" readonly></textarea>
         </div>
-
         <div class="command-row">
-            <input type="text" id="command" placeholder="Start the server to enter a command.">
+            <input type="text"
+                   id="command"
+                   placeholder="Start the server to enter a command.">
             <div class="controls">
                 <button type="button" id="start">Start</button>
                 <button type="button" id="stop" disabled>Stop</button>

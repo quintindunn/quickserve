@@ -1,0 +1,153 @@
+.home {
+    margin: 0 auto;
+}
+
+/* Heading */
+.home > .heading {
+    position: relative;
+    height: clamp(300px, 10vh, 30vh);
+
+    border: 1px solid var(--border);
+    border-radius: 25px;
+
+    padding: clamp(2rem, 6vw, 4rem);
+    margin: 0 auto;
+
+    background: radial-gradient(ellipse at 85% 15%, var(--accent-radial-gradient), transparent 55%), var(--accent-bg);
+}
+
+.home > .heading > .heading-text {
+    display: inline;
+
+    color: var(--text-h);
+    font-size: clamp(2.5rem, 6vw, 5rem);;
+}
+
+.home > .heading > .heading-tagline {
+    color: var(--accent);
+    font-size: clamp(1.3rem, 3.1vw, 1.8rem);
+    font-weight: 600;
+    text-shadow: 0 0 3px;
+
+    margin-left: 10px;
+}
+
+.home > .heading > .heading-description {
+    max-width: 75%;
+}
+
+.home > .heading > .heading-links {
+    padding-top: 2vh;
+}
+
+.home > .heading > .heading-links > .heading-link {
+    background-color: var(--accent);
+
+    text-decoration: none;
+    font-size: .9rem;
+    font-weight: 550;
+}
+
+.home > .heading > .heading-links > .heading-link:not(:first-child) {
+    margin-left: 1vw;
+}
+
+.home > .heading > .heading-links > .heading-link-marketplace {
+    background-color: var(--accent);
+    border: 1px solid var(--border);
+    color: var(--accent-bg);
+}
+
+.home > .heading > .heading-links > .heading-link-marketplace:hover {
+    box-shadow: 0 0 3px 0 var(--accent-bg) ;
+}
+
+.home > .heading > .heading-links > .heading-link-github {
+    background: transparent;
+    border: 1px solid var(--border);
+
+    color: var(--text-h);
+}
+
+.home > .heading > .heading-links > .heading-link-github:hover {
+    box-shadow: 0 0 3px 0 var(--border) ;
+}
+
+/* Features */
+.home > .features {
+    margin-top: 6vh;
+}
+
+.home > .features > .features-heading {
+    color: var(--text-h);
+
+    margin-left: 5px;
+}
+
+.home > .features > .feature-cards {
+    display: grid;
+    gap: 2vw;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: max-content;
+    grid-template-rows: repeat(2, max-content);
+    padding: .25rem 1rem;
+
+    max-height: 20rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.home > .features > .feature-cards > a.feature-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+.feature-card {
+    background-color: var(--accent-bg);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    padding: .875rem 1.325rem;
+}
+
+.feature-card:hover {
+    border-color: var(--accent-border);
+
+    scale: 1.02;
+}
+
+.home > .features > .feature-cards > .feature-card > .feature-card-heading {
+    color: var(--text-h);
+}
+
+.home > .features > .feature-cards > .feature-card > .feature-card-content {
+    text-indent: 25px;
+}
+
+.home > .features > .feature-cards > .feature-card > .feature-card-content > .feature-card-bold {
+    font-weight: 600;
+}
+
+/* Getting Started */
+.home > .getting-started {
+    margin: 6vh 1vw;
+    padding: 1rem 2rem 2rem;
+
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    background-color: var(--accent-bg);
+
+}
+
+.home > .getting-started > .getting-started-heading {
+    color: var(--text-h);
+}
+
+.home > .getting-started > .getting-started-marketplace-link {
+    text-decoration: none;
+    font-size: .9rem;
+    font-weight: 550;
+
+    background-color: var(--accent);
+    border: 1px solid var(--border);
+    color: var(--accent-bg);
+}
