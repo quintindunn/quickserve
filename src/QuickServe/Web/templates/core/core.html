@@ -45,13 +45,13 @@
                 </div>
                 <div class="sidebar-section">
                     <span>MODULES</span>
-                    {% for module in modules %}
-                        <div class="sidebar-subsection">
+                    <div class="sidebar-subsection">
+                        {% for module in modules %}
                             <span>
                                 <a href="{{ url_for('modules.module_about', module_name=module) }}">{{ module }}</a>
                             </span>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
             <div class="content">

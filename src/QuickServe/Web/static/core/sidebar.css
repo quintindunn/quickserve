@@ -37,6 +37,39 @@
 
 .sidebar-section > .sidebar-subsection {
     margin: 0.15rem 0;
+    max-height: 20rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-subsection {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.sidebar-subsection::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar-subsection::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-subsection::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 10px;
+}
+
+.sidebar-subsection::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text);
+}
+
+.sidebar-section > .sidebar-subsection > span > a {
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0 0.5rem;
 }
 
 .sidebar-section > div > span > a {
