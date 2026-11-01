@@ -1,7 +1,4 @@
 {% extends "core/module.html" %}
-{% block moduletitle %}
-    Test
-{% endblock %}
 {% block modulehead %}
     <link rel="stylesheet" href="{{ resource(filename='management.css') }}">
 {% endblock %}
@@ -48,6 +45,14 @@
                 <div>
                     <h1>De-OP Player</h1>
                     {{ context.param_forms.deop }}
+                </div>
+            </div>
+        </div>
+        <div class="kick">
+            <div class="forms">
+                <div>
+                    <h1>Kick Player</h1>
+                    {{ context.param_forms.kick }}
                 </div>
             </div>
         </div>
