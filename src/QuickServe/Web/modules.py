@@ -100,7 +100,10 @@ def _render_module_page(
     if hasattr(module, "AUTHORS"):
         ctx["module_authors"] = module.AUTHORS
 
-    if not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES") or page not in module.QS_INTERNAL_REGISTERED_PAGES:
+    if (
+        not hasattr(module, "QS_INTERNAL_REGISTERED_PAGES")
+        or page not in module.QS_INTERNAL_REGISTERED_PAGES
+    ):
         raise ValueError(f"Module {module_name} doesn't have page {page}")
 
     page = module.QS_INTERNAL_REGISTERED_PAGES[page]

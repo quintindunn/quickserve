@@ -39,6 +39,15 @@
     --form-transparent-on-hover: #383838;
     --invalid-input-outline-color: #e06c75;
 
+    /* SimpleFS */
+    --action-button-color: #292a35;
+    --fs-surface: var(--accent-bg);
+    --fs-surface-raised: color-mix(in srgb, var(--accent-bg) 80%, var(--text-h));
+    --fs-surface-hover: color-mix(in srgb, var(--action-button-color) 70%, var(--text-h));
+    --fs-border: var(--border);
+    --fs-radius: 10px;
+    --fs-transition: 160ms ease;
+
     /* Form layout */
     --form-max-width: 650px;
     --form-major-weight: 500;

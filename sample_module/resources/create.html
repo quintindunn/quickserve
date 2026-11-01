@@ -1,4 +1,3 @@
-
 {% extends "core/module.html" %}
 {% block modulehead %}
     <link rel="stylesheet" href="{{ resource(filename='create.css') }}">
@@ -6,7 +5,10 @@
 {% block modulebody %}
     <div class="create">
         <h2 class="create-heading">Minecraft Vanilla Server Generator</h2>
-        <form action="{{ action('install') }}" method="post" id="install-form" class="qs-form">
+        <form action="{{ action("install") }}"
+              method="post"
+              id="install-form"
+              class="qs-form">
             <label>
                 Instance Name
                 <input type="text" name="instance-name" value="MinecraftVanilla" required>
@@ -22,20 +24,19 @@
                     <option value="latest-snapshot">Latest Snapshot</option>
                     {% for version in context.param_versions %}
                         <option value="{{ version.id }}"
-                                data-is-release="{{ version.is_release | lower }}">
-                            {{ version.id }}
-                        </option>
+                                data-is-release="{{ version.is_release | lower }}">{{ version.id }}</option>
                     {% endfor %}
                 </select>
             </label>
             <label for="eula">
                 <input type="checkbox" id="eula" name="eula" required>
-                I agree to the<a href="https://www.minecraft.net/en-us/eula" target="_blank" rel="noopener noreferrer">Minecraft EULA.</a>
+                I agree to the<a href="https://www.minecraft.net/en-us/eula"
+   target="_blank"
+   rel="noopener noreferrer">Minecraft EULA.</a>
             </label>
             <button type="submit">Install</button>
         </form>
     </div>
-
     <script>
         const checkbox = document.getElementById("only-releases");
         const select = document.getElementById("minecraft-version");
@@ -45,8 +46,8 @@
         function updateVersions() {
             for (const option of select.options) {
                 if (option.dataset.isRelease !== undefined) {
-                    option.hidden = checkbox.checked
-                        && option.dataset.isRelease !== "true";
+                    option.hidden = checkbox.checked &&
+                        option.dataset.isRelease !== "true";
                 }
             }
         }
