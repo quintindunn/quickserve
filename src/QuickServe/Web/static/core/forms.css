@@ -1,0 +1,257 @@
+.qs-form {
+    max-width: var(--form-max-width);
+    margin: 2rem auto;
+    padding: 2rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background: var(--accent-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-h);
+    font-size: .85rem;
+    box-shadow: 0 0 10px var(--accent-radial-gradient);
+}
+
+.qs-form > label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-weight: var(--form-major-weight);
+}
+
+.qs-form input[type="text"],
+.qs-form input[type="email"],
+.qs-form input[type="password"],
+.qs-form input[type="number"],
+.qs-form input[type="url"],
+.qs-form input[type="date"],
+.qs-form input[type="datetime-local"],
+.qs-form input[type="time"],
+.qs-form input[type="month"],
+.qs-form input[type="week"],
+.qs-form textarea,
+.qs-form select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--form-textarea-outline-color);
+    border-radius: 6px;
+    background: var(--accent-bg-dark);
+    color: var(--text-h);
+    font: inherit;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.qs-form input[type="text"]:focus,
+.qs-form input[type="email"]:focus,
+.qs-form input[type="password"]:focus,
+.qs-form input[type="number"]:focus,
+.qs-form input[type="url"]:focus,
+.qs-form input[type="date"]:focus,
+.qs-form input[type="datetime-local"]:focus,
+.qs-form input[type="time"]:focus,
+.qs-form input[type="month"]:focus,
+.qs-form input[type="week"]:focus,
+.qs-form textarea:focus,
+.qs-form select:focus {
+    border-color: var(--form-focus-color);
+    box-shadow: 0 0 0 2px var(--form-textarea-outline-color);
+}
+
+.qs-form textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.qs-form input::placeholder,
+.qs-form textarea::placeholder {
+    color: var(--form-input-placeholder-text-color);
+    opacity: 1;
+}
+
+.qs-form input[type="date"],
+.qs-form input[type="datetime-local"],
+.qs-form input[type="time"],
+.qs-form input[type="month"],
+.qs-form input[type="week"],
+.qs-form select {
+    color-scheme: dark;
+}
+
+.qs-form select {
+    min-height: 2.8rem;
+    cursor: pointer;
+}
+
+.qs-form select option {
+    background: var(--accent-bg-dark);
+    color: var(--text-h);
+}
+
+.qs-form select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.qs-form input[type="file"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--accent-bg-dark);
+    color: var(--min-text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.qs-form input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--code-background);
+    color: var(--text-h);
+    font: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.qs-form input[type="file"]::file-selector-button:hover {
+    background: var(--form-transparent-on-hover);
+}
+
+.qs-form input[type="color"] {
+    width: 100%;
+    height: 42px;
+    padding: 0.3rem;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--accent-bg-dark);
+    cursor: pointer;
+}
+
+.qs-form input[type="checkbox"],
+.qs-form input[type="radio"] {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: var(--form-submit-button-color);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.qs-form > label:has(input[type="checkbox"]) {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.65rem;
+    cursor: pointer;
+}
+
+.qs-form fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.qs-form legend {
+    padding: 0 0.4rem;
+    color: var(--text-h);
+    font-weight: 600;
+}
+
+.qs-form fieldset label {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--min-text);
+    cursor: pointer;
+}
+
+.qs-form input[type="range"] {
+    width: 100%;
+    margin: 0.4rem 0;
+    accent-color: var(--form-submit-button-color);
+    cursor: pointer;
+}
+
+.qs-form input[type="reset"],
+.qs-form button[type="submit"],
+.qs-form input[type="submit"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.qs-form input[type="reset"] {
+    border: 1px solid var(--border);
+    background: var(--code-background);
+    color: var(--text-h);
+}
+
+.qs-form input[type="reset"]:hover {
+    background: var(--form-transparent-on-hover);
+}
+
+.qs-form button[type="submit"],
+.qs-form input[type="submit"] {
+    background: var(--form-submit-button-color);
+    color: #fff;
+}
+
+.qs-form button[type="submit"]:hover,
+.qs-form input[type="submit"]:hover {
+    background: var(--form-submit-hover);
+}
+
+.qs-form input[type="reset"]:active,
+.qs-form button[type="submit"]:active,
+.qs-form input[type="submit"]:active {
+    transform: translateY(1px);
+}
+
+.qs-form input[type="reset"]:disabled,
+.qs-form button[type="submit"]:disabled,
+.qs-form input[type="submit"]:disabled {
+    background: var(--button-disabled-background-color);
+    color: var(--button-disabled-outline-color);
+    cursor: not-allowed;
+}
+
+.qs-form input:focus-visible,
+.qs-form textarea:focus-visible,
+.qs-form select:focus-visible,
+.qs-form button:focus-visible {
+    outline: 2px solid var(--form-focus-color);
+    outline-offset: 2px;
+}
+
+.qs-form input:invalid:not(:placeholder-shown),
+.qs-form textarea:invalid:not(:placeholder-shown) {
+    border-color: var(--invalid-input-outline-color);
+}
+
+@media (max-width: 600px) {
+    .qs-form {
+        margin: 1rem auto;
+        padding: 1.25rem;
+        gap: 1rem;
+        border-radius: 8px;
+    }
+}

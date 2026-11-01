@@ -4,11 +4,14 @@
 {% endblock %}
 {% block modulebody %}
     <div class="create">
-        <h2>Minecraft Vanilla Server Generator</h2>
-        <form action="{{ action("install") }}" method="post" id="install-form">
+        <h2 class="create-heading">Minecraft Vanilla Server Generator</h2>
+        <form action="{{ action("install") }}"
+              method="post"
+              id="install-form"
+              class="qs-form">
             <label>
                 Instance Name
-                <input type="text" name="instance-name" value="MinecraftVanilla">
+                <input type="text" name="instance-name" value="MinecraftVanilla" required>
             </label>
             <label for="only-releases">
                 <input type="checkbox" id="only-releases" name="only-releases" checked>
@@ -25,32 +28,34 @@
                     {% endfor %}
                 </select>
             </label>
-            <script defer>
-                const checkbox = document.getElementById("only-releases");
-                const select = document.getElementById("minecraft-version");
-
-                function updateVersions() {
-                    for (const option of select.options) {
-                        if (option.dataset.isRelease !== undefined) {
-                            option.hidden = checkbox.checked && option.dataset.isRelease !== "true";
-                        }
-                    }
-                }
-
-                checkbox.addEventListener("change", updateVersions);
-                updateVersions();
-            </script>
             <label for="eula">
-                <input type="checkbox" id="eula" name="eula">
-                By checking the checkbox, you are indicating your agreement to the minecraft <a href="https://account.mojang.com/documents/minecraft_eula">EULA (https://account.mojang.com/documents/minecraft_eula)</a>
+                <input type="checkbox" id="eula" name="eula" required>
+                I agree to the<a href="https://www.minecraft.net/en-us/eula"
+   target="_blank"
+   rel="noopener noreferrer">Minecraft EULA.</a>
             </label>
             <button type="submit">Install</button>
         </form>
     </div>
     <script>
-        document.getElementById("install-form").addEventListener("submit", function(event) {
-            const eula = document.getElementById("eula");
+        const checkbox = document.getElementById("only-releases");
+        const select = document.getElementById("minecraft-version");
+        const form = document.getElementById("install-form");
+        const eula = document.getElementById("eula");
 
+        function updateVersions() {
+            for (const option of select.options) {
+                if (option.dataset.isRelease !== undefined) {
+                    option.hidden = checkbox.checked &&
+                        option.dataset.isRelease !== "true";
+                }
+            }
+        }
+
+        checkbox.addEventListener("change", updateVersions);
+        updateVersions();
+
+        form.addEventListener("submit", function(event) {
             if (!eula.checked) {
                 event.preventDefault();
                 alert("You must agree to the Minecraft EULA before installing.");

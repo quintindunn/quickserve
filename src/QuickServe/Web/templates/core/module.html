@@ -13,44 +13,61 @@
 {% endblock %}
 {% block content %}
     <div class="module">
-        <div>
-            <div class="mod-heading">
-                <a href="{{ link(page='about') }}"
-                   style="text-decoration: underline;
-                          color: inherit">
-                    {% if context.isInstance %}
-                        <h1>{{ context.instance_name }} - V{{ context.module_version }}</h1>
-                        <p>Instance of <span>{{ context.module_name }}</span></p>
-                    {% else %}
-                        <h1>{{ context.module_name }} - V{{ context.module_version }}</h1>
-                    {% endif %}
+        <div class="module-head">
+            {% if context.isInstance %}
+                <a class="unstyled-anchor" href="{{ link(page='about') }}">
+                    <h1 class="module-heading">{{ context.instance_name }}</h1>
                 </a>
-                 {% if context.instance_uuid %}
-                    <button id="qs-instance-delete">Delete Instance</button>
-                {% endif %}
-            </div>
-
+                <p>Instance of <a class="unstyled-anchor module-instance-module-anchor"
+    href="{{ url_for("modules.module_about", module_name=context.module_name) }}">{{ context.module_name }} V{{ context.module_version }}</a></p>
+            {% else %}
+                <a class="unstyled-anchor"
+                   href="{{ url_for("modules.module_about", module_name=context.module_name) }}">
+                    <h1 class="module-heading">{{ context.module_name }} - V{{ context.module_version }}</h1>
+                </a>
+            {% endif %}
+            {% if context.instance_uuid %}
+                <button id="qs-instance-delete"
+                        class="btn-medium btn-fillet instance-delete-button">Delete</button>
+            {% endif %}
             {% if context.isInstance %}
                 <div class="module-size-parent">
                     <div class="module-size">
-                        <img src="{{ url_for('static', filename="core/hard-drive-svgrepo-com.svg") }}"
-                             alt="Size on Filesystem">
+                        <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+                        <svg fill="currentColor"
+                             width="800px"
+                             height="800px"
+                             viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <g id="Hard_Drive" data-name="Hard Drive">
+                            <g>
+                            <path d="M20.905,14.325l-1.83-10.04a1.507,1.507,0,0,0-1.47-1.22H6.405A1.493,1.493,0,0,0,4.925,4.3l-1.84,10.03a2.452,2.452,0,0,0-.02.27v4.84a1.5,1.5,0,0,0,1.5,1.5h14.87a1.511,1.511,0,0,0,1.5-1.5V14.6A1.241,1.241,0,0,0,20.905,14.325Zm-15-9.85a.5.5,0,0,1,.5-.41h11.2a.511.511,0,0,1,.49.4l1.74,9.54H4.165Zm14.03,14.96a.5.5,0,0,1-.5.5H4.565a.5.5,0,0,1-.5-.5l.01-4.43h15.86Z">
+                            </path>
+                            <circle cx="5.561" cy="17.47" r="0.5"></circle>
+                            <circle cx="7.561" cy="17.47" r="0.5"></circle>
+                            <path d="M18.45,17.97a.5.5,0,0,0,0-1h-5a.5.5,0,0,0,0,1Z"></path>
+                            </g>
+                            </g>
+                        </svg>
                         <p>{{ context.instance_size_formatted }}</p>
                     </div>
                 </div>
             {% endif %}
             {% if context.module_authors %}
-                <span>Module by {% for author in context.module_authors %}<a href="{{ author.github }}">{{ author.name }}</a>, {% endfor %}</span>
-                <div class="pages">
-                    <span>|</span>
-                    {% for page in context.module_pages %}
-                        <a href="{{ link(page=page) }}">{{ page | title }}</a>
-                        <span>|</span>
-                    {% endfor %}
-                </div>
+                <span>Module by
+                    {% for author in context.module_authors %}
+                        <a href="{{ author.github }}">{{ author.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</span>
             {% endif %}
+            <div class="spacer"></div>
+            <div class="pages">
+                {% for page in context.module_pages %}
+                    <a class="tab unstyled-anchor"
+                       href="{{ link(page=page.name) }}"
+                       data-selected="{% if page.selected %}true{% else %}false{% endif %}">{{ page.name | title }}</a>
+                {% endfor %}
+            </div>
         </div>
-        <div>
+        <div class="module-content">
             {% block modulebody %}{% endblock %}
         </div>
         {% if context.instance_uuid %}

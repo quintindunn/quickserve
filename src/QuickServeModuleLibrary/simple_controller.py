@@ -132,10 +132,7 @@ class SimpleControllerProcessManager:
         message = "alive" if process.is_alive() else "dead"
 
         for callback in process.get_stdout_callbacks():
-            callback(json.dumps({
-                "type": "process-status",
-                "value": message
-            }).encode())
+            callback(json.dumps({"type": "process-status", "value": message}).encode())
 
     def _on_start(self, instance: "BaseInstance") -> None:
         """
@@ -218,13 +215,11 @@ class SimpleControllerProcessManager:
         for stdio_type, line in terminal_history:
             if stdio_type == b"stdout" or stdio_type == b"stdin":
                 for callback in process.get_stdout_callbacks():
-                    callback(json.dumps({
-                        "type": "stdout",
-                        "value": line.decode()
-                    }).encode())
+                    callback(
+                        json.dumps({"type": "stdout", "value": line.decode()}).encode()
+                    )
             elif stdio_type == b"stderr":
                 for callback in process.get_stderr_callbacks():
-                    callback(json.dumps({
-                        "type": "stderr",
-                        "value": line.decode()
-                    }).encode())
+                    callback(
+                        json.dumps({"type": "stderr", "value": line.decode()}).encode()
+                    )

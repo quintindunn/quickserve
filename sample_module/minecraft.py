@@ -25,6 +25,7 @@ from .forms import (
     DeOpPlayer,
     WhitelistPlayer,
     WhitelistRemove,
+    ExampleForm,
 )
 
 if TYPE_CHECKING:
