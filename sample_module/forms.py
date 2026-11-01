@@ -58,3 +58,11 @@ class WhitelistRemove(QSForm):
         super().__init__(action_name, instance_uuid)
 
     username = String(placeholder="Username", required=True)
+
+
+class KickPlayer(QSForm):
+    def __init__(self, action_name: str, instance_uuid: str):
+        super().__init__(action_name, instance_uuid)
+
+    username = String(placeholder="Username", required=True)
+    kickReason = String(placeholder="Kick Reason", required=False)

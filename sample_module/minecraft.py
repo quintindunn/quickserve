@@ -25,7 +25,7 @@ from .forms import (
     DeOpPlayer,
     WhitelistPlayer,
     WhitelistRemove,
-    ExampleForm,
+    KickPlayer,
 )
 
 if TYPE_CHECKING:
@@ -227,6 +227,9 @@ class Module:
                 "deop": DeOpPlayer(
                     action_name="deop-action", instance_uuid=str(instance.uuid)
                 ).compile(submit_text="DeOP player"),
+                "kick": KickPlayer(
+                    action_name="kick-action", instance_uuid=str(instance.uuid)
+                ).compile(submit_text="Kick"),
             }
         }
 
@@ -343,6 +346,20 @@ class Module:
         instance = instances.from_uuid(form.instance_uuid.response)
 
         command = ["deop", form.username.response]
+        logger.info(
+            "Command %s - %s", repr(command), self.execute_command(instance, command)
+        )
+
+        return "Player Management", 302, instance
+
+    @action(action_name="kick-action")
+    def deop_player_action(self, instances: "InstanceManager", **kwargs):
+        form = KickPlayer.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+
+        command = ["kick", form.username.response]
+        if form.kickReason.response:
+            command.append(form.kickReason.response)
         logger.info(
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
