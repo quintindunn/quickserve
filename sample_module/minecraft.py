@@ -354,10 +354,12 @@ class Module:
 
     @action(action_name="kick-action")
     def deop_player_action(self, instances: "InstanceManager", **kwargs):
-        form = DeOpPlayer.response_from_request(kwargs)
+        form = KickPlayer.response_from_request(kwargs)
         instance = instances.from_uuid(form.instance_uuid.response)
 
         command = ["kick", form.username.response]
+        if form.kickReason.response:
+            command.append(form.kickReason.response)
         logger.info(
             "Command %s - %s", repr(command), self.execute_command(instance, command)
         )
