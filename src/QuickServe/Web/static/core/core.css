@@ -1,32 +1,53 @@
 :root {
+    /* Text colors */
     --text: #9ca3af;
     --text-h: #f3f4f6;
     --min-text: #BBBBBB;
 
+    /* Backgrounds and borders */
     --background: #16171d;
     --code-background: #202029;
     --border: #30303a;
 
+    /* Accent colors */
     --accent: #c084fc;
     --accent-radial-gradient: rgba(192, 132, 252, 0.05);
     --accent-bg: #202029;
     --accent-bg-dark: #181818;
     --accent-border: rgba(192, 132, 252, 0.5);
 
+    /* Button sizing */
     --btn-large-size: .875rem 1.325rem;
     --btn-large-hover-size: .95rem 1.4rem;
-
     --btn-medium-size: .7rem 1.1rem;
     --btn-medium-hover-size: .75rem 1.15rem;
 
+    /* Fonts */
     --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
     --trebuchet: "Trebuchet MS", sans-serif;
     --serif: 18px/145% Georgia, serif;
     --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
     --mono: ui-monospace, Consolas, monospace;
-
     --font: var(--trebuchet);
 
+    /* Form colors */
+    --form-textarea-outline-color: #44444444;
+    --form-submit-button-color: #3b82f6;
+    --form-submit-hover: #2563eb;
+    --form-focus-color: #6ea8fe;
+    --form-input-placeholder-text-color: #777777;
+    --form-transparent-on-hover: #383838;
+    --invalid-input-outline-color: #e06c75;
+
+    /* Form layout */
+    --form-max-width: 650px;
+    --form-major-weight: 500;
+
+    /* Disabled button colors */
+    --button-disabled-outline-color: #888888;
+    --button-disabled-background-color: #44444444;
+
+    /* Global styles */
     font: 18px/145% var(--font);
     letter-spacing: 0.18px;
     color-scheme: dark;
