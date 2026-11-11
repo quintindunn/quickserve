@@ -58,6 +58,7 @@ def create_admin(username: str | None = None):
     UserModel.create(
         username=username,
         password_hash=generate_password_hash(password),
+        is_admin=True
     )
 
     print(f"Admin {username} created successfully.")
