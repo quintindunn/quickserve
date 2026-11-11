@@ -76,5 +76,5 @@ class TestDownloader(unittest.TestCase):
         v_1_0 = self.downloader.get_release_manifest("1.0")
         self.assertEqual(v_1_0.java.major_version, 8)
 
-        v_rd_132211 = self.downloader.get_release_manifest("rd-132211")
+        v_rd_132211 = self.downloader.get_release_manifest("a1.1.0")
         self.assertEqual(v_rd_132211.java.major_version, 8)

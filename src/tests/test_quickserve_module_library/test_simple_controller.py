@@ -19,7 +19,9 @@ class TestSimpleControllerProcessManager(unittest.TestCase):
     """
 
     def setUp(self):
-        self.manager = SimpleControllerProcessManager()
+        mock = MagicMock()
+        mock.QS_INTERNAL_PROCESS_MANAGER_INSTANCE_DELETE = []
+        self.manager = SimpleControllerProcessManager(mock)
 
         self.instance = MagicMock()
         self.instance.uuid = uuid4()
