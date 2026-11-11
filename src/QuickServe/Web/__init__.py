@@ -17,7 +17,7 @@ from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
 from QuickServe.Web.api import api
 from QuickServe.Web.module_common.registry import Registry
-from QuickServe.Database.instances import UserModel
+from QuickServe.Database.users import UserModel
 
 from typing import TYPE_CHECKING
 

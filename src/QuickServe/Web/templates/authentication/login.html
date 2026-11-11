@@ -21,6 +21,8 @@
         <label>
             <button type="submit" id="submit" name="submit" value="Submit">Sign In</button>
         </label>
-        <p><a href="{{ url_for('home.create_account') }}">Create an account</a></p>
+        {% if not context.has_users %}
+            <p><a href="{{ url_for('home.create_account') }}">Create an account</a></p>
+        {% endif %}
     </form>
 {% endblock %}

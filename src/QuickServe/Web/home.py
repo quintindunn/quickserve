@@ -51,7 +51,8 @@ def login() -> ResponseReturnValue:
     if request.method == "GET":
         if current_user.is_authenticated:
             return redirect(url_for("home.index"))
-        return render_template("authentication/login.html")
+        has_users = UserModel.select().exists()
+        return render_template("authentication/login.html", context={"has_users": has_users})
 
     username = (request.form.get("username") or "").strip()
     password = request.form.get("password") or ""
