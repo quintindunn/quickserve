@@ -109,6 +109,22 @@ def change_password(username: str | None = None):
     print(f"Password changed for user {username}.")
 
 
+def list_users():
+    users = UserModel.select()
+
+    if not users.exists():
+        print("No users found.")
+        return
+
+    print(f"{'ID':<6} {'Username':<20}")
+    print("-" * 26)
+
+    for user in users:
+        print(f"{user.id:<6} {user.username:<20}")
+
+    print(f"\nTotal users: {users.count()}")
+
+
 parser = argparse.ArgumentParser(prog="quickserve")
 subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -123,6 +139,10 @@ password_parser = subparsers.add_parser(
 )
 password_parser.add_argument("--username", help="Username")
 
+subparsers.add_parser(
+    "listusers",
+    help="List all user accounts."
+)
 
 args = parser.parse_args()
 
@@ -134,3 +154,6 @@ elif args.command == "deleteuser":
 
 elif args.command == "changepassword":
     change_password(args.username)
+
+elif args.command == "listusers":
+    list_users()
