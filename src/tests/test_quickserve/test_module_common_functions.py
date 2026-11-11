@@ -320,7 +320,7 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
                 self.assertTrue(files["empty"]["isEmptyDir"])
                 self.assertTrue(files["file.txt"]["isFile"])
                 self.assertFalse(files["file.txt"]["isDir"])
-                self.assertEqual(files["file.txt"]["size"], "0.0kb")
+                self.assertEqual(files["file.txt"]["size"], "5.0 B")
                 self.assertEqual(files["file.txt"]["cwd"], "/")
 
                 expected_date = datetime.fromtimestamp(

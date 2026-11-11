@@ -120,7 +120,7 @@ class TestInstanceManager(unittest.TestCase):
         first_uuid = uuid4()
         second_uuid = uuid4()
 
-        self.repository.load_all.return_value = [
+        self.repository.load_all_active.return_value = [
             InstanceRecord(
                 instance_uuid=first_uuid,
                 instance_name="First",
