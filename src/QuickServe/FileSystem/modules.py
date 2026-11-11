@@ -43,12 +43,14 @@ class BaseModule:
         workspace: "Workspace",
         runtime_manager: "RuntimeManager",
         config: "Config",
+        qs_version: str,
         **kwargs,
     ):
         self.path = Path(module_path)
         self.workspace = workspace
         self.runtime_manager = runtime_manager
         self.config = config
+        self.qs_version_real = qs_version
 
         self._remove_attr_on_load = None
         if "remove_attr_on_load" in kwargs:
