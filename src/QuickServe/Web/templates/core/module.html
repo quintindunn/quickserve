@@ -109,9 +109,9 @@
                         body: JSON.stringify({
                             instance_name: new_name,
                         }),
-                        }).then(async (r) => {
-                            window.location.href = await r.text();
-                        });
+                    }).then(async (r) => {
+                        window.location.href = await r.text();
+                    });
                 });
             </script>
         {% endif %}

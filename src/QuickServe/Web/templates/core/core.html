@@ -32,7 +32,9 @@
                  alt="QuickServe logo featuring a Q with a server rack inside and four horizontal lines extending from the left.">
         </a>
         {% if current_user.is_authenticated %}
-            <form class="sign-out-form" method="post" action="{{ url_for('home.logout') }}">
+            <form class="sign-out-form"
+                  method="post"
+                  action="{{ url_for("home.logout") }}">
                 <button type="submit" class="btn-fillet btn-logout">Sign Out</button>
             </form>
         {% endif %}

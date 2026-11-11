@@ -567,13 +567,21 @@ def instance_delete(uuid: str):
 
 @instance_static.route("/<uuid>/duplicate", methods=["POST"])
 def instance_duplicate(uuid: str):
-    instance_manager: "InstanceManager" = current_app.extensions["quickserve.instance_manager"]
+    instance_manager: "InstanceManager" = current_app.extensions[
+        "quickserve.instance_manager"
+    ]
     new_name = request.json["instance_name"]
     instance = _get_instance(uuid)
 
-    new_instance = instance_manager.new_instance(module_name=instance.module_name, instance_name=new_name)
+    new_instance = instance_manager.new_instance(
+        module_name=instance.module_name, instance_name=new_name
+    )
 
-    shutil.copytree(instance.working_directory(), new_instance.working_directory(), dirs_exist_ok=True)
+    shutil.copytree(
+        instance.working_directory(),
+        new_instance.working_directory(),
+        dirs_exist_ok=True,
+    )
 
     catalog: "ModuleCatalog" = current_app.extensions["quickserve.catalog"]
     module = catalog.get(instance.module_name)
@@ -583,6 +591,11 @@ def instance_duplicate(uuid: str):
     ):
         module.module.QS_INTERNAL_DUPLICATE_INSTANCE(instance, new_instance)
 
-
-    return url_for("modules.instances.module_instance", uuid=str(new_instance.uuid), page="about"), 200
-
+    return (
+        url_for(
+            "modules.instances.module_instance",
+            uuid=str(new_instance.uuid),
+            page="about",
+        ),
+        200,
+    )

@@ -4,6 +4,7 @@ Main entry point for quickserve
 Author: Quintin Dunn
 Date: 09/09/2026
 """
+
 import gzip
 from datetime import datetime
 from threading import Thread
@@ -47,9 +48,7 @@ if __name__ == "__main__":
 
     if log_path.exists() and log_path.is_file():
         stat = log_path.stat()
-        created = datetime.fromtimestamp(
-            getattr(stat, "st_birthtime", stat.st_mtime)
-        )
+        created = datetime.fromtimestamp(getattr(stat, "st_birthtime", stat.st_mtime))
 
         with open(log_path, "rb") as f:
             compressed = gzip.compress(f.read())

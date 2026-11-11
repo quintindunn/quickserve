@@ -52,7 +52,10 @@ class TestPluginLoader(unittest.TestCase):
         setup_modules(self.workspace)
 
         plugin_loader = PluginLoader(
-            workspace=self.workspace, runtime_manager=None, config=None, qs_version="0.0.1"
+            workspace=self.workspace,
+            runtime_manager=None,
+            config=None,
+            qs_version="0.0.1",
         )
         catalog = plugin_loader.load_all()
         self.assertEqual(len(list(catalog.items())), 1)
@@ -63,7 +66,10 @@ class TestPluginLoader(unittest.TestCase):
         """
 
         plugin_loader = PluginLoader(
-            workspace=self.workspace, runtime_manager=None, config=None, qs_version="0.0.1"
+            workspace=self.workspace,
+            runtime_manager=None,
+            config=None,
+            qs_version="0.0.1",
         )
         catalog = plugin_loader.load_all()
         self.assertEqual(len(list(catalog.items())), 0)
@@ -78,5 +84,8 @@ class TestPluginLoader(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             PluginLoader(
-                workspace=self.workspace, runtime_manager=None, config=None, qs_version="0.0.1"
+                workspace=self.workspace,
+                runtime_manager=None,
+                config=None,
+                qs_version="0.0.1",
             ).load_all()

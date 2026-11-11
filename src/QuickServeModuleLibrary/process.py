@@ -41,7 +41,7 @@ class ManagedProcess:
         base_module: "BaseModule",
         root_dir: Path | None = None,
         history_buffer_flush_interval: int = 20,
-        custom_stop_command: str | None = None
+        custom_stop_command: str | None = None,
     ):
         self.command = command
         self.base_module = base_module
