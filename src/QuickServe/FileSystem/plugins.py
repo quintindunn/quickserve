@@ -92,7 +92,11 @@ class PluginLoader:
     """
 
     def __init__(
-        self, workspace: Workspace, runtime_manager: "RuntimeManager", config: "Config", qs_version: str
+        self,
+        workspace: Workspace,
+        runtime_manager: "RuntimeManager",
+        config: "Config",
+        qs_version: str,
     ) -> None:
         """
         Initializes the plugin loader.
@@ -125,7 +129,7 @@ class PluginLoader:
                 workspace=self.workspace,
                 runtime_manager=self.runtime_manager,
                 config=self.config,
-                qs_version=self.qs_version
+                qs_version=self.qs_version,
             )
             module.load_module()
             name = module.module.NAME

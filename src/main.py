@@ -15,6 +15,7 @@ from QuickServe.Common.search import Search
 
 QS_VERSION = "0.0.1"
 
+
 def start_websocket(ws_server):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -51,7 +52,10 @@ if __name__ == "__main__":
     database.create_tables(models=MODELS)
 
     catalog = PluginLoader(
-        workspace=workspace, runtime_manager=runtime_manager, config=config, qs_version=QS_VERSION
+        workspace=workspace,
+        runtime_manager=runtime_manager,
+        config=config,
+        qs_version=QS_VERSION,
     ).load_all()
 
     instance_manager = InstanceManager(
