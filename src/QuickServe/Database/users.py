@@ -5,7 +5,7 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-from peewee import Model, CharField, AutoField
+from peewee import Model, CharField, AutoField, BooleanField
 from flask_login import UserMixin
 
 from QuickServe.Database.database import database_proxy
@@ -17,6 +17,7 @@ class UserModel(UserMixin, Model):
     id = AutoField()
     username = CharField(max_length=20, unique=True, null=False)
     password_hash = CharField(max_length=255, null=False)
+    is_admin = BooleanField(default=False)
 
     class Meta:
         database = database_proxy

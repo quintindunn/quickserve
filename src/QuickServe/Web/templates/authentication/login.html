@@ -2,27 +2,34 @@
 {% block title %}
     QuickServe - Login
 {% endblock %}
-{% block head %}
-
-{% endblock %}
-
+{% block head %}{% endblock %}
 {% block content %}
-    <form class="qs-form" method="post" action="{{ url_for('home.login') }}">
+    <form class="qs-form" method="post" action="{{ url_for("home.login") }}">
         <h2>Sign In</h2>
         {% if error %}<p role="alert">{{ error }}</p>{% endif %}
         <label>
             Username
-            <input type="text" id="username" placeholder="Username" name="username" minlength="4" maxlength="16" required>
+            <input type="text"
+                   id="username"
+                   placeholder="Username"
+                   name="username"
+                   minlength="4"
+                   maxlength="16"
+                   required>
         </label>
         <label>
             Password
-            <input type="password" id="password" placeholder="Password" name="password" minlength="5" maxlength="32" required>
+            <input type="password"
+                   id="password"
+                   placeholder="Password"
+                   name="password"
+                   minlength="5"
+                   maxlength="32"
+                   required>
         </label>
         <label>
             <button type="submit" id="submit" name="submit" value="Submit">Sign In</button>
         </label>
-        {% if not context.has_users %}
-            <p><a href="{{ url_for('home.create_account') }}">Create an account</a></p>
-        {% endif %}
+        {% if not context.has_users %}<p><a href="{{ url_for("home.create_account") }}">Create an account</a></p>{% endif %}
     </form>
 {% endblock %}

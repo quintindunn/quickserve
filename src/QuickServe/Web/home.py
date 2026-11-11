@@ -5,7 +5,15 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-from flask import Blueprint, render_template, send_from_directory, current_app, request, redirect, url_for
+from flask import (
+    Blueprint,
+    render_template,
+    send_from_directory,
+    current_app,
+    request,
+    redirect,
+    url_for,
+)
 from flask.typing import ResponseReturnValue
 from flask_login import current_user, login_user, logout_user
 from peewee import IntegrityError
@@ -25,7 +33,9 @@ home = Blueprint("home", __name__)
 
 
 class LoginForm(QSForm):
-    username: String = String(placeholder="Username", required=True, minlength=4, maxlength=20)
+    username: String = String(
+        placeholder="Username", required=True, minlength=4, maxlength=20
+    )
 
 
 @home.route("/")
@@ -46,13 +56,16 @@ def index() -> ResponseReturnValue:
         context={"instances": instances, "modules": modules},
     )
 
+
 @home.route("/login", methods=["GET", "POST"])
 def login() -> ResponseReturnValue:
     if request.method == "GET":
         if current_user.is_authenticated:
             return redirect(url_for("home.index"))
         has_users = UserModel.select().exists()
-        return render_template("authentication/login.html", context={"has_users": has_users})
+        return render_template(
+            "authentication/login.html", context={"has_users": has_users}
+        )
 
     username = (request.form.get("username") or "").strip()
     password = request.form.get("password") or ""
@@ -60,8 +73,14 @@ def login() -> ResponseReturnValue:
 
     if user is None or not check_password_hash(user.password_hash, password):
         has_users = UserModel.select().exists()
-        return render_template(
-            "authentication/login.html", error="Invalid username or password.", context={"has_users": has_users}), 401
+        return (
+            render_template(
+                "authentication/login.html",
+                error="Invalid username or password.",
+                context={"has_users": has_users},
+            ),
+            401,
+        )
 
     login_user(user)
     return redirect(url_for("home.index"))
@@ -75,19 +94,28 @@ def create_account() -> ResponseReturnValue:
     username = (request.form.get("username") or "").strip()
     password = request.form.get("password") or ""
     if len(username) <= 4 or len(username) >= 20:
-        return render_template(
-            "authentication/create.html",
-            error="Username must be between 4 and 20 characters.",
-        ), 400
+        return (
+            render_template(
+                "authentication/create.html",
+                error="Username must be between 4 and 20 characters.",
+            ),
+            400,
+        )
     if len(password) <= 5 or len(password) >= 32:
-        return render_template(
-            "authentication/create.html",
-            error="Password must be between 5 and 32 characters.",
-        ), 400
+        return (
+            render_template(
+                "authentication/create.html",
+                error="Password must be between 5 and 32 characters.",
+            ),
+            400,
+        )
     if UserModel.get_or_none(UserModel.username == username) is not None:
-        return render_template(
-            "authentication/create.html", error="That username is already taken."
-        ), 409
+        return (
+            render_template(
+                "authentication/create.html", error="That username is already taken."
+            ),
+            409,
+        )
 
     try:
         UserModel.create(
@@ -95,9 +123,12 @@ def create_account() -> ResponseReturnValue:
             password_hash=generate_password_hash(password),
         )
     except IntegrityError:
-        return render_template(
-            "authentication/create.html", error="That username is already taken."
-        ), 409
+        return (
+            render_template(
+                "authentication/create.html", error="That username is already taken."
+            ),
+            409,
+        )
 
     return redirect(url_for("home.login"))
 

@@ -14,7 +14,12 @@ import requests
 
 from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
-from QuickServeModuleLibrary.decorators import page, action, on_instance_duplicate, on_quickserve_load
+from QuickServeModuleLibrary.decorators import (
+    page,
+    action,
+    on_instance_duplicate,
+    on_quickserve_load,
+)
 
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 from .forms import (
@@ -206,7 +211,10 @@ class Module:
                 json.dump(configuration, f)
 
     def _load_backwards_compatability(self, instance: "BaseInstance"):
-        migrations: list[Callable[["BaseInstance"], None]] = [self._migration_01, self._post_migration_patches]
+        migrations: list[Callable[["BaseInstance"], None]] = [
+            self._migration_01,
+            self._post_migration_patches,
+        ]
 
         for migration in migrations:
             migration(instance)
@@ -237,14 +245,16 @@ class Module:
             base_module=self.module,
             root_dir=instance.working_directory() / "server",
             history_buffer_flush_interval=20,
-            custom_stop_command="stop"
+            custom_stop_command="stop",
         )
         process.on_stderr(send_callback)
         process.on_stdout(send_callback)
         return process
 
     @on_instance_duplicate
-    def on_instance_duplicate(self, old_instance: "BaseInstance", new_instance: "BaseInstance"):
+    def on_instance_duplicate(
+        self, old_instance: "BaseInstance", new_instance: "BaseInstance"
+    ):
         logger.info(f"Cloning instance {old_instance.uuid} to {new_instance.uuid}")
 
     def on_message(self, msg: str, instance: "BaseInstance") -> None:
