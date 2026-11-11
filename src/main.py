@@ -56,7 +56,7 @@ if __name__ == "__main__":
         with open(log_path, "rb") as f:
             compressed = gzip.compress(f.read())
 
-        archive_path = log_folder / f"{created.isoformat().replace(':', '-')}.gz"
+        archive_path = log_folder / f"{created.isoformat().replace(':', '-')}.txt.gz"
 
         with open(archive_path, "wb") as f:
             f.write(compressed)
