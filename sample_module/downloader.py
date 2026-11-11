@@ -68,6 +68,7 @@ class ReleaseManifest(BaseModel):
     java: Java
     server: ReleaseManifestServer
 
+
 # DISCLAIMER: THIS MAPPING MIGHT NOT BE PERFECT
 
 # CREDIT: https://www.omniarchive.net
@@ -79,7 +80,6 @@ OMNI_ARCHIVE_MAP: dict[str, str] = {
     "1.2.1": "server-release/1.2/1.2.1.jar",
     "1.1": "server-release/1.1/1.1.jar",
     "1.0": "server-beta/b1.9/pre/b1.9-pre6.jar",
-
     "b1.8.1": "server-beta/b1.8/b1.8.1.jar",
     "b1.8": "server-beta/b1.8/b1.8.jar",
     "b1.7.3": "server-beta/b1.7/b1.7.3.jar",
@@ -106,7 +106,6 @@ OMNI_ARCHIVE_MAP: dict[str, str] = {
     "b1.0.2": "server-beta/b1.0/b1.0_01.jar",
     "b1.0_01": "server-beta/b1.0/b1.0_01.jar",
     "b1.0": "server-beta/b1.0/b1.0.jar",
-
     "a1.2.6": "server-alpha/a0.2.8.jar",
     "a1.2.5": "server-alpha/a0.2.7.jar",
     "a1.2.4_01": "server-alpha/a0.2.6_02.jar",
@@ -132,7 +131,6 @@ OMNI_ARCHIVE_MAP: dict[str, str] = {
     "a1.0.11": "TODO: FIND",
     "a1.0.5_01": "TODO: FIND",
     "a1.0.4": "TODO: FIND",
-
     "inf-20100618": "TODO: FIND",
     "c0.30_01c": "TODO: FIND",
     "c0.0.13a": "TODO: FIND",
@@ -144,6 +142,7 @@ OMNI_ARCHIVE_MAP: dict[str, str] = {
     "rd-132328": "TODO: FIND",
     "rd-132211": "TODO: FIND",
 }
+
 
 def has_omniarchive_url(version: str) -> bool:
     return version in OMNI_ARCHIVE_MAP
@@ -206,7 +205,7 @@ class Downloader:
                 release["id"]: json_version_to_model(release)
                 for release in manifest_json["versions"]
                 if release["id"] not in OMNI_ARCHIVE_MAP
-               or OMNI_ARCHIVE_MAP[release["id"]] != "TODO: FIND"
+                or OMNI_ARCHIVE_MAP[release["id"]] != "TODO: FIND"
             },
         )
 
@@ -257,6 +256,7 @@ class Downloader:
                 ),
             )
         raise RuntimeError("Unhandled version!")
+
 
 if __name__ == "__main__":
     downloader = Downloader()

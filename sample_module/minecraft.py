@@ -5,6 +5,7 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
+import json
 import logging
 
 from typing import TYPE_CHECKING, Callable
@@ -26,6 +27,7 @@ from .forms import (
     WhitelistPlayer,
     WhitelistRemove,
     KickPlayer,
+    ServerConfiguration,
 )
 
 if TYPE_CHECKING:
@@ -39,7 +41,7 @@ logger = logging.getLogger("minecraft-vanilla")
 
 class Module:
     NAME: str = "Minecraft-Vanilla"
-    VERSION: str = "0.0.1"
+    VERSION: str = "0.0.2"
     QUICKSERVE_VERSION: str = "0.0.1"
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
@@ -70,6 +72,14 @@ class Module:
         self.runtime_manager = runtime_manager
 
         self.simple_controller_process_manager = SimpleControllerProcessManager(self)
+
+    @staticmethod
+    def get_configuration(instance: BaseInstance):
+        cwd = instance.working_directory()
+        configuration_path = cwd / "configuration.json"
+
+        with configuration_path.open("r") as f:
+            return json.load(f)
 
     @page(page_name="about")
     def about(self, *_, **__) -> str:
@@ -117,16 +127,29 @@ class Module:
         )
 
         cwd = instance.working_directory()
-        with open(cwd / "jre-requirements", "w") as f:
-            f.write(str(java_major))
+
+        with open(cwd / "configuration.json", "w") as f:
+            json.dump(
+                {
+                    "jre-version": java_major,
+                    "minecraft-version": minecraft_version,
+                    "xms": "4G",
+                    "xmx": "4G",
+                },
+                f,
+            )
 
         server_dir = cwd / "server"
         self.module.workspace.ensure_directory(server_dir)
 
         with open(server_dir / "server.jar", "wb") as f:
-            request = requests.get(jar_url, stream=True, headers={
-                "User-Agent": f"QuickServe/{self.module.qs_version_real} (https://github.com/quintindunn/QuickServe; mailto:dunnquintin07@gmail.com)"
-            })
+            request = requests.get(
+                jar_url,
+                stream=True,
+                headers={
+                    "User-Agent": f"QuickServe/{self.module.qs_version_real} (https://github.com/quintindunn/QuickServe; mailto:dunnquintin07@gmail.com)"
+                },
+            )
             request.raise_for_status()
 
             for chunk in request.iter_content(chunk_size=1024 * 1024 * 10):
@@ -137,27 +160,60 @@ class Module:
 
         return "start", 302, instance
 
+    def _migration_01(self, instance: "BaseInstance"):
+        """
+        Migrates instance from v0.0.1 to v0.0.2
+        :param instance: The instance being migrated
+        :return:
+        """
+
+        cwd = instance.working_directory()
+        jre_requirements_path = cwd / "jre-requirements"
+        if jre_requirements_path.exists():
+            with jre_requirements_path.open(mode="r") as f:
+                jre_version = int(f.read())
+        else:
+            return
+
+        configuration_path = cwd / "configuration.json"
+        configuration = {}
+
+        if configuration_path.exists():
+            configuration = self.get_configuration(instance=instance)
+
+        configuration["jre-version"] = jre_version
+        configuration["minecraft-version"] = "UNKNOWN"
+        configuration["xmx"] = "4G"
+        configuration["xms"] = "4G"
+
+        with configuration_path.open(mode="w") as f:
+            json.dump(configuration, f)
+
+        jre_requirements_path.unlink(missing_ok=True)
+
+    def _load_backwards_compatability(self, instance: "BaseInstance"):
+        migrations: list[Callable[["BaseInstance"], None]] = [self._migration_01]
+
+        for migration in migrations:
+            migration(instance)
+
     def build_process(
         self,
         instance: "BaseInstance",
         send_callback: Callable,
-        xmx: str = "4G",
-        xms: str = "4G",
     ):
-        jre_requirements_path = instance.working_directory() / "jre-requirements"
-        assert jre_requirements_path.exists()
+        self._load_backwards_compatability(instance=instance)
 
-        with open(jre_requirements_path, "r") as f:
-            jre_requirement = int(f.read())
+        configuration = self.get_configuration(instance=instance)
 
         java_executable = self.runtime_manager.get_java_executable(
-            jre_requirement, "jre"
+            configuration.get("jre-version", 8), "jre"
         )
 
         command = [
             java_executable,
-            f"-Xmx{xmx}",
-            f"-Xms{xms}",
+            f"-Xmx{configuration.get('xmx')}",
+            f"-Xms{configuration.get('xms')}",
             "-jar",
             "./server.jar",
             "nogui",
@@ -367,3 +423,47 @@ class Module:
         )
 
         return "Player Management", 302, instance
+
+    @page(instance_specific=True, page_name="Server Configuration")
+    def server_configuration(self, instance: "BaseInstance", *args, **kwargs):
+        context = {
+            "configuration_form": ServerConfiguration(
+                action_name="server-configuration-action",
+                instance_uuid=str(instance.uuid),
+            ).compile("Update Configuration (Server restart required)")
+        }
+        asset = self.module.get_resource_path("configuration.html")
+
+        with open(asset, "r") as f:
+            return f.read(), context
+
+    @action(action_name="server-configuration-action")
+    def configure_server(self, instances: "InstanceManager", **kwargs):
+        form = ServerConfiguration.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+        self._load_backwards_compatability(instance=instance)
+
+        try:
+            xmx = float(form.maxHeapSize.response)
+            xms = float(form.minHeapSize.response)
+        except ValueError:
+            return "Server Configuration", 302, instance
+
+        if xmx <= 0 or xms <= 0:
+            return "Server Configuration", 302, instance
+
+        if xms > xmx:
+            return "Server Configuration", 302, instance
+
+        xmx_arg = f"{int(float(xmx) * 1024)}M"
+        xms_arg = f"{int(float(xms) * 1024)}M"
+
+        configuration = self.get_configuration(instance=instance)
+
+        configuration["xmx"] = xmx_arg
+        configuration["xms"] = xms_arg
+
+        with open(instance.working_directory() / "configuration.json", "w") as f:
+            json.dump(configuration, f)
+
+        return "start", 302, instance

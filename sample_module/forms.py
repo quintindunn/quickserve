@@ -1,5 +1,13 @@
-from QuickServeModuleLibrary.forms.datatypes import String
+from QuickServeModuleLibrary.forms.datatypes import String, Number
 from QuickServeModuleLibrary.forms.forms import QSForm
+
+
+class ServerConfiguration(QSForm):
+    def __init__(self, action_name: str, instance_uuid: str):
+        super().__init__(action_name, instance_uuid)
+
+    maxHeapSize = Number(placeholder="XMX (GB)", step=0.1)
+    minHeapSize = Number(placeholder="XMS (GB)", step=0.1)
 
 
 class BanPlayer(QSForm):
