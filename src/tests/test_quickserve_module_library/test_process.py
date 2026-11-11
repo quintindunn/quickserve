@@ -110,7 +110,7 @@ class TestManagedProcess(TestCase):
 
         self.process._handle_stdout()
 
-        callback.assert_called_once_with(b"foo\n")
+        callback.assert_called_once_with(b'{"type": "stdout", "value": "foo\\n"}')
 
     def test_stderr_callback(self):
         """Test receiving process stderr."""
@@ -123,7 +123,7 @@ class TestManagedProcess(TestCase):
 
         self.process._handle_stderr()
 
-        callback.assert_called_once_with(b"error\n")
+        callback.assert_called_once_with(b'{"type": "stdout", "value": "error\\n"}')
 
     def test_write(self):
         """Test writing to process stdin."""
