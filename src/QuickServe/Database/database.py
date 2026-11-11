@@ -10,6 +10,8 @@ from pathlib import Path
 
 from peewee import DatabaseProxy, SqliteDatabase
 
+from QuickServe.Database.migrations import run_migrations
+
 logger = logging.getLogger("Database.database")
 
 database_proxy = DatabaseProxy()
@@ -34,6 +36,7 @@ def initialize(database: SqliteDatabase) -> None:
     :param database: The database used by Peewee models.
     :return: None
     """
+
     database_proxy.initialize(database)
 
 
@@ -46,6 +49,9 @@ def connect(database: SqliteDatabase) -> None:
     logger.debug("Connecting to database")
     database.connect(reuse_if_open=True)
     logger.info("Connected to database")
+    logger.info("Running migrations")
+    run_migrations(database)
+    logger.info("Ran migrations")
 
 
 def close() -> None:
