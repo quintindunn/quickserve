@@ -31,26 +31,35 @@
                  src="{{ url_for('static', filename="core/QuickServe.webp") }}"
                  alt="QuickServe logo featuring a Q with a server rack inside and four horizontal lines extending from the left.">
         </a>
+        {% if current_user.is_authenticated %}
+            <form class="sign-out-form" method="post" action="{{ url_for('home.logout') }}">
+                <button type="submit" class="btn-fillet btn-logout">Sign Out</button>
+            </form>
+        {% endif %}
         <div class="main">
             <div class="sidebar">
                 <div class="sidebar-section">
                     <span>INSTANCES</span>
                     <div class="sidebar-subsection">
-                        {% for instance in instances %}
-                            <span>
-                                <a href="{{ instance.url }}">{{ instance.name }}</a>
-                            </span>
-                        {% endfor %}
+                        {% if current_user.is_authenticated %}
+                            {% for instance in instances %}
+                                <span>
+                                    <a href="{{ instance.url }}">{{ instance.name }}</a>
+                                </span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="sidebar-section">
                     <span>MODULES</span>
                     <div class="sidebar-subsection">
-                        {% for module in modules %}
-                            <span>
-                                <a href="{{ url_for('modules.module_about', module_name=module) }}">{{ module }}</a>
-                            </span>
-                        {% endfor %}
+                        {% if current_user.is_authenticated %}
+                            {% for module in modules %}
+                                <span>
+                                    <a href="{{ url_for('modules.module_about', module_name=module) }}">{{ module }}</a>
+                                </span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
