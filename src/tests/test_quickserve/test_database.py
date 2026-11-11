@@ -42,9 +42,16 @@ class TestDatabase(unittest.TestCase):
         Tests creating database tables.
         """
 
+        models = [
+            *self.database.get_tables(),
+        ]
+
+        models.remove("sqlite_sequence")
+        models.remove("schema_migrations")
+
         self.assertEqual(
-            set(self.database.get_tables()),
-            {model._meta.table_name for model in MODELS},
+            set(models),
+            {model._meta.table_name for model in [*MODELS]},
         )
 
     def test_db_create_instance_direct(self):
