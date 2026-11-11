@@ -4,7 +4,8 @@ Main entry point for quickserve
 Author: Quintin Dunn
 Date: 09/09/2026
 """
-
+import gzip
+from datetime import datetime
 from threading import Thread
 
 import asyncio
@@ -23,7 +24,6 @@ def start_websocket(ws_server):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
     from QuickServe.Application.instances import InstanceManager
     from QuickServe.Database.database import create_database
     from QuickServe.Database.database import connect as db_connect
@@ -41,6 +41,36 @@ if __name__ == "__main__":
     logging.getLogger("websockets.server").setLevel(logging.ERROR)
 
     workspace = Workspace()
+    log_folder = workspace.root / "logs"
+
+    log_folder.mkdir(exist_ok=True)
+
+    log_path = log_folder / "log-latest.txt"
+
+    if log_path.exists() and log_path.is_file():
+        stat = log_path.stat()
+        created = datetime.fromtimestamp(
+            getattr(stat, "st_birthtime", stat.st_mtime)
+        )
+
+        with open(log_path, "rb") as f:
+            compressed = gzip.compress(f.read())
+
+        archive_path = log_folder / f"{created.isoformat().replace(':', '-')}.txt.gz"
+
+        with open(archive_path, "wb") as f:
+            f.write(compressed)
+
+        log_path.unlink()
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        handlers=[
+            logging.FileHandler(log_path, encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
+    )
 
     runtime_manager = RuntimeManager(workspace=workspace)
 
