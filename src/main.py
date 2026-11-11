@@ -9,8 +9,6 @@ from datetime import datetime
 from threading import Thread
 
 import asyncio
-import logging
-import sys
 
 from QuickServe.Common.search import Search
 
