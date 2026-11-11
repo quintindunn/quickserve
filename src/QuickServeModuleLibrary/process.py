@@ -33,6 +33,7 @@ class ManagedProcess:
     command: str
     root_dir: Path | None
     base_module: "BaseModule"
+    custom_stop_command: str | None
 
     def __init__(
         self,
@@ -40,6 +41,7 @@ class ManagedProcess:
         base_module: "BaseModule",
         root_dir: Path | None = None,
         history_buffer_flush_interval: int = 20,
+        custom_stop_command: str | None = None
     ):
         self.command = command
         self.base_module = base_module
@@ -51,6 +53,7 @@ class ManagedProcess:
         self.line_buffer_lock: RLock = RLock()
         self.line_buffer_has_written: bool = False
         self.history_buffer_flush_interval: int = history_buffer_flush_interval
+        self.custom_stop_command = custom_stop_command
         self.config: "Config" = base_module.config
 
     def get_stdout_callbacks(self) -> list[Callable[[bytes], None]]:
@@ -265,7 +268,12 @@ class ManagedProcess:
 
         if not self.is_alive():
             return
-        os.kill(self.pid, signal.SIGTERM)
+
+        if self.custom_stop_command:
+            stop_command = f"{self.custom_stop_command}{'\n' if not self.custom_stop_command.endswith('\n') else ''}"
+            self.write(stop_command.encode())
+        else:
+            os.kill(self.pid, signal.SIGTERM)
 
     def kill(self) -> None:
         """

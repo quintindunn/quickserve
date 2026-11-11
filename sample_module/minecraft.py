@@ -237,6 +237,7 @@ class Module:
             base_module=self.module,
             root_dir=instance.working_directory() / "server",
             history_buffer_flush_interval=20,
+            custom_stop_command="stop"
         )
         process.on_stderr(send_callback)
         process.on_stdout(send_callback)
