@@ -14,7 +14,7 @@ import requests
 
 from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
-from QuickServeModuleLibrary.decorators import page, action
+from QuickServeModuleLibrary.decorators import page, action, on_instance_duplicate
 
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 from .forms import (
@@ -241,6 +241,10 @@ class Module:
         process.on_stderr(send_callback)
         process.on_stdout(send_callback)
         return process
+
+    @on_instance_duplicate
+    def on_instance_duplicate(self, old_instance: "BaseInstance", new_instance: "BaseInstance"):
+        logger.info(f"Cloning instance {old_instance.uuid} to {new_instance.uuid}")
 
     def on_message(self, msg: str, instance: "BaseInstance") -> None:
         self.simple_controller_process_manager.on_message(msg=msg, instance=instance)

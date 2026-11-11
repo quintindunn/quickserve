@@ -575,5 +575,14 @@ def instance_duplicate(uuid: str):
 
     shutil.copytree(instance.working_directory(), new_instance.working_directory(), dirs_exist_ok=True)
 
-    return url_for("instances.module_instance", uuid=str(new_instance.uuid), page="about"), 200
+    catalog: "ModuleCatalog" = current_app.extensions["quickserve.catalog"]
+    module = catalog.get(instance.module_name)
+
+    if hasattr(module, "module") and hasattr(
+        module.module, "QS_INTERNAL_DUPLICATE_INSTANCE"
+    ):
+        module.module.QS_INTERNAL_DUPLICATE_INSTANCE(instance, new_instance)
+
+
+    return url_for("modules.instances.module_instance", uuid=str(new_instance.uuid), page="about"), 200
 
