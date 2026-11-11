@@ -5,7 +5,6 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-import json
 from enum import Enum
 from functools import lru_cache
 
@@ -69,78 +68,83 @@ class ReleaseManifest(BaseModel):
     java: Java
     server: ReleaseManifestServer
 
+# Requests made to OmniArchive servers should include the GitHub repo, project name, and contact info in the User-Agent.
+OMNI_ARCHIVE_BASE = "https://vault.omniarchive.uk/archive/java/"
+OMNI_ARCHIVE_MAP: dict[str, str] = {
+    "1.2.4": "server-release/1.2/1.2.4.jar",
+    "1.2.3": "server-release/1.2/1.2.3.jar",
+    "1.2.2": "server-release/1.2/1.2.2.jar",
+    "1.2.1": "server-release/1.2/1.2.1.jar",
+    "1.1": "server-release/1.1/1.1.jar",
+    "1.0": "server-beta/b1.9/pre/b1.9-pre6.jar",
 
-def _is_less_than_eq_1_2_4(version: str) -> bool:
-    versions = {
-        "1.2.4",
-        "1.2.3",
-        "1.2.2",
-        "1.2.1",
-        "1.1",
-        "1.0",
-        "b1.8.1",
-        "b1.8",
-        "b1.7.3",
-        "b1.7.2",
-        "b1.7",
-        "b1.6.6",
-        "b1.6.5",
-        "b1.6.4",
-        "b1.6.3",
-        "b1.6.2",
-        "b1.6.1",
-        "b1.6",
-        "b1.5_01",
-        "b1.5",
-        "b1.4_01",
-        "b1.4",
-        "b1.3_01",
-        "b1.3b",
-        "b1.2_02",
-        "b1.2_01",
-        "b1.2",
-        "b1.1_02",
-        "b1.1_01",
-        "b1.0.2",
-        "b1.0_01",
-        "b1.0",
-        "a1.2.6",
-        "a1.2.5",
-        "a1.2.4_01",
-        "a1.2.3_04",
-        "a1.2.3_02",
-        "a1.2.3_01",
-        "a1.2.3",
-        "a1.2.2b",
-        "a1.2.2a",
-        "a1.2.1_01",
-        "a1.2.1",
-        "a1.2.0_02",
-        "a1.2.0_01",
-        "a1.2.0",
-        "a1.1.2_01",
-        "a1.1.2",
-        "a1.1.0",
-        "a1.0.17_04",
-        "a1.0.17_02",
-        "a1.0.16",
-        "a1.0.15",
-        "a1.0.14",
-        "a1.0.11",
-        "a1.0.5_01",
-        "a1.0.4",
-        "inf-20100618",
-        "c0.30_01c",
-        "c0.0.13a",
-        "c0.0.13a_03",
-        "c0.0.11a",
-        "rd-161348",
-        "rd-160052",
-        "rd-20090515",
-        "rd-132328",
-        "rd-132211",
-    }
-    return version in versions
+    "b1.8.1": "server-beta/b1.8/b1.8.1.jar",
+    "b1.8": "server-beta/b1.8/b1.8.jar",
+    "b1.7.3": "server-beta/b1.7/b1.7.3.jar",
+    "b1.7.2": "server-beta/b1.7/b1.7.2.jar",
+    "b1.7": "server-beta/b1.7/b1.7.jar",
+    "b1.6.6": "server-beta/b1.6/b1.6.6.jar",
+    "b1.6.5": "server-beta/b1.6/b1.6.5.jar",
+    "b1.6.4": "server-beta/b1.6/b1.6.4.jar",
+    "b1.6.3": "server-beta/b1.6/b1.6.3.jar",
+    "b1.6.2": "server-beta/b1.6/b1.6.2.jar",
+    "b1.6.1": "server-beta/b1.6/b1.6.1.jar",
+    "b1.6": "server-beta/b1.6/b1.6.jar",
+    "b1.5_01": "server-beta/b1.5/b1.5_01.jar",
+    "b1.5": "server-beta/b1.5/b1.5.jar",
+    "b1.4_01": "server-beta/b1.4/b1.4_01.jar",
+    "b1.4": "server-beta/b1.4/b1.4.jar",
+    "b1.3_01": "server-beta/b1.3/b1.3-1731.jar",
+    "b1.3b": "server-beta/b1.3/b1.3-1731.jar",
+    "b1.2_02": "server-beta/b1.2/b1.2_01.jar",
+    "b1.2_01": "server-beta/b1.2/b1.2_01.jar",
+    "b1.2": "server-beta/b1.2/b1.2.jar",
+    "b1.1_02": "server-beta/b1.1/b1.1_02.jar",
+    "b1.1_01": "server-beta/b1.1/b1.1_01.jar",
+    "b1.0.2": "server-beta/b1.0/b1.0_01.jar",
+    "b1.0_01": "server-beta/b1.0/b1.0_01.jar",
+    "b1.0": "server-beta/b1.0/b1.0.jar",
+
+    "a1.2.6": "server-alpha/a0.2.8.jar",
+    "a1.2.5": "server-alpha/a0.2.7.jar",
+    "a1.2.4_01": "server-alpha/a0.2.6_02.jar",
+    "a1.2.3_04": "TODO: FIND",
+    "a1.2.3_02": "server-alpha/a0.2.5_02.jar",
+    "a1.2.3_01": "server-alpha/a0.2.5-1004.jar",
+    "a1.2.3": "server-alpha/a0.2.5-1004.jar",
+    "a1.2.2b": "server-alpha/a0.2.4.jar",
+    "a1.2.2a": "server-alpha/a0.2.4.jar",
+    "a1.2.1_01": "server-alpha/a0.2.3.jar",
+    "a1.2.1": "server-alpha/a0.2.3.jar",
+    "a1.2.0_02": "server-alpha/a0.2.3.jar",
+    "a1.2.0_01": "server-alpha/a0.2.2_01.jar",
+    "a1.2.0": "server-alpha/a0.2.2.jar",
+    "a1.1.2_01": "server-alpha/a0.2.1.jar",
+    "a1.1.2": "server-alpha/a0.2.1.jar",
+    "a1.1.0": "server-alpha/a0.2.1.jar",
+    "a1.0.17_04": "server-alpha/a0.1.4.jar",
+    "a1.0.17_02": "server-alpha/a0.1.4.jar",
+    "a1.0.16": "server-alpha/a0.1.1-1707.jar",
+    "a1.0.15": "server-alpha/a0.1.0.jar",
+    "a1.0.14": "TODO: FIND",
+    "a1.0.11": "TODO: FIND",
+    "a1.0.5_01": "TODO: FIND",
+    "a1.0.4": "TODO: FIND",
+
+    "inf-20100618": "TODO: FIND",
+    "c0.30_01c": "TODO: FIND",
+    "c0.0.13a": "TODO: FIND",
+    "c0.0.13a_03": "TODO: FIND",
+    "c0.0.11a": "TODO: FIND",
+    "rd-161348": "TODO: FIND",
+    "rd-160052": "TODO: FIND",
+    "rd-20090515": "TODO: FIND",
+    "rd-132328": "TODO: FIND",
+    "rd-132211": "TODO: FIND",
+}
+
+def has_omniarchive_url(version: str) -> bool:
+    return version in OMNI_ARCHIVE_MAP
 
 
 class Downloader:
@@ -199,6 +203,8 @@ class Downloader:
             versions={
                 release["id"]: json_version_to_model(release)
                 for release in manifest_json["versions"]
+                if release["id"] not in OMNI_ARCHIVE_MAP
+               or OMNI_ARCHIVE_MAP[release["id"]] != "TODO: FIND"
             },
         )
 
@@ -218,26 +224,37 @@ class Downloader:
         release = self.version_manifest.versions[id_]
 
         url = release.release_url
-        print(url)
 
         request = requests.get(url)
         request.raise_for_status()
 
         release_raw = request.json()
 
-        target_file = "client" if _is_less_than_eq_1_2_4(id_) else "server"
-        return ReleaseManifest(
-            java=Java(
-                component=release_raw["javaVersion"]["component"],
-                major_version=release_raw["javaVersion"]["majorVersion"],
-            ),
-            server=ReleaseManifestServer(
-                sha1=release_raw["downloads"][target_file]["sha1"],
-                size=release_raw["downloads"][target_file]["size"],
-                url=release_raw["downloads"][target_file]["url"],
-            ),
-        )
-
+        if has_omniarchive_url(id_):
+            return ReleaseManifest(
+                java=Java(
+                    component=JavaComponentEnum.jre_legacy,
+                    major_version=8,
+                ),
+                server=ReleaseManifestServer(
+                    sha1="N/A",
+                    size=-1,
+                    url=OMNI_ARCHIVE_BASE + OMNI_ARCHIVE_MAP[id_],
+                ),
+            )
+        elif "server" in release_raw["downloads"]:
+            return ReleaseManifest(
+                java=Java(
+                    component=release_raw["javaVersion"]["component"],
+                    major_version=release_raw["javaVersion"]["majorVersion"],
+                ),
+                server=ReleaseManifestServer(
+                    sha1=release_raw["downloads"]["server"]["sha1"],
+                    size=release_raw["downloads"]["server"]["size"],
+                    url=release_raw["downloads"]["server"]["url"],
+                ),
+            )
+        raise RuntimeError("Unhandled version!")
 
 if __name__ == "__main__":
     downloader = Downloader()

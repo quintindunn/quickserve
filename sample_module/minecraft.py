@@ -124,7 +124,9 @@ class Module:
         self.module.workspace.ensure_directory(server_dir)
 
         with open(server_dir / "server.jar", "wb") as f:
-            request = requests.get(jar_url, stream=True)
+            request = requests.get(jar_url, stream=True, headers={
+                "User-Agent": f"QuickServe/{self.module.qs_version_real} (https://github.com/quintindunn/QuickServe; mailto:dunnquintin07@gmail.com)"
+            })
             request.raise_for_status()
 
             for chunk in request.iter_content(chunk_size=1024 * 1024 * 10):
