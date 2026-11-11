@@ -28,6 +28,15 @@
     border: 2px solid rgba(255, 0, 0, 0.25);
 }
 
+.module > .module-head > .instance-duplicate-button {
+    position: absolute;
+    top: 1rem;
+    right: 6rem;
+
+    background-color: rgba(192, 132, 252, 0.2);
+    border: 2px solid rgba(192, 132, 252, 0.4);
+}
+
 .module > .module-head > .instance-delete-button:hover {
     background-color: rgba(255, 0, 0, 0.3);
     border: 2px solid rgba(255, 0, 0, 0.45);

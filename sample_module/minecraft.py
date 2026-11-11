@@ -191,8 +191,22 @@ class Module:
 
         jre_requirements_path.unlink(missing_ok=True)
 
+    def _post_migration_patches(self, instance: "BaseInstance"):
+        configuration = self.get_configuration(instance=instance)
+
+        changed = False
+
+        if configuration.get("xmx") is None or configuration.get("xms") is None:
+            configuration["xmx"] = "4G"
+            configuration["xms"] = "4G"
+            changed = True
+
+        if changed:
+            with open(instance.working_directory() / "configuration.json", "w") as f:
+                json.dump(configuration, f)
+
     def _load_backwards_compatability(self, instance: "BaseInstance"):
-        migrations: list[Callable[["BaseInstance"], None]] = [self._migration_01]
+        migrations: list[Callable[["BaseInstance"], None]] = [self._migration_01, self._post_migration_patches]
 
         for migration in migrations:
             migration(instance)
