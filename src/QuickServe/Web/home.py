@@ -59,9 +59,9 @@ def login() -> ResponseReturnValue:
     user = UserModel.get_or_none(UserModel.username == username)
 
     if user is None or not check_password_hash(user.password_hash, password):
+        has_users = UserModel.select().exists()
         return render_template(
-            "authentication/login.html", error="Invalid username or password."
-        ), 401
+            "authentication/login.html", error="Invalid username or password.", context={"has_users": has_users}), 401
 
     login_user(user)
     return redirect(url_for("home.index"))
