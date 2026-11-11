@@ -56,9 +56,7 @@ def create_admin(username: str | None = None):
     print(f"Creating admin: {username}")
 
     UserModel.create(
-        username=username,
-        password_hash=generate_password_hash(password),
-        is_admin=True
+        username=username, password_hash=generate_password_hash(password), is_admin=True
     )
 
     print(f"Admin {username} created successfully.")
@@ -140,10 +138,7 @@ password_parser = subparsers.add_parser(
 )
 password_parser.add_argument("--username", help="Username")
 
-subparsers.add_parser(
-    "listusers",
-    help="List all user accounts."
-)
+subparsers.add_parser("listusers", help="List all user accounts.")
 
 args = parser.parse_args()
 

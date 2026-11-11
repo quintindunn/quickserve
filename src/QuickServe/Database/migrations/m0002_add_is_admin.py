@@ -5,6 +5,7 @@ from playhouse.migrate import SqliteMigrator, migrate
 
 logger = logging.getLogger(__name__)
 
+
 def run(database):
     logger.info("Running migration 0002")
 
