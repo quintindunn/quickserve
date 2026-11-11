@@ -43,6 +43,10 @@ class InstanceManager:
         self.repository = repository
         self._instances: dict[str, BaseInstance] = {}
 
+        for instance in self.load_all():
+            if hasattr(instance.base_module.module, "QS_INTERNAL_ON_QUICKSERVE_LOAD"):
+                instance.base_module.module.QS_INTERNAL_ON_QUICKSERVE_LOAD(instance)
+
     def new_instance(self, module_name: str, instance_name: str) -> BaseInstance:
         """
         Creates and persists a module instance.
