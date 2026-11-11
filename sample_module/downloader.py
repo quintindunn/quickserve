@@ -68,7 +68,9 @@ class ReleaseManifest(BaseModel):
     java: Java
     server: ReleaseManifestServer
 
-# Requests made to OmniArchive servers should include the GitHub repo, project name, and contact info in the User-Agent.
+# DISCLAIMER: THIS MAPPING MIGHT NOT BE PERFECT
+
+# CREDIT: https://www.omniarchive.net
 OMNI_ARCHIVE_BASE = "https://vault.omniarchive.uk/archive/java/"
 OMNI_ARCHIVE_MAP: dict[str, str] = {
     "1.2.4": "server-release/1.2/1.2.4.jar",
