@@ -14,7 +14,7 @@ import requests
 
 from QuickServeModuleLibrary.process import ManagedProcess
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
-from QuickServeModuleLibrary.decorators import page, action, on_instance_duplicate
+from QuickServeModuleLibrary.decorators import page, action, on_instance_duplicate, on_quickserve_load
 
 from .downloader import Downloader, VersionManifestReleaseTypeEnum
 from .forms import (
@@ -248,6 +248,10 @@ class Module:
 
     def on_message(self, msg: str, instance: "BaseInstance") -> None:
         self.simple_controller_process_manager.on_message(msg=msg, instance=instance)
+
+    @on_quickserve_load
+    def on_quickserve_load(self, instance: "BaseInstance"):
+        logger.info(f"Loaded instance {instance.uuid}-{instance.instance_name}")
 
     @page(instance_specific=True, page_name="start")
     def start(

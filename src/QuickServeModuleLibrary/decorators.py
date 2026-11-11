@@ -256,3 +256,14 @@ class on_instance_duplicate:
 
     def __get__(self, instance: Any, owner: type | None = None) -> Any:
         return self.fn.__get__(instance, owner)
+
+
+class on_quickserve_load:
+    def __init__(self, fn: Callable[..., Any]):
+        self.fn = fn
+
+    def __set_name__(self, owner: type, name: str) -> None:
+        owner.QS_INTERNAL_ON_QUICKSERVE_LOAD = self.fn
+
+    def __get__(self, instance: Any, owner: type | None = None) -> Any:
+        return self.fn.__get__(instance, owner)
