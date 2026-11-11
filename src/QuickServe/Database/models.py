@@ -6,5 +6,6 @@ Date: 09/14/2026
 """
 
 from QuickServe.Database.instances import InstanceModel
+from QuickServe.Database.users import UserModel
 
-MODELS = [InstanceModel]
+MODELS = [InstanceModel, UserModel]

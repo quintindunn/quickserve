@@ -9,6 +9,7 @@
 {% block content %}
     <form class="qs-form" method="post" action="{{ url_for('home.login') }}">
         <h2>Sign In</h2>
+        {% if error %}<p role="alert">{{ error }}</p>{% endif %}
         <label>
             Username
             <input type="text" id="username" placeholder="Username" name="username" minlength="4" maxlength="16" required>
@@ -20,5 +21,6 @@
         <label>
             <button type="submit" id="submit" name="submit" value="Submit">Sign In</button>
         </label>
+        <p><a href="{{ url_for('home.create_account') }}">Create an account</a></p>
     </form>
 {% endblock %}

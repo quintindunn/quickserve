@@ -31,6 +31,11 @@
                  src="{{ url_for('static', filename="core/QuickServe.webp") }}"
                  alt="QuickServe logo featuring a Q with a server rack inside and four horizontal lines extending from the left.">
         </a>
+        {% if current_user.is_authenticated %}
+            <form method="post" action="{{ url_for('home.logout') }}">
+                <button type="submit">Sign Out</button>
+            </form>
+        {% endif %}
         <div class="main">
             <div class="sidebar">
                 <div class="sidebar-section">

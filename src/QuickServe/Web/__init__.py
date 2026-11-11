@@ -7,14 +7,17 @@ Date: 09/09/2026
 
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, request
+from flask_login import current_user
 from flask import url_for
+from flask_login import LoginManager
 
 from QuickServe.Common.search import Search
 from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
 from QuickServe.Web.api import api
 from QuickServe.Web.module_common.registry import Registry
+from QuickServe.Database.instances import UserModel
 
 from typing import TYPE_CHECKING
 
@@ -23,6 +26,18 @@ if TYPE_CHECKING:
     from QuickServe.Application.instances import InstanceManager
     from QuickServe.Driver.networking.websocket import WebsocketServer
     from QuickServe.FileSystem.config import Config
+
+
+login_manager = LoginManager()
+login_manager.login_view = "home.login"
+
+
+@login_manager.user_loader
+def load_user(user_id: str):
+    try:
+        return UserModel.get_or_none(UserModel.id == int(user_id))
+    except (TypeError, ValueError):
+        return None
 
 
 def create_app(
@@ -53,6 +68,23 @@ def create_app(
         raise Exception("Invalid Config")
 
     app.config["SECRET_KEY"] = config.web.secret_key
+    login_manager.init_app(app)
+
+    @app.before_request
+    def require_login():
+        if request.endpoint == "home.create_account":
+            if not UserModel.select().exists():
+                return None
+            return login_manager.unauthorized()
+
+        public_endpoints = {
+            "static",
+            "home.login",
+            "home.favicon",
+        }
+        if current_user.is_authenticated or request.endpoint in public_endpoints:
+            return None
+        return login_manager.unauthorized()
 
     app.register_blueprint(home)
     app.register_blueprint(modules)

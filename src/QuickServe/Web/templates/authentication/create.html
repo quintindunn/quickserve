@@ -1,0 +1,23 @@
+{% extends "core/core.html" %}
+{% block title %}
+    QuickServe - Create Account
+{% endblock %}
+
+{% block content %}
+    <form class="qs-form" method="post" action="{{ url_for('home.create_account') }}">
+        <h2>Create Account</h2>
+        {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+        <label>
+            Username
+            <input type="text" id="username" placeholder="Username" name="username" minlength="4" maxlength="20" required>
+        </label>
+        <label>
+            Password
+            <input type="password" id="password" placeholder="Password" name="password" minlength="5" maxlength="128" required>
+        </label>
+        <label>
+            <button type="submit" id="submit" name="submit" value="Submit">Create Account</button>
+        </label>
+        <p><a href="{{ url_for('home.login') }}">Back to sign in</a></p>
+    </form>
+{% endblock %}

@@ -5,7 +5,7 @@ Author: Quintin Dunn
 Date: 09/09/2026
 """
 
-from peewee import DateTimeField, UUIDField, Model, CharField, BooleanField
+from peewee import DateTimeField, UUIDField, Model, CharField
 
 from datetime import datetime
 
