@@ -29,6 +29,8 @@
             {% if context.instance_uuid %}
                 <button id="qs-instance-delete"
                         class="btn-medium btn-fillet instance-delete-button">Delete</button>
+                <button id="qs-instance-duplicate"
+                        class="btn-medium btn-fillet instance-duplicate-button">Clone</button>
             {% endif %}
             {% if context.isInstance %}
                 <div class="module-size-parent">
@@ -87,6 +89,29 @@
                     }).then(() => {
                         window.location.href = {{ url_for("modules.module_about", module_name=context.module_name) | tojson }}
                     })
+                });
+
+                const duplicate_instance_btn = document.getElementById("qs-instance-duplicate");
+
+                duplicate_instance_btn.addEventListener("click", () => {
+                    const confirmed = confirm(`Duplicate instance "${instance_name}"?`);
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    const new_name = prompt("New instance name: ");
+                    fetch({{ url_for("modules.instancestatic.instance_duplicate", uuid=context.instance_uuid) | tojson }}, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            instance_name: new_name,
+                        }),
+                        }).then(async (r) => {
+                            window.location.href = await r.text();
+                        });
                 });
             </script>
         {% endif %}
