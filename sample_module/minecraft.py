@@ -27,6 +27,7 @@ from .forms import (
     WhitelistPlayer,
     WhitelistRemove,
     KickPlayer,
+    ServerConfiguration,
 )
 
 if TYPE_CHECKING:
@@ -422,3 +423,47 @@ class Module:
         )
 
         return "Player Management", 302, instance
+
+    @page(instance_specific=True, page_name="Server Configuration")
+    def server_configuration(self, instance: "BaseInstance", *args, **kwargs):
+        context = {
+            "configuration_form": ServerConfiguration(
+                action_name="server-configuration-action",
+                instance_uuid=str(instance.uuid),
+            ).compile("Update Configuration (Server restart required)")
+        }
+        asset = self.module.get_resource_path("configuration.html")
+
+        with open(asset, "r") as f:
+            return f.read(), context
+
+    @action(action_name="server-configuration-action")
+    def configure_server(self, instances: "InstanceManager", **kwargs):
+        form = ServerConfiguration.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+        self._load_backwards_compatability(instance=instance)
+
+        try:
+            xmx = float(form.maxHeapSize.response)
+            xms = float(form.minHeapSize.response)
+        except ValueError:
+            return "Server Configuration", 302, instance
+
+        if xmx <= 0 or xms <= 0:
+            return "Server Configuration", 302, instance
+
+        if xms > xmx:
+            return "Server Configuration", 302, instance
+
+        xmx_arg = f"{int(float(xmx) * 1024)}M"
+        xms_arg = f"{int(float(xms) * 1024)}M"
+
+        configuration = self.get_configuration(instance=instance)
+
+        configuration["xmx"] = xmx_arg
+        configuration["xms"] = xms_arg
+
+        with open(instance.working_directory() / "configuration.json", "w") as f:
+            json.dump(configuration, f)
+
+        return "start", 302, instance
