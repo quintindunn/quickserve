@@ -38,7 +38,7 @@ def index() -> ResponseReturnValue:
     instances = list(instance_manager.load_all())
     modules = list(module_catalog.items())
 
-    if (len(instances) + len(modules)) == 0:
+    if (len(instances) + len(modules)) == 0 or not current_user.is_authenticated:
         return render_template("home/home-first-time.html", context={})
 
     return render_template(

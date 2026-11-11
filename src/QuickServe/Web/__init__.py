@@ -79,6 +79,7 @@ def create_app(
 
         public_endpoints = {
             "static",
+            "home.index",
             "home.login",
             "home.favicon",
         }
