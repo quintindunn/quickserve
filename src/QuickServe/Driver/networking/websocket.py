@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from QuickServe.Driver.networking.common import InstanceWebsocketConnection
     from QuickServe.Application.instances import InstanceManager
     from QuickServe.contracts import WebSettings
+    from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
 
 
 logger = logging.getLogger(__name__)
@@ -47,9 +48,10 @@ class WebsocketServer:
     _stop: asyncio.Event
     _connection_instances: set["InstanceWebsocketConnection"]
     _instance_manager: "InstanceManager"
+    token_manager: "WebsocketTokenManager"
     _loop: asyncio.AbstractEventLoop | None
 
-    def __init__(self, config: "WebSettings", instance_manager: "InstanceManager"):
+    def __init__(self, config: "WebSettings", instance_manager: "InstanceManager", token_manager: "WebsocketTokenManager"):
         self.host = config.websocket_host
         self.port = config.websocket_port
         self.router_map = Map(
@@ -61,6 +63,7 @@ class WebsocketServer:
             ]
         )
         self._instance_manager = instance_manager
+        self.token_manager = token_manager
         self._connection_instances: set["InstanceWebsocketConnection"] = set()
         self._loop = None
         self._stop = asyncio.Event()
