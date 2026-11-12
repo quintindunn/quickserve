@@ -64,6 +64,8 @@ async def instance_handler(
 
             instance_websocket_object.user = user
             instance_websocket_object.is_authenticated = True
+            logger.info("%s authenticated!", connection.remote_address)
+            continue
 
         if not hasattr(module, "on_message"):
             break

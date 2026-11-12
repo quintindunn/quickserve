@@ -339,6 +339,7 @@
         const ws = new WebSocket(ws_url);
 
         ws.onopen = () => {
+            ws.send({{ context.websocket_token | tojson }});
             ws.send(JSON.stringify({
                 isSimpleController: true,
                 type: "history",
