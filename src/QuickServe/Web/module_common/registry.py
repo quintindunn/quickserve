@@ -8,6 +8,7 @@ Date: 09/27/2026
 import typing
 from typing import Callable
 
+from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
 from QuickServe.Web.module_common.factories.link import link_builder
 from QuickServe.Web.module_common.factories.action import action_builder
 from QuickServe.Web.module_common.factories.resource import resource_builder
@@ -29,16 +30,18 @@ class Registry:
     registered: dict[str, Callable]
     websocket_server: "WebsocketServer"
     config: "Config"
+    token_manager: "WebsocketTokenManager"
 
-    def __init__(self, websocket_server: "WebsocketServer", config: "Config"):
+    def __init__(self, websocket_server: "WebsocketServer", config: "Config", token_manager: "WebsocketTokenManager"):
         self.registered = dict()
         self.websocket_server = websocket_server
         self.config = config
+        self.token_manager=token_manager
 
         self.register(
             "simple_controller",
             lambda module_name, _=None: simple_controller_builder(
-                module_name, websocket_server, config
+                module_name, websocket_server, config, token_manager
             ),
         )
         self.register(

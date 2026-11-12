@@ -112,6 +112,7 @@ if __name__ == "__main__":
         instance_manager=instance_manager,
         websocket_server=websocket_server,
         search_engine=search_engine,
+        token_manager=websocket_token_manager
     )
     app.run(
         host=config.web.website_host,
