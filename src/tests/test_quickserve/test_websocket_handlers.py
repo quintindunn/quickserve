@@ -36,7 +36,7 @@ class TestWebsocketHandler(unittest.IsolatedAsyncioTestCase):
         Tests that the instance handler properly forwards messages
         """
 
-        messages = ["hello", "world"]
+        messages = ["token", "hello", "world"]
 
         async def receive_messages():
             for message in messages:
@@ -53,9 +53,10 @@ class TestWebsocketHandler(unittest.IsolatedAsyncioTestCase):
         self.server.get_instance_manager.return_value.from_uuid.assert_called_once_with(
             UUID
         )
+
         self.assertEqual(
             self.module.on_message.call_args_list,
-            [unittest.mock.call(message, self.instance) for message in messages],
+            [unittest.mock.call(message, self.instance) for message in messages[1:]],
         )
 
     async def test_instance_handler_without_on_message(self):

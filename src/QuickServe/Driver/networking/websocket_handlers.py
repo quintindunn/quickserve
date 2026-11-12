@@ -34,8 +34,8 @@ async def instance_handler(
     logger.info(f"New connecting from instance {instance_uuid}")
     instance_websocket_object = InstanceWebsocketConnection(
         instance_uuid=instance_uuid,
-        authentication="",
         is_authenticated=False,
+        user=None,
         remote_host=connection.remote_address[0],
         remote_port=connection.remote_address[1],
         connection=connection,
@@ -47,7 +47,30 @@ async def instance_handler(
     instance = instance_manager.from_uuid(instance_uuid)
     module: "Module" = instance.base_module.module
 
+    token = None
     async for message in connection:
+        if token is None:
+            token = message
+            logger.debug(
+                "Received authorization token from %s", connection.remote_address
+            )
+
+            if isinstance(token, bytes):
+                token = token.decode()
+            user = server.token_manager.consume_unexpired_user(token)
+
+            if user is None:
+                logger.info(
+                    "Invalid authorization token from %s", connection.remote_address
+                )
+                await connection.close(1008, "INVALID AUTHORIZATION")
+                return
+
+            instance_websocket_object.user = user
+            instance_websocket_object.is_authenticated = True
+            logger.info("%s authenticated!", connection.remote_address)
+            continue
+
         if not hasattr(module, "on_message"):
             break
         module.on_message(message, instance)  # noqa

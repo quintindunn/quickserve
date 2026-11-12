@@ -12,6 +12,7 @@ from threading import Thread
 import asyncio
 
 from QuickServe.Common.search import Search
+from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
 
 QS_VERSION = "0.0.1"
 
@@ -94,8 +95,11 @@ if __name__ == "__main__":
     search_engine = Search(catalog=catalog, instance_manager=instance_manager)
     search_engine.update_all()
 
+    websocket_token_manager = WebsocketTokenManager(config=config)
     websocket_server = WebsocketServer(
-        config=config.web, instance_manager=instance_manager
+        config=config.web,
+        instance_manager=instance_manager,
+        token_manager=websocket_token_manager,
     )
 
     Thread(
@@ -110,6 +114,7 @@ if __name__ == "__main__":
         instance_manager=instance_manager,
         websocket_server=websocket_server,
         search_engine=search_engine,
+        token_manager=websocket_token_manager,
     )
     app.run(
         host=config.web.website_host,

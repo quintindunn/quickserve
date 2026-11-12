@@ -39,6 +39,7 @@ class WebModel(ConfigModel):
     websocket_port: int = 5000
     simple_controller_terminal_buffer: int = 100_000
     website_debug: bool = False
+    websocket_token_lifetime: int = 120
 
 
 class DriverModel(ConfigModel):

@@ -170,7 +170,7 @@ class TestModuleCommonFunctions(unittest.TestCase):
                     fake_config = MagicMock()
                     fake_config.web.simple_controller_terminal_buffer = 100_000
                     controller = simple_controller_builder(
-                        "mymodule", websocket_server, fake_config
+                        "mymodule", websocket_server, fake_config, token_manager=MagicMock()
                     )
                     result = controller()
 
@@ -183,6 +183,7 @@ class TestModuleCommonFunctions(unittest.TestCase):
                             "module_name": "mymodule",
                             "websocket_host": "192.168.1.98",
                             "websocket_port": 5001,
+                            "websocket_token": "",
                             "terminal_buffer": fake_config.web.simple_controller_terminal_buffer,
                         }
                     )
@@ -222,7 +223,7 @@ class TestModuleCommonFunctions(unittest.TestCase):
                     fake_config = MagicMock()
                     fake_config.web.simple_controller_terminal_buffer = 100_000
                     controller = simple_controller_builder(
-                        "mymodule", websocket_server, config=fake_config
+                        "mymodule", websocket_server, config=fake_config, token_manager=MagicMock()
                     )
                     controller()
 
@@ -231,6 +232,7 @@ class TestModuleCommonFunctions(unittest.TestCase):
                             "module_name": "mymodule",
                             "websocket_host": "192.168.1.50",
                             "websocket_port": 5001,
+                            "websocket_token": "",
                             "terminal_buffer": fake_config.web.simple_controller_terminal_buffer,
                         }
                     )

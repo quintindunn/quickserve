@@ -48,6 +48,7 @@ class WebSettings(Protocol):
     website_port: int
     simple_controller_terminal_buffer: int
     website_debug: bool
+    websocket_token_lifetime: int
 
 
 @dataclass(frozen=True, slots=True)

@@ -13,6 +13,7 @@ from flask import url_for
 from flask_login import LoginManager
 
 from QuickServe.Common.search import Search
+from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
 from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
 from QuickServe.Web.api import api
@@ -46,6 +47,7 @@ def create_app(
     instance_manager: "InstanceManager",
     websocket_server: "WebsocketServer",
     search_engine: "Search",
+    token_manager: "WebsocketTokenManager",
 ) -> Flask:
     """
     Creates a Flask application from already-constructed dependencies.
@@ -95,7 +97,7 @@ def create_app(
     app.extensions["quickserve.instance_manager"] = instance_manager
     app.extensions["quickserve.websocket_server"] = websocket_server
     app.extensions["quickserve.template_registry"] = Registry(
-        websocket_server, config=config
+        websocket_server=websocket_server, config=config, token_manager=token_manager
     )
     app.extensions["quickserve.search"] = search_engine
 
