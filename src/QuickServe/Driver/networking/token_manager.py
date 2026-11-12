@@ -17,10 +17,12 @@ class Token:
     expiration: datetime
     consumed: bool = False
 
+
 class WebsocketTokenManager:
     """
     Manages tokens for websocket authentication
     """
+
     _token_map: dict[str, "Token"]
     _token_list: deque["Token"]
 
@@ -92,7 +94,6 @@ class WebsocketTokenManager:
             return None
         tok.consumed = True
         return user
-
 
     def cleanup(self):
         while len(self._token_list) and self.is_expired(self._token_list[0].token):

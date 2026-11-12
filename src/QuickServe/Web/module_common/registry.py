@@ -32,11 +32,16 @@ class Registry:
     config: "Config"
     token_manager: "WebsocketTokenManager"
 
-    def __init__(self, websocket_server: "WebsocketServer", config: "Config", token_manager: "WebsocketTokenManager"):
+    def __init__(
+        self,
+        websocket_server: "WebsocketServer",
+        config: "Config",
+        token_manager: "WebsocketTokenManager",
+    ):
         self.registered = dict()
         self.websocket_server = websocket_server
         self.config = config
-        self.token_manager=token_manager
+        self.token_manager = token_manager
 
         self.register(
             "simple_controller",

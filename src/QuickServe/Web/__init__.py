@@ -47,7 +47,7 @@ def create_app(
     instance_manager: "InstanceManager",
     websocket_server: "WebsocketServer",
     search_engine: "Search",
-    token_manager: "WebsocketTokenManager"
+    token_manager: "WebsocketTokenManager",
 ) -> Flask:
     """
     Creates a Flask application from already-constructed dependencies.

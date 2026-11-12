@@ -51,7 +51,12 @@ class WebsocketServer:
     token_manager: "WebsocketTokenManager"
     _loop: asyncio.AbstractEventLoop | None
 
-    def __init__(self, config: "WebSettings", instance_manager: "InstanceManager", token_manager: "WebsocketTokenManager"):
+    def __init__(
+        self,
+        config: "WebSettings",
+        instance_manager: "InstanceManager",
+        token_manager: "WebsocketTokenManager",
+    ):
         self.host = config.websocket_host
         self.port = config.websocket_port
         self.router_map = Map(

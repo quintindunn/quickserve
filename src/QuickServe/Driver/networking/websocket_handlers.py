@@ -51,14 +51,18 @@ async def instance_handler(
     async for message in connection:
         if token is None:
             token = message
-            logger.debug("Received authorization token from %s", connection.remote_address)
+            logger.debug(
+                "Received authorization token from %s", connection.remote_address
+            )
 
             if isinstance(token, bytes):
                 token = token.decode()
             user = server.token_manager.consume_unexpired_user(token)
 
             if user is None:
-                logger.info("Invalid authorization token from %s", connection.remote_address)
+                logger.info(
+                    "Invalid authorization token from %s", connection.remote_address
+                )
                 await connection.close(1008, "INVALID AUTHORIZATION")
                 return
 
