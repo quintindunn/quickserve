@@ -33,10 +33,12 @@ def simple_controller_builder(
         template = current_app.jinja_env.from_string(resource)
 
         websocket_host = websocket_server.host
-        user_id = current_user.get_id()
-        user = UserModel.select().where(UserModel.id == user_id).first()
+        token = ""
+        if hasattr(current_app, "login_manager"):
+            user_id = current_user.get_id()
+            user = UserModel.select().where(UserModel.id == user_id).first()
 
-        token = token_manager.generate_token(user=user)
+            token = token_manager.generate_token(user=user)
 
         if websocket_host == "0.0.0.0":
             websocket_host = local_ip
