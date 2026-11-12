@@ -25,7 +25,7 @@ class TestWebsocket(unittest.TestCase):
         self.websocket_server = websocket.WebsocketServer(
             config=self.config,
             instance_manager=self.instance_manager,
-            token_manager=MagicMock()
+            token_manager=MagicMock(),
         )
 
     def tearDown(self):
