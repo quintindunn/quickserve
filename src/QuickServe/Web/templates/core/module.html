@@ -79,7 +79,7 @@
         {% if context.instance_uuid %}
             <script defer>
                 const delete_instance_btn = document.getElementById("qs-instance-delete");
-                const instance_name = {{ context.instance_name | tojson }}
+                let instance_name = {{ context.instance_name | tojson }}
 
                 delete_instance_btn.addEventListener("click", () => {
                     const confirmed = confirm(`Delete instance "${instance_name}"? This cannot be undone!`);
@@ -123,7 +123,7 @@
 
                 rename_instance_btn.addEventListener("click", () => {
                     instance_name_block.innerHTML = '';
-                    const input = document.createElement("input");
+                    let input = document.createElement("input");
                     input.type = "text";
                     input.id = "instance-renaming-box";
                     input.classList.add("module-heading");
@@ -131,18 +131,33 @@
                     instance_name_block.appendChild(input);
                     input.focus();
 
-                    input.addEventListener("keydown", (e) => {
+                    input.addEventListener("keydown", async (e) => {
                         if (e.key !== "Enter") {
                             return;
                         }
 
-                        console.log(`New name: ${input.value}`);
-                    })
-                })
+                        e.preventDefault();
 
-                /*
-                            <input type="text" id="instance-renaming-box" class="module-heading">
-                */
+                        instance_name = input.value;
+
+                        const response = await fetch({{ url_for("modules.instancestatic.instance_rename", uuid=context.instance_uuid) | tojson }}, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                instance_name: instance_name,
+                            })
+                        });
+
+                        if (!response.ok) {
+                            console.error("Failed to rename instance:", response.status);
+                            return;
+                        }
+
+                        window.location.reload();
+                    });
+                })
             </script>
         {% endif %}
     </div>

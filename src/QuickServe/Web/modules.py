@@ -23,6 +23,7 @@ from flask.typing import ResponseReturnValue
 from werkzeug.utils import secure_filename
 
 from QuickServe.Common.search import Search
+from QuickServe.Database.instances import InstanceModel
 from QuickServe.Driver.networking.websocket import WebsocketServer
 from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.FileSystem.plugins import ModuleCatalog
@@ -599,3 +600,13 @@ def instance_duplicate(uuid: str):
         ),
         200,
     )
+
+
+@instance_static.route("/<uuid>/rename", methods=["POST"])
+def instance_rename(uuid: str):
+    model: InstanceModel = InstanceModel.select().where(InstanceModel.instance_uuid == uuid).first()
+
+    model.instance_name = request.json.get("instance_name", model.instance_name)
+    model.save()
+
+    return "", 200
