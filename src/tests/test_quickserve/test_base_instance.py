@@ -26,6 +26,7 @@ class TestBaseInstance(unittest.TestCase):
         self.instance = BaseInstance(
             base_module=MagicMock(),
             instance_name="Test Instance",
+            original_instance_name="Test Instance",
             uuid=self.instance_uuid,
             module_name="test_module",
             workspace=self.workspace,

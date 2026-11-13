@@ -64,6 +64,7 @@ class TestDatabase(unittest.TestCase):
         InstanceModel.create(
             instance_uuid=instance_uuid,
             instance_name="Test instance",
+            original_instance_name="Test instance",
             module_name="test_database.py",
         )
 
@@ -89,6 +90,7 @@ class TestDatabase(unittest.TestCase):
         instance_record = InstanceRecord(
             instance_uuid=instance_uuid,
             instance_name="Test instance 2",
+            original_instance_name="Test instance 2",
             module_name="test_database.py",
         )
 
@@ -116,6 +118,7 @@ class TestDatabase(unittest.TestCase):
         InstanceModel.create(
             instance_uuid=instance_uuid,
             instance_name="Test instance 3",
+            original_instance_name="Test instance 3",
             module_name="test_database.py",
         )
 
@@ -154,6 +157,7 @@ class TestDatabase(unittest.TestCase):
             InstanceModel.create(
                 instance_uuid=instance_uuid,
                 instance_name=f"Test instance {i}",
+                original_instance_name=f"Test instance {i}",
                 module_name="test_database.py",
             )
 

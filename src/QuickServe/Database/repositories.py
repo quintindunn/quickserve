@@ -30,6 +30,7 @@ class PeeweeInstanceManager:
         model = InstanceModel.create(
             instance_uuid=record.instance_uuid,
             instance_name=record.instance_name,
+            original_instance_name=record.instance_name,
             module_name=record.module_name,
         )
         return self._record(model)
@@ -75,5 +76,6 @@ class PeeweeInstanceManager:
         return InstanceRecord(
             instance_uuid=model.instance_uuid,
             instance_name=model.instance_name,
+            original_instance_name=model.original_instance_name,
             module_name=model.module_name,
         )
