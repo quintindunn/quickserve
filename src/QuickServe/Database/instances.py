@@ -16,7 +16,8 @@ class InstanceModel(Model):
     """Model for registered instances."""
 
     instance_uuid = UUIDField(null=False)
-    instance_name = CharField(null=False)
+    original_instance_name = CharField(null=False)
+    instance_name = CharField(null=False, default="")
     module_name = CharField(null=False)
     created_on = DateTimeField(default=datetime.now)
 

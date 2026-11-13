@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 class BaseInstance:
     base_module: "BaseModule"
     instance_name: str
+    original_instance_name: str
     uuid: UUID
     module_name: str
     workspace: "Workspace"
@@ -32,5 +33,5 @@ class BaseInstance:
 
         :return: The instance working directory.
         """
-        dir_name = sanitize_filename(f"{self.uuid.hex[:16]}-{self.instance_name}")
+        dir_name = sanitize_filename(f"{self.uuid.hex[:16]}-{self.original_instance_name}")
         return self.workspace.ensure_directory(f"instances/{dir_name}")

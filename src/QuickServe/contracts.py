@@ -59,6 +59,7 @@ class InstanceRecord:
 
     instance_uuid: UUID
     instance_name: str
+    original_instance_name: str
     module_name: str
 
 
