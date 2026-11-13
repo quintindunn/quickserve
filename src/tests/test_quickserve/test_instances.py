@@ -42,6 +42,7 @@ class TestInstanceManager(unittest.TestCase):
         self.repository.create.return_value = InstanceRecord(
             instance_uuid=identifier,
             instance_name="Test Instance",
+            original_instance_name="Test Instance",
             module_name="TestModule",
         )
 
@@ -91,6 +92,7 @@ class TestInstanceManager(unittest.TestCase):
         self.repository.get.return_value = InstanceRecord(
             instance_uuid=identifier,
             instance_name="Test Instance",
+            original_instance_name="Test Instance",
             module_name="TestModule",
         )
 
@@ -124,11 +126,13 @@ class TestInstanceManager(unittest.TestCase):
             InstanceRecord(
                 instance_uuid=first_uuid,
                 instance_name="First",
+                original_instance_name="First",
                 module_name="Module",
             ),
             InstanceRecord(
                 instance_uuid=second_uuid,
                 instance_name="Second",
+                original_instance_name="Second",
                 module_name="Module",
             ),
         ]
