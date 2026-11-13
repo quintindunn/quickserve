@@ -604,7 +604,9 @@ def instance_duplicate(uuid: str):
 
 @instance_static.route("/<uuid>/rename", methods=["POST"])
 def instance_rename(uuid: str):
-    model: InstanceModel = InstanceModel.select().where(InstanceModel.instance_uuid == uuid).first()
+    model: InstanceModel = (
+        InstanceModel.select().where(InstanceModel.instance_uuid == uuid).first()
+    )
 
     model.instance_name = request.json.get("instance_name", model.instance_name)
     model.save()

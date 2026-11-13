@@ -66,7 +66,11 @@ class InstanceManager:
             )
         )
         return self._build(
-            module, record.instance_name, record.original_instance_name, record.module_name, record.instance_uuid
+            module,
+            record.instance_name,
+            record.original_instance_name,
+            record.module_name,
+            record.instance_uuid,
         )
 
     def from_uuid(self, identifier: str | UUID) -> BaseInstance:
@@ -83,14 +87,22 @@ class InstanceManager:
         record = self.repository.get(identifier)
         module = self.catalog.require(record.module_name)
         return self._build(
-            module, record.instance_name, record.original_instance_name, record.module_name, record.instance_uuid
+            module,
+            record.instance_name,
+            record.original_instance_name,
+            record.module_name,
+            record.instance_uuid,
         )
 
     def load_all(self) -> Generator[BaseInstance, Any, None]:
         for record in self.repository.load_all_active():
             module = self.catalog.require(record.module_name)
             yield self._build(
-                module, record.instance_name, record.original_instance_name, record.module_name, record.instance_uuid
+                module,
+                record.instance_name,
+                record.original_instance_name,
+                record.module_name,
+                record.instance_uuid,
             )
 
     def delete_from_uuid(self, uuid: str | UUID):
@@ -99,7 +111,12 @@ class InstanceManager:
             self._instances.pop(str(uuid))
 
     def _build(
-        self, module, instance_name: str, original_instance_name: str, module_name: str, identifier: UUID
+        self,
+        module,
+        instance_name: str,
+        original_instance_name: str,
+        module_name: str,
+        identifier: UUID,
     ) -> BaseInstance:
         """
         Builds an instance and assigns its websocket port.

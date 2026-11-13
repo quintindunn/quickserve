@@ -33,5 +33,7 @@ class BaseInstance:
 
         :return: The instance working directory.
         """
-        dir_name = sanitize_filename(f"{self.uuid.hex[:16]}-{self.original_instance_name}")
+        dir_name = sanitize_filename(
+            f"{self.uuid.hex[:16]}-{self.original_instance_name}"
+        )
         return self.workspace.ensure_directory(f"instances/{dir_name}")
