@@ -9,11 +9,32 @@
     border-radius: 25px;
 }
 
-.module > .module-head > a > .module-heading {
+.module > .module-head > .heading > a > .module-heading {
     color: var(--text-h);
     font-size: 2.5rem;
     font-weight: 600;
 }
+
+.module > .module-head > .heading {
+    display: flex;
+    flex-direction: row;
+}
+
+.module > .module-head > .heading > .instance-name-edit {
+    position: relative;
+    top: 1.75rem;
+    left: .5rem;
+    width: 1.75rem;
+    height: 1.75rem;
+
+    fill: transparent;
+}
+
+.module > .module-head > .heading > .instance-name-edit:hover {
+    fill: var(--min-text);
+    cursor: pointer;
+}
+
 
 .module > .module-head > p > .module-instance-module-anchor {
     color: var(--text-h);
@@ -141,7 +162,7 @@
         bottom: 2rem;
     }
 
-    .module > .module-head > a > .module-heading {
+    .module > .module-head > .heading > a > .module-heading {
         font-size: 2rem;
     }
 }
