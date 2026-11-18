@@ -170,7 +170,10 @@ class TestModuleCommonFunctions(unittest.TestCase):
                     fake_config = MagicMock()
                     fake_config.web.simple_controller_terminal_buffer = 100_000
                     controller = simple_controller_builder(
-                        "mymodule", websocket_server, fake_config, token_manager=MagicMock()
+                        "mymodule",
+                        websocket_server,
+                        fake_config,
+                        token_manager=MagicMock(),
                     )
                     result = controller()
 
@@ -223,7 +226,10 @@ class TestModuleCommonFunctions(unittest.TestCase):
                     fake_config = MagicMock()
                     fake_config.web.simple_controller_terminal_buffer = 100_000
                     controller = simple_controller_builder(
-                        "mymodule", websocket_server, config=fake_config, token_manager=MagicMock()
+                        "mymodule",
+                        websocket_server,
+                        config=fake_config,
+                        token_manager=MagicMock(),
                     )
                     controller()
 
