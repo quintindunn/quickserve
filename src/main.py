@@ -11,9 +11,6 @@ from threading import Thread
 
 import asyncio
 
-from QuickServe.Common.search import Search
-from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
-
 QS_VERSION = "0.0.1"
 
 
@@ -23,19 +20,34 @@ def start_websocket(ws_server):
     loop.run_until_complete(ws_server.start())
 
 
+def start_scheduler(scheduler_: "Scheduler"):
+    scheduler_.runner_loop()
+
+
 if __name__ == "__main__":
     from QuickServe.Application.instances import InstanceManager
+
     from QuickServe.Database.database import create_database
     from QuickServe.Database.database import connect as db_connect
     from QuickServe.Database.database import initialize as db_initialize
     from QuickServe.Database.models import MODELS
     from QuickServe.Database.repositories import PeeweeInstanceManager
+
     from QuickServe.Web import create_app
+
     from QuickServe.FileSystem.config import Config
     from QuickServe.FileSystem.path_resolver import Workspace
     from QuickServe.FileSystem.plugins import PluginLoader
+
     from QuickServe.Driver.networking.websocket import WebsocketServer
+    from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
+
     from QuickServe.Runtimes.runtime_manager import RuntimeManager
+
+    from QuickServe.Common.search import Search
+
+    from QuickServe.Scheduler.scheduler import Scheduler
+
     import logging
 
     logging.getLogger("websockets.server").setLevel(logging.ERROR)
@@ -70,6 +82,8 @@ if __name__ == "__main__":
         ],
     )
 
+    scheduler = Scheduler()
+
     runtime_manager = RuntimeManager(workspace=workspace)
 
     config = Config(workspace=workspace)
@@ -83,6 +97,7 @@ if __name__ == "__main__":
         workspace=workspace,
         runtime_manager=runtime_manager,
         config=config,
+        scheduler=scheduler,
         qs_version=QS_VERSION,
     ).load_all()
 
@@ -104,7 +119,13 @@ if __name__ == "__main__":
 
     Thread(
         target=start_websocket,
-        args=[websocket_server],
+        args=(websocket_server,),
+        daemon=True,
+    ).start()
+
+    Thread(
+        target=start_scheduler,
+        args=(scheduler,),
         daemon=True,
     ).start()
 

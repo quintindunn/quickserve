@@ -9,7 +9,6 @@ import dataclasses
 import heapq
 import logging
 import threading
-import time
 
 from datetime import datetime, timedelta
 from itertools import count
@@ -56,20 +55,21 @@ class Scheduler:
         self._jobs = list()
         self._recurring_jobs = list()
         self.running = True
+        self._jobs_changed = threading.Condition()
 
         self._sequence = count()
 
     def submit_job(
         self,
-        start_time: datetime | timedelta,
         func: Callable[[Any], Any],
         args: tuple = (),
         kwargs: dict | None = None,
+        start_time: datetime | timedelta | None = None,
         _parent: "RecurringJob | None" = None,
     ) -> ScheduledJob:
         """
         Submits a new job to the scheduler.
-        :param start_time: The time for the job to start executing.
+        :param start_time: The time for the job to start executing, if None datetime.now().
         :param func: The function to call for the job.
         :param args: The args for the job's function.
         :param kwargs: The kwargs for the job's function.
@@ -80,6 +80,9 @@ class Scheduler:
         if isinstance(start_time, timedelta):
             delay = start_time
             start_time = datetime.now() + delay
+
+        if start_time is None:
+            start_time = datetime.now()
 
         job = ScheduledJob(
             start_time=start_time,
@@ -97,7 +100,9 @@ class Scheduler:
             job.start_time.isoformat(),
         )
 
-        heapq.heappush(self._jobs, (start_time, next(self._sequence), job))
+        with self._jobs_changed:
+            heapq.heappush(self._jobs, (start_time, next(self._sequence), job))
+            self._jobs_changed.notify()
         logger.info(
             "Submitted job %s for %s%s.",
             getattr(func, "__qualname__", repr(func)),
@@ -107,7 +112,7 @@ class Scheduler:
         return job
 
     def _submit_job_from_recurring_job(
-        self, recurring_job: RecurringJob
+        self, recurring_job: RecurringJob, previous_start_time: datetime
     ) -> ScheduledJob:
         """
         Submits a new job from a recurring job.
@@ -115,7 +120,7 @@ class Scheduler:
         :return: The scheduled job.
         """
 
-        next_start_time = recurring_job.interval
+        next_start_time = previous_start_time + recurring_job.interval
         job = self.submit_job(
             start_time=next_start_time,
             func=recurring_job.func,
@@ -132,23 +137,26 @@ class Scheduler:
 
     def submit_recurring_job(
         self,
-        initial_start_time: datetime,
         interval: timedelta,
         func: Callable[[Any], Any],
         args: tuple = (),
         kwargs: dict | None = None,
+        initial_start_time: "datetime | None" = None,
     ) -> RecurringJob:
         """
         Register a recurring job in the recurring jobs list.
-        :param initial_start_time: The initial start time for the first job.
         :param interval: The interval between job starts.
         :param func: The function to call.
         :param args: The args for the function.
         :param kwargs: The kwargs for the function.
+        :param initial_start_time: The initial start time for the first job, if None default: datetime.now().
         """
 
         if interval <= timedelta(0):
             raise ValueError("interval must be greater than zero")
+
+        if initial_start_time is None:
+            initial_start_time = datetime.now()
 
         recurring_job = RecurringJob(
             initial_start_time=initial_start_time,
@@ -176,24 +184,27 @@ class Scheduler:
         return recurring_job
 
     def pop_next_job(self):
-        while self._jobs:
-            _, _, job = heapq.heappop(self._jobs)
-            if job.cancelled:
-                logger.debug(
-                    "Skipping cancelled job scheduled for %s.",
-                    job.start_time.isoformat(),
-                )
-                continue
-            if job.parent is not None:
-                if job.parent.cancelled:
+        with self._jobs_changed:
+            while self._jobs:
+                _, _, job = heapq.heappop(self._jobs)
+                if job.cancelled:
                     logger.debug(
-                        "Skipping occurrence of cancelled recurring job scheduled for %s.",
+                        "Skipping cancelled job scheduled for %s.",
                         job.start_time.isoformat(),
                     )
                     continue
-                self._submit_job_from_recurring_job(job.parent)
-            logger.debug("Dequeued job scheduled for %s.", job.start_time.isoformat())
-            return job
+                if job.parent is not None:
+                    if job.parent.cancelled:
+                        logger.debug(
+                            "Skipping occurrence of cancelled recurring job scheduled for %s.",
+                            job.start_time.isoformat(),
+                        )
+                        continue
+                    self._submit_job_from_recurring_job(job.parent, job.start_time)
+                logger.debug(
+                    "Dequeued job scheduled for %s.", job.start_time.isoformat()
+                )
+                return job
         return None
 
     @staticmethod
@@ -202,13 +213,27 @@ class Scheduler:
 
     def runner_loop(self):
         while self.running:
-            if not self._jobs or self._jobs[0][2].start_time < datetime.now():
-                time.sleep(0.05)
+            job = None
+            with self._jobs_changed:
+                while self.running:
+                    if not self._jobs:
+                        self._jobs_changed.wait()
+                        continue
 
-            job = self.pop_next_job()
+                    wait_seconds = (
+                        self._jobs[0][2].start_time - datetime.now()
+                    ).total_seconds()
+                    if wait_seconds > 0:
+                        self._jobs_changed.wait(timeout=wait_seconds)
+                        continue
+
+                    job = self.pop_next_job()
+                    break
+
+            if not self.running:
+                break
 
             if job is None:
-                logger.error("Job is None!")
                 continue
 
             thread = threading.Thread(

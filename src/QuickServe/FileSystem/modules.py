@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from types import ModuleType
 
+from QuickServe.Scheduler.scheduler import Scheduler
 from QuickServe.contracts import Module
 from QuickServe.FileSystem.exceptions import (
     InvalidModuleError,
@@ -43,6 +44,7 @@ class BaseModule:
         workspace: "Workspace",
         runtime_manager: "RuntimeManager",
         config: "Config",
+        scheduler: "Scheduler",
         qs_version: str,
         **kwargs,
     ):
@@ -50,6 +52,7 @@ class BaseModule:
         self.workspace = workspace
         self.runtime_manager = runtime_manager
         self.config = config
+        self.scheduler = scheduler
         self.qs_version_real = qs_version
 
         self._remove_attr_on_load = None
