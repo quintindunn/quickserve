@@ -88,10 +88,18 @@ class Module:
                 backup_dir="backups",
                 ignored_paths=["eula.txt", "logs/*", "world/session.lock"],
             ),
+            pre_backup_fn=self.pre_backup,
+            post_backup_fn=self.post_backup
         )
 
+    def pre_backup(self, instance: "BaseInstance"):
+        self.execute_command(instance=instance, args=["say", "Backing", "up", "server..."])
+
+    def post_backup(self, instance: "BaseInstance"):
+        self.execute_command(instance=instance, args=["say", "Backing", "complete!"])
+
     @staticmethod
-    def get_configuration(instance: BaseInstance):
+    def get_configuration(instance: "BaseInstance"):
         cwd = instance.working_directory()
         configuration_path = cwd / "configuration.json"
 
