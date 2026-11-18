@@ -139,6 +139,10 @@ class SimpleBackup:
 
         instance_working_dir = instance.working_directory()
         root_dir = instance_working_dir / self._options.root_dir
+        backup_dir = (instance_working_dir / self._options.backup_dir).resolve()
+        if not backup_dir.is_relative_to(instance_working_dir.resolve()):
+            logger.error("Cannot save backups outside of instance working dir!")
+            return
 
         workspace = self._base_module.workspace
         zip_file_name = (
@@ -160,10 +164,11 @@ class SimpleBackup:
                     logger.debug("Adding file to backup archive: %s", relative_path)
                     backup_zip.write(file_path, arcname=relative_path.as_posix())
 
+            resolved_instance_dir = instance_working_dir.resolve()
             final_zip_location = (
                 instance_working_dir / self._options.backup_dir / zip_file_name
             )
-            if not final_zip_location.is_relative_to(instance_working_dir):
+            if not final_zip_location.resolve().is_relative_to(resolved_instance_dir):
                 logger.error("Cannot save zip outside of instance working dir!")
             else:
                 os.makedirs(final_zip_location.parent, exist_ok=True)
@@ -186,9 +191,10 @@ class SimpleBackup:
         :param instance: The instance to remove old backups from
         :return: None
         """
-        backups_dir = instance.working_directory() / self._options.backup_dir
+        instance_working_dir = instance.working_directory().resolve()
+        backups_dir = (instance.working_directory() / self._options.backup_dir).resolve()
 
-        if not backups_dir.is_relative_to(instance.working_directory()):
+        if not backups_dir.is_relative_to(instance_working_dir):
             logger.error(
                 "Backup directory cannot be outside of instance working directory, aborting cleanup!"
             )
@@ -291,8 +297,8 @@ class SimpleBackup:
         """
 
         instance_working_dir = instance.working_directory()
-        instance_backup_dir = instance_working_dir / self._options.backup_dir
-        if not instance_backup_dir.is_relative_to(instance_working_dir):
+        instance_backup_dir = (instance_working_dir / self._options.backup_dir).resolve()
+        if not instance_backup_dir.is_relative_to(instance_working_dir.resolve()):
             logger.error(
                 "Backup directory cannot be outside of instance working directory, aborting submission!"
             )
