@@ -92,7 +92,7 @@ class Module:
             ),
             pre_backup_fn=self.pre_backup,
             post_backup_fn=self.post_backup,
-            max_stored_backups=100,
+            max_stored_backups=250,
             max_total_backup_size=20 * 1024 * 1024 * 1024,
         )
 
