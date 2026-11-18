@@ -44,6 +44,7 @@ class InstanceManager:
         self._instances: dict[str, BaseInstance] = {}
 
         for instance in self.load_all():
+            print("Checking")
             if hasattr(instance.base_module.module, "QS_INTERNAL_ON_QUICKSERVE_LOAD"):
                 instance.base_module.module.QS_INTERNAL_ON_QUICKSERVE_LOAD(instance)
 

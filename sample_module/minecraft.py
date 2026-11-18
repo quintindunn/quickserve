@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Callable
 import requests
 
 from QuickServeModuleLibrary.process import ManagedProcess
+from QuickServeModuleLibrary.simple_backups import SimpleBackup, BackupOptions
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from QuickServeModuleLibrary.decorators import (
     page,
@@ -78,6 +79,16 @@ class Module:
         self.runtime_manager = runtime_manager
 
         self.simple_controller_process_manager = SimpleControllerProcessManager(self)
+
+        self.backup = SimpleBackup(
+            self,
+            datetime.timedelta(seconds=5),
+            options=BackupOptions(
+                root_dir="server",
+                backup_dir="backups",
+                ignored_paths=["eula.txt", "logs/*", "world/session.lock"],
+            ),
+        )
 
     @staticmethod
     def get_configuration(instance: BaseInstance):
@@ -250,6 +261,8 @@ class Module:
         )
         process.on_stderr(send_callback)
         process.on_stdout(send_callback)
+
+        self.backup.submit_instance(instance=instance)
         return process
 
     @on_instance_duplicate

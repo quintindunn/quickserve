@@ -6,6 +6,8 @@ Date: 09/09/20206
 """
 
 import platform
+import shutil
+import uuid
 from pathlib import Path
 import os
 from typing import Callable, Any
@@ -59,6 +61,10 @@ class Workspace:
 
         self.root: Path = Path(root)
         self.ensure_directory(root)
+
+        tmp_dir = self.root / "tmp"
+        if tmp_dir.exists():
+            shutil.rmtree(tmp_dir)
 
     def get_path(self, path: PathType) -> Path:
         """
@@ -120,6 +126,19 @@ class Workspace:
         self.ensure_directory(path.parent)
 
         return path.absolute()
+
+    # TODO: Add context manager for getting temp dirs
+    def get_temp_folder(self) -> Path:
+        """
+        Gets a temp directory.
+        :return: The path to the temp directory.
+        """
+
+        root_tmp = self.ensure_directory("tmp")
+        tmp_folder_uuid = uuid.uuid4()
+
+        temp_folder = self.ensure_directory(root_tmp / str(tmp_folder_uuid))
+        return temp_folder
 
     def call_if_not_exist(
         self,
