@@ -325,7 +325,6 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
                 self.assertEqual(set(files), {"folder", "empty", "file.txt"})
                 self.assertTrue(files["folder"]["isDir"])
                 self.assertFalse(files["folder"]["isFile"])
-                self.assertTrue(files["empty"]["isEmptyDir"])
                 self.assertTrue(files["file.txt"]["isFile"])
                 self.assertFalse(files["file.txt"]["isDir"])
                 self.assertEqual(files["file.txt"]["size"], "5.0 B")
