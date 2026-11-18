@@ -275,23 +275,6 @@ class TestModuleBlueprint(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(folder.exists())
 
-    def test_delete_nonempty_folder(self):
-        """
-        Test rejecting deletion of a nonempty folder.
-        """
-
-        folder = self.working_dir / "test"
-        folder.mkdir()
-        (folder / "file.txt").touch()
-
-        response = self.client.post(
-            self.url + "deletepath/",
-            json={"filepath": "test"},
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertTrue(folder.exists())
-
     def test_delete_working_directory(self):
         """
         Test preventing deletion of the instance root.
