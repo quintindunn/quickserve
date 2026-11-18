@@ -60,6 +60,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
 
@@ -77,6 +78,7 @@ class TestBaseModule(unittest.TestCase):
             runtime_manager=None,  # noqa
             remove_attr_on_load="NAME",
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
 
@@ -95,6 +97,7 @@ class TestBaseModule(unittest.TestCase):
             runtime_manager=None,  # noqa
             remove_attr_on_load="VERSION",
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
 
@@ -113,6 +116,7 @@ class TestBaseModule(unittest.TestCase):
             runtime_manager=None,  # noqa
             remove_attr_on_load="QUICKSERVE_VERSION",
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
 
@@ -127,6 +131,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
         module.load_module()
@@ -140,6 +145,7 @@ class TestBaseModule(unittest.TestCase):
             runtime_manager=None,  # noqa
             remove_attr_on_load="SUPPORTED_OPERATING_SYSTEMS",
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
         with self.assertRaises(InvalidModuleError):
@@ -153,6 +159,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
 
@@ -174,6 +181,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
 
@@ -196,6 +204,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             config=None,  # noqa
+            scheduler=None, # noqa
             qs_version="0.0.1",
         )
 
