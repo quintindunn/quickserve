@@ -25,8 +25,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-logging.getLogger("QuickServe.Scheduler.scheduler").setLevel(logging.ERROR)
-
 
 @dataclasses.dataclass
 class BackupOptions:
@@ -87,13 +85,19 @@ def walk_backup_files(
 
 
 class SimpleBackup:
+    """
+    Makes creating server backups easy!
+    """
+
     def __init__(
         self,
         module: "Module",
         interval: timedelta,
         options: "BackupOptions",
         pre_backup_fn: "Callable[[BaseInstance], None] | None" = None,
-        post_backup_fn: "Callable[[BaseInstance], None] | None" = None,
+        post_backup_fn: "Callable[[BaseInstance, Path], None] | None" = None,
+        max_stored_backups: int = -1,
+        max_total_backup_size: int = -1,
     ):
         self._base_module = module.module
         self._module = module
@@ -103,9 +107,14 @@ class SimpleBackup:
         self._pre_backup_fn = pre_backup_fn
         self._post_backup_fn = post_backup_fn
 
+        self._max_stored_backups = max_stored_backups
+        self._max_total_backup_size = max_total_backup_size
+
         self.recurring_jobs: dict[UUID, RecurringJob] = dict()
 
         self.instances: dict[UUID, BaseInstance] = dict()
+
+        self.backup_dir_sizes: dict[UUID, int] = dict()
 
         self._options = options
 
@@ -159,12 +168,53 @@ class SimpleBackup:
             else:
                 os.makedirs(final_zip_location.parent, exist_ok=True)
                 shutil.move(tmp_zip_path, final_zip_location)
+                self.backup_dir_sizes[
+                    instance.uuid
+                ] += final_zip_location.stat().st_size
         finally:
             if tmp_folder:
                 shutil.rmtree(tmp_folder)
 
+        self.remove_old_backups(instance=instance)
+
         if self._post_backup_fn:
-            self._post_backup_fn(instance)
+            self._post_backup_fn(instance, final_zip_location)
+
+    def remove_old_backups(self, instance: "BaseInstance"):
+        """
+        Removes old backups to comply with the BackupOptions passed into SimpleBackup
+        :param instance: The instance to remove old backups from
+        :return: None
+        """
+        backups_dir = instance.working_directory() / self._options.backup_dir
+
+        if not backups_dir.is_relative_to(instance.working_directory()):
+            logger.error(
+                "Backup directory cannot be outside of instance working directory, aborting cleanup!"
+            )
+            return
+
+        if self._max_stored_backups <= 0 or self._max_total_backup_size <= 0:
+            return
+
+        if not backups_dir.is_dir():
+            return
+
+        files = sorted(
+            (file for file in backups_dir.iterdir() if file.is_file()),
+            key=lambda file: file.stat().st_mtime,
+            reverse=True,
+        )
+
+        while files and (
+            len(files) > self._max_stored_backups
+            or self.backup_dir_sizes[instance.uuid] > self._max_total_backup_size
+        ):
+            oldest = files.pop()
+            size = oldest.stat().st_size
+
+            os.remove(oldest)
+            self.backup_dir_sizes[instance.uuid] -= size
 
     def _initialize_recurring_job(self, instance: "BaseInstance") -> None:
         """
@@ -240,5 +290,26 @@ class SimpleBackup:
         :return: None
         """
 
+        instance_working_dir = instance.working_directory()
+        instance_backup_dir = instance_working_dir / self._options.backup_dir
+        if not instance_backup_dir.is_relative_to(instance_working_dir):
+            logger.error(
+                "Backup directory cannot be outside of instance working directory, aborting submission!"
+            )
+            return
+
         self.instances[instance.uuid] = instance
         self._initialize_recurring_job(instance=instance)
+
+        self.backup_dir_sizes[instance.uuid] = 0
+
+        instance_backup_dir = instance.working_directory() / self._options.backup_dir
+
+        if not instance_backup_dir.exists():
+            return
+
+        for file in instance_backup_dir.iterdir():
+            if not file.is_file():
+                continue
+
+            self.backup_dir_sizes[instance.uuid] += file.stat().st_size
