@@ -51,7 +51,7 @@ logger = logging.getLogger("minecraft-vanilla")
 class Module:
     NAME: str = "Minecraft-Vanilla"
     VERSION: str = "0.0.2"
-    QUICKSERVE_VERSION: str = "0.0.1"
+    QUICKSERVE_VERSION: str = "0.0.2"
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
