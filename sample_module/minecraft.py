@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Callable
 import requests
 
 from QuickServeModuleLibrary.process import ManagedProcess
+from QuickServeModuleLibrary.simple_backups import SimpleBackup, BackupOptions
 from QuickServeModuleLibrary.simple_controller import SimpleControllerProcessManager
 from QuickServeModuleLibrary.decorators import (
     page,
@@ -42,13 +43,15 @@ if TYPE_CHECKING:
     from QuickServe.Application.instances import InstanceManager
     from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
+    from pathlib import Path
+
 logger = logging.getLogger("minecraft-vanilla")
 
 
 class Module:
     NAME: str = "Minecraft-Vanilla"
     VERSION: str = "0.0.2"
-    QUICKSERVE_VERSION: str = "0.0.1"
+    QUICKSERVE_VERSION: str = "0.0.2"
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
@@ -79,8 +82,30 @@ class Module:
 
         self.simple_controller_process_manager = SimpleControllerProcessManager(self)
 
+        self.backup = SimpleBackup(
+            self,
+            datetime.timedelta(minutes=25),
+            options=BackupOptions(
+                root_dir="server",
+                backup_dir="backups",
+                ignored_paths=["eula.txt", "logs/*", "world/session.lock"],
+            ),
+            pre_backup_fn=self.pre_backup,
+            post_backup_fn=self.post_backup,
+            max_stored_backups=10,
+            max_total_backup_size=20 * 1024 * 1024 * 1024,
+        )
+
+    def pre_backup(self, instance: "BaseInstance"):
+        self.execute_command(
+            instance=instance, args=["say", "Backing", "up", "server..."]
+        )
+
+    def post_backup(self, instance: "BaseInstance", file_path: Path):
+        self.execute_command(instance=instance, args=["say", "Backup", "complete!"])
+
     @staticmethod
-    def get_configuration(instance: BaseInstance):
+    def get_configuration(instance: "BaseInstance"):
         cwd = instance.working_directory()
         configuration_path = cwd / "configuration.json"
 
@@ -250,6 +275,8 @@ class Module:
         )
         process.on_stderr(send_callback)
         process.on_stdout(send_callback)
+
+        self.backup.submit_instance(instance=instance)
         return process
 
     @on_instance_duplicate

@@ -11,7 +11,10 @@ from threading import Thread
 
 import asyncio
 
-QS_VERSION = "0.0.1"
+from QuickServe.Common.search import Search
+from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
+
+QS_VERSION = "0.0.2"
 
 
 def start_websocket(ws_server):
