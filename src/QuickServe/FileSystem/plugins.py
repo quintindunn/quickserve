@@ -17,6 +17,7 @@ from QuickServe.Runtimes.runtime_manager import RuntimeManager
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.config import Config
+    from QuickServe.Scheduler.scheduler import Scheduler
 
 logger = logging.getLogger("QuickServe.plugins")
 
@@ -96,18 +97,23 @@ class PluginLoader:
         workspace: Workspace,
         runtime_manager: "RuntimeManager",
         config: "Config",
+        scheduler: "Scheduler",
         qs_version: str,
     ) -> None:
         """
         Initializes the plugin loader.
 
-        :param workspace: The workspace containing the modules directory.
+        :param workspace: The workspace containing the directory of modules.
         :param runtime_manager: The server runtime manager.
+        :param config: The QuickServe config.
+        :param scheduler: The QuickServe scheduler object.
+        :param qs_version: The QuickServe version.
         :return: None
         """
         self.workspace = workspace
         self.runtime_manager = runtime_manager
         self.config = config
+        self.scheduler = scheduler
         self.qs_version = qs_version
 
     def load_all(self) -> ModuleCatalog:
@@ -129,6 +135,7 @@ class PluginLoader:
                 workspace=self.workspace,
                 runtime_manager=self.runtime_manager,
                 config=self.config,
+                scheduler=self.scheduler,
                 qs_version=self.qs_version,
             )
             module.load_module()

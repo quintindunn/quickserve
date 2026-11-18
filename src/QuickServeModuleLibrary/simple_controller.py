@@ -43,6 +43,8 @@ class SimpleControllerProcessManager:
             logger.info("Killing process %d", process.pid)
             process.kill()
 
+        setattr(module, "QS_INTERNAL_SIMPLE_PROCESS_MANAGER", self)
+
         setattr(
             module,
             "QS_INTERNAL_SIMPLE_PROCESS_MANAGER_INSTANCE_DELETE",

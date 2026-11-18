@@ -55,6 +55,7 @@ class TestPluginLoader(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,
             config=None,
+            scheduler=None,
             qs_version="0.0.1",
         )
         catalog = plugin_loader.load_all()
@@ -69,6 +70,7 @@ class TestPluginLoader(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,
             config=None,
+            scheduler=None,
             qs_version="0.0.1",
         )
         catalog = plugin_loader.load_all()
@@ -87,5 +89,6 @@ class TestPluginLoader(unittest.TestCase):
                 workspace=self.workspace,
                 runtime_manager=None,
                 config=None,
+                scheduler=None,
                 qs_version="0.0.1",
             ).load_all()
