@@ -154,8 +154,6 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
                     "size": convert_size(os.stat(file_path).st_size, precision=1),
                     "isFile": os.path.isfile(file_path),
                     "isDir": os.path.isdir(file_path),
-                    "isEmptyDir": os.path.isdir(file_path)
-                    and not any(os.scandir(file_path)),
                     "canEdit": (
                         False
                         if os.path.isdir(file_path)
