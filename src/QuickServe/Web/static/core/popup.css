@@ -1,0 +1,80 @@
+.popup-container {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+}
+
+.popup-container[data-shown="true"] {
+    display: block;
+}
+
+.popup-darken {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.popup {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 25rem;
+    padding: 1.5rem;
+    background: #202029;
+    border: 1px solid #353541;
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+.popup .prompt {
+    color: var(--text-h);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 2;
+}
+
+.popup .buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+}
+
+.popup-button {
+    appearance: none;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 5.5rem;
+    height: 2.4rem;
+    padding: 0 1rem;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 550;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.popup-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.popup-button.cancel {
+    color: var(--text-h);
+    background: var(--min-text);
+}
+
+.popup-button.delete {
+    color: white;
+    background: rgba(255, 0, 0, 0.3);
+    border: 1px solid rgba(255, 0, 0, 0.45);
+}

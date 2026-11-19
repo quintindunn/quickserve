@@ -1,0 +1,54 @@
+<link rel="stylesheet"
+      href="{{ url_for('static', filename="core/popup.css") }}">
+<div class="popup-container" id="popup-container" data-shown="false">
+    <div class="popup-darken">
+        <div class="popup">
+            <div class="prompt">
+                <span id="popup-text"></span>
+            </div>
+            <div class="buttons" id="popup-buttons"></div>
+        </div>
+    </div>
+    <script>
+        const popup_text = document.getElementById("popup-text");
+        const popup_buttons = document.getElementById("popup-buttons");
+        const popup_container = document.getElementById("popup-container");
+
+        function button(text, r, g, b, border_a, background_a, callback) {
+            popup_container.dataset.shown = "true";
+            let button_elem = document.createElement("button");
+            button_elem.classList.add("btn-medium");
+            button_elem.classList.add("btn-fillet");
+            button_elem.style.border = `1px solid rgba(${r}, ${g}, ${b}, ${border_a})`;
+            button_elem.style.backgroundColor = `transparent`;
+            button_elem.style.color = `rgba(${r}, ${g}, ${b}, ${background_a})`;
+            button_elem.innerText = text;
+            button_elem.onclick = (e) => {
+                callback(e.target);
+                popup_container.dataset.shown = "false"
+            };
+            return button_elem
+        }
+
+        function minButton(text, callback) {
+            return button(text, 255, 255, 255, 0.45, .3, callback);
+        }
+
+        function submitButton(text, callback) {
+            return button(text, 59, 130, 246, 1, 1, callback);
+        }
+
+        function deleteButton(text, callback) {
+            return button(text, 255, 0, 0, 0.45, 0.3, callback);
+        }
+
+        function setPopup(prompt, buttons) {
+            popup_buttons.innerHTML = ``;
+            buttons.forEach((button) => {
+                popup_buttons.appendChild(button);
+            });
+
+            popup_text.innerText = prompt;
+        }
+    </script>
+</div>

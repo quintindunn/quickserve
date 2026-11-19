@@ -17,6 +17,7 @@ from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
 from QuickServe.Web.home import home
 from QuickServe.Web.modules import modules
 from QuickServe.Web.api import api
+from QuickServe.Web.settings import settings
 from QuickServe.Web.module_common.registry import Registry
 from QuickServe.Database.users import UserModel
 
@@ -57,8 +58,8 @@ def create_app(
     :param instance_manager: The application manager used by instance routes.
     :param websocket_server: The QuickServe websocket server
     :param search_engine: The TFIDF search engine
-    :return: The configured Flask application.
     :param token_manager: The QuickServe websocket token manager.
+    :return: The configured Flask application.
     """
 
     root_dir = Path(__file__).resolve().parent
@@ -93,6 +94,7 @@ def create_app(
     app.register_blueprint(home)
     app.register_blueprint(modules)
     app.register_blueprint(api)
+    app.register_blueprint(settings)
 
     app.extensions["quickserve.catalog"] = catalog
     app.extensions["quickserve.instance_manager"] = instance_manager
@@ -101,6 +103,7 @@ def create_app(
         websocket_server=websocket_server, config=config, token_manager=token_manager
     )
     app.extensions["quickserve.search"] = search_engine
+    app.extensions["quickserve.login_manager"] = login_manager
     app.extensions["quickserve.websocket_token_manager"] = token_manager
 
     @app.context_processor
