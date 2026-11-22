@@ -192,6 +192,7 @@ class TestModuleCommonFunctions(unittest.TestCase):
                     self.assertIsInstance(result, Markup)
                     self.assertEqual(str(result), "<div>rendered</div>")
 
+
 class TestSimpleFilesystemBuilder(unittest.TestCase):
     """
     Tests for the simple filesystem.

@@ -60,7 +60,7 @@ class TestBaseModule(unittest.TestCase):
             workspace=self.workspace,
             runtime_manager=None,  # noqa
             config=None,  # noqa
-            scheduler=None, # noqa
+            scheduler=None,  # noqa
             qs_version="0.0.1",
         )
 

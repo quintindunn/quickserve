@@ -1,0 +1,101 @@
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='core/popup.css') }}">
+<div class="popup-container" id="popup-container" data-shown="false">
+    <div class="popup-darken">
+        <div class="popup">
+            <div class="prompt">
+                <span id="popup-text"></span>
+            </div>
+            <div class="popup-inputs" id="popup-inputs"></div>
+            <div class="popup-error" id="popup-error"></div>
+            <div class="buttons" id="popup-buttons"></div>
+        </div>
+    </div>
+    <script>
+        const popup_text = document.getElementById("popup-text");
+        const popup_buttons = document.getElementById("popup-buttons");
+        const popup_inputs = document.getElementById("popup-inputs");
+        const popup_error = document.getElementById("popup-error");
+        const popup_container = document.getElementById("popup-container");
+
+        function button(text, r, g, b, border_a, background_a, callback) {
+            let button_elem = document.createElement("button");
+
+            button_elem.classList.add("btn-medium", "btn-fillet");
+            button_elem.style.border = `1px solid rgba(${r}, ${g}, ${b}, ${border_a})`;
+            button_elem.style.backgroundColor = "transparent";
+            button_elem.style.color = `rgba(${r}, ${g}, ${b}, ${background_a})`;
+            button_elem.innerText = text;
+
+            button_elem.onclick = (e) => {
+                if (callback(e.currentTarget) === false) {
+                    return;
+                }
+
+                popup_container.dataset.shown = "false";
+            };
+
+            return button_elem;
+        }
+
+        function minButton(text, callback) {
+            return button(text, 255, 255, 255, 0.45, .3, callback);
+        }
+
+        function submitButton(text, callback) {
+            return button(text, 59, 130, 246, 1, 1, callback);
+        }
+
+        function deleteButton(text, callback) {
+            return button(text, 255, 0, 0, 0.45, 0.3, callback);
+        }
+
+        function setPopup(prompt, buttons, inputs = []) {
+            popup_text.innerText = prompt;
+
+            popup_buttons.innerHTML = "";
+            popup_inputs.innerHTML = "";
+
+            popup_error.innerText = "";
+            popup_error.dataset.shown = "false";
+
+            inputs.forEach(input => {
+                const elem = document.createElement("input");
+
+                elem.type = input.type || "text";
+                elem.placeholder = input.placeholder || "";
+                elem.name = input.name;
+                elem.classList.add("popup-input");
+
+                if (input.required) {
+                    elem.required = true;
+                }
+
+                if (input.value !== undefined) {
+                    elem.value = input.value;
+                }
+
+                popup_inputs.appendChild(elem);
+            });
+
+            popup_container.getInputs = () => {
+                return Object.fromEntries(
+                    [...popup_inputs.querySelectorAll("input")].map(
+                        input => [input.name, input.value]
+                    )
+                );
+            };
+
+            popup_container.setError = (message) => {
+                popup_error.innerText = message || "";
+                popup_error.dataset.shown = message ? "true" : "false";
+            };
+
+            buttons.forEach(btn => {
+                popup_buttons.appendChild(btn);
+            });
+
+            popup_container.dataset.shown = "true";
+        }
+    </script>
+</div>

@@ -4,7 +4,6 @@ from typing import Any
 
 from markupsafe import Markup, escape
 
-
 logger = logging.getLogger(__name__)
 
 _ATTRIBUTE_NAME_PATTERN = re.compile(r"^[a-zA-Z_:][a-zA-Z0-9_.:-]*$")
