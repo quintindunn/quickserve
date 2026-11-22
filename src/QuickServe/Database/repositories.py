@@ -11,7 +11,6 @@ from uuid import UUID
 from QuickServe.contracts import InstanceRecord
 from QuickServe.Database.instances import InstanceModel
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -11,7 +11,6 @@ from QuickServe.FileSystem.path_resolver import Workspace
 from QuickServe.Database.database import connect as db_connect
 from QuickServe.Database.database import initialize as db_initialize
 
-
 workspace = Workspace()
 config = Config(workspace=workspace)
 

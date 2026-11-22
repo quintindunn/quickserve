@@ -20,9 +20,7 @@ def run(database):
             )
         )
 
-        database.execute_sql(
-            """
+        database.execute_sql("""
             UPDATE instancemodel
             SET original_instance_name = instance_name
-            """
-        )
+            """)

@@ -38,7 +38,7 @@ login_manager.login_view = "home.login"
 def load_user(user_id: str):
     try:
         return UserModel.get_or_none(UserModel.id == int(user_id))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 

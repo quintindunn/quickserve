@@ -12,7 +12,6 @@ from QuickServeModuleLibrary.forms.util import (
     _generate_label,
 )
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from QuickServe.FileSystem.config import Config
     from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
 
+
 def simple_controller_builder(
     module_name: str,
     websocket_server: "WebsocketServer",
