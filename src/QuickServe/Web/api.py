@@ -5,8 +5,9 @@ Author: Quintin Dunn
 Date: 10/06/2026
 """
 
-from flask import Blueprint, request, current_app, render_template
+from flask import Blueprint, request, current_app, render_template, jsonify
 from flask.typing import ResponseReturnValue
+from flask_login import current_user
 
 from QuickServe.Application.instances import InstanceManager
 from QuickServe.Common.search import Search
@@ -39,3 +40,11 @@ def search() -> ResponseReturnValue:
     return render_template(
         "core/search.html", context={"modules": modules, "instances": instances}
     )
+
+@api.route("/websocket-token")
+def get_websocket_token() -> ResponseReturnValue:
+    token_manager = current_app.extensions["quickserve.websocket_token_manager"]
+    token = token_manager.generate_token(user=current_user)
+    return jsonify({
+        "token": token
+    })
