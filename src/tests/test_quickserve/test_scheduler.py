@@ -14,7 +14,6 @@ from unittest.mock import patch
 from QuickServe.Scheduler import scheduler as scheduler_module
 from QuickServe.Scheduler.scheduler import Scheduler
 
-
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 

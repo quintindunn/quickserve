@@ -5,14 +5,12 @@ from pathlib import Path
 def run_migrations(database):
     migrations_directory = Path(__file__).parent
 
-    database.execute_sql(
-        """
+    database.execute_sql("""
         CREATE TABLE IF NOT EXISTS schema_migrations (
             name TEXT PRIMARY KEY,
             applied_on DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    """
-    )
+    """)
 
     applied = {
         row[0]

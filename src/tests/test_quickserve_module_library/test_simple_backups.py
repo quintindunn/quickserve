@@ -143,7 +143,9 @@ class TestSimpleBackup(unittest.TestCase):
             )
             self.assertEqual(archive.read("server/world/level.dat"), b"world data")
 
-        self.assertEqual(backup.backup_dir_sizes[self.instance.uuid], archives[0].stat().st_size)
+        self.assertEqual(
+            backup.backup_dir_sizes[self.instance.uuid], archives[0].stat().st_size
+        )
         self.assertFalse(self.workspace.temp_path.exists())
 
     def test_backup_calls_pre_and_post_callbacks(self):
@@ -195,4 +197,3 @@ class TestSimpleBackup(unittest.TestCase):
             backup.backup_dir_sizes[self.instance.uuid],
             sum(archive.stat().st_size for archive in archives),
         )
-

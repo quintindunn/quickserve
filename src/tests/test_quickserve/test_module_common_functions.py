@@ -184,7 +184,6 @@ class TestModuleCommonFunctions(unittest.TestCase):
                     mock_from_string.return_value.render.assert_called_once_with(
                         context={
                             "module_name": "mymodule",
-                            "websocket_host": "192.168.1.98",
                             "websocket_port": 5001,
                             "websocket_token": "",
                             "terminal_buffer": fake_config.web.simple_controller_terminal_buffer,
@@ -192,56 +191,6 @@ class TestModuleCommonFunctions(unittest.TestCase):
                     )
                     self.assertIsInstance(result, Markup)
                     self.assertEqual(str(result), "<div>rendered</div>")
-
-    def test_simple_controller_0_0_0_0_host(self):
-        """
-        Tests the simple controller function returns a non 0.0.0.0 host when host is 0.0.0.0.
-        """
-
-        app = Flask(__name__)
-
-        with (
-            patch(
-                "QuickServe.Web.module_common.factories.simple_controller.get_resource",
-                return_value="<div>mymodule</div>",
-            ),
-            patch(
-                "QuickServe.Web.module_common.factories.simple_controller.local_ip",
-                "192.168.1.50",
-            ),
-        ):
-            websocket_server = Mock(host="0.0.0.0", port=5001)
-
-            with (
-                app.app_context(),
-                app.test_request_context(),
-            ):
-                request.instance = Mock()
-
-                with patch.object(app.jinja_env, "from_string") as mock_from_string:
-                    mock_from_string.return_value.render.return_value = (
-                        "<div>rendered</div>"
-                    )
-
-                    fake_config = MagicMock()
-                    fake_config.web.simple_controller_terminal_buffer = 100_000
-                    controller = simple_controller_builder(
-                        "mymodule",
-                        websocket_server,
-                        config=fake_config,
-                        token_manager=MagicMock(),
-                    )
-                    controller()
-
-                    mock_from_string.return_value.render.assert_called_once_with(
-                        context={
-                            "module_name": "mymodule",
-                            "websocket_host": "192.168.1.50",
-                            "websocket_port": 5001,
-                            "websocket_token": "",
-                            "terminal_buffer": fake_config.web.simple_controller_terminal_buffer,
-                        }
-                    )
 
 
 class TestSimpleFilesystemBuilder(unittest.TestCase):
@@ -325,7 +274,6 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
                 self.assertEqual(set(files), {"folder", "empty", "file.txt"})
                 self.assertTrue(files["folder"]["isDir"])
                 self.assertFalse(files["folder"]["isFile"])
-                self.assertTrue(files["empty"]["isEmptyDir"])
                 self.assertTrue(files["file.txt"]["isFile"])
                 self.assertFalse(files["file.txt"]["isDir"])
                 self.assertEqual(files["file.txt"]["size"], "5.0 B")

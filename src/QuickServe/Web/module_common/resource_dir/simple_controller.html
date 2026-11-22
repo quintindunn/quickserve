@@ -229,16 +229,13 @@
         </div>
     </div>
     <input type="hidden"
-           id="websocket-host"
-           value="{{ context.websocket_host }}">
-    <input type="hidden"
            id="websocket-port"
            value="{{ context.websocket_port }}">
     <input type="hidden"
            id="terminal-buffer"
            value="{{ context.terminal_buffer }}">
     <script defer>
-        const ws_host = document.getElementById("websocket-host").value;
+        const ws_host = window.location.hostname;
         const ws_port = document.getElementById("websocket-port").value;
         const terminal_buffer = +document.getElementById("terminal-buffer").value;
         const process_status = document.getElementById("process-status");
@@ -250,8 +247,6 @@
         const ws_url = `ws://${ws_host}:${ws_port}/instance/${instance_uuid}`;
 
         const MAX_TERMINAL_CHARS = terminal_buffer;
-
-        console.log(MAX_TERMINAL_CHARS, typeof MAX_TERMINAL_CHARS)
 
         let terminalBuffer = [];
         let terminalLength = 0;
@@ -336,69 +331,6 @@
             writeTerminal(text + "\n");
         }
 
-        const ws = new WebSocket(ws_url);
-
-        ws.onopen = () => {
-            ws.send({{ context.websocket_token | tojson }});
-            ws.send(JSON.stringify({
-                isSimpleController: true,
-                type: "history",
-            }));
-
-            command.addEventListener("keydown", (event) => {
-                if (event.key !== "Enter") return;
-                if (ws.readyState !== WebSocket.OPEN) return;
-
-                const raw = command.value + "\n";
-
-                const packet = {
-                    isSimpleController: true,
-                    type: "command",
-                    raw,
-                };
-
-                writeTerminal(raw);
-                command.value = "";
-
-                ws.send(JSON.stringify(packet));
-            });
-
-            setInterval(() => {
-                const packet = {
-                    isSimpleController: true,
-                    type: "queryAlive"
-                };
-                ws.send(JSON.stringify(packet))
-            }, 500);
-
-            start.addEventListener("click", () => {
-                if (ws.readyState !== WebSocket.OPEN) return;
-
-                ws.send(JSON.stringify({
-                    isSimpleController: true,
-                    type: "start",
-                }));
-            });
-
-            stop.addEventListener("click", () => {
-                if (ws.readyState !== WebSocket.OPEN) return;
-
-                ws.send(JSON.stringify({
-                    isSimpleController: true,
-                    type: "stop",
-                }));
-            });
-
-            kill.addEventListener("click", () => {
-                if (ws.readyState !== WebSocket.OPEN) return;
-
-                ws.send(JSON.stringify({
-                    isSimpleController: true,
-                    type: "kill",
-                }));
-            });
-        };
-
         function setStatus(value) {
             process_status.dataset["processStatus"] = value;
 
@@ -417,28 +349,144 @@
             }
         }
 
-        const decoder = new TextDecoder();
+        function getWSToken() {
+            const url = {{ url_for('api.get_websocket_token') | tojson }};
 
-        ws.onmessage = async (event) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", url, false);
+            xhr.send();
 
-            if (typeof event.data === "string") {
-                writeTerminal(parsed.value);
-                return;
+            if (xhr.status !== 200) {
+                throw new Error(`Failed to fetch WebSocket token: ${xhr.status}`);
             }
 
-            const buffer = await event.data.arrayBuffer();
-            const decoded = decoder.decode(buffer);
-            const parsed = JSON.parse(decoded);
-            if (parsed.type === "process-status") {
-                setStatus(parsed.value);
-            } else {
-                writeTerminal(parsed.value);
-            }
+            return JSON.parse(xhr.responseText).token;
+        }
 
-        };
+        let ws = null;
+        let aliveInterval = null;
+        let reconnectTimeout = null;
 
-        ws.onerror = (event) => {
-            console.error("WebSocket error:", event);
-        };
+        function connectWS() {
+            if (ws && (
+                    ws.readyState === WebSocket.CONNECTING ||
+                    ws.readyState === WebSocket.OPEN
+                )) return;
+
+            const socket = new WebSocket(ws_url);
+            ws = socket;
+
+            socket.onopen = () => {
+                console.log("Websocket connected!");
+
+                try {
+                    socket.send(getWSToken());
+
+                    socket.send(JSON.stringify({
+                        isSimpleController: true,
+                        type: "history",
+                    }));
+                } catch (error) {
+                    console.error("Websocket initialization failed:", error);
+                    socket.close();
+                    return;
+                }
+
+                aliveInterval = setInterval(() => {
+                    if (socket.readyState !== WebSocket.OPEN) return;
+
+                    socket.send(JSON.stringify({
+                        isSimpleController: true,
+                        type: "queryAlive"
+                    }));
+                }, 500);
+            };
+
+            socket.onclose = (event) => {
+                console.log(
+                    "Websocket closed!",
+                    event.code,
+                    event.reason
+                );
+
+                clearInterval(aliveInterval);
+                aliveInterval = null;
+
+                if (reconnectTimeout !== null) return;
+
+                reconnectTimeout = setTimeout(() => {
+                    reconnectTimeout = null;
+                    console.log("Attempting websocket reconnect...");
+                    connectWS();
+                }, 1000);
+            };
+
+            socket.onerror = (error) => {
+                console.error("Websocket error:", error);
+            };
+
+            const decoder = new TextDecoder();
+
+            socket.onmessage = async (event) => {
+                if (typeof event.data === "string") {
+                    writeTerminal(event.data);
+                    return;
+                }
+
+                const buffer = await event.data.arrayBuffer();
+                const decoded = decoder.decode(buffer);
+                const parsed = JSON.parse(decoded);
+
+                if (parsed.type === "process-status") {
+                    setStatus(parsed.value);
+                } else {
+                    writeTerminal(parsed.value);
+                }
+            };
+        }
+
+        function sendPacket(packet) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+            ws.send(JSON.stringify(packet));
+        }
+
+        command.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter") return;
+
+            const raw = command.value + "\n";
+
+            writeTerminal(raw);
+            command.value = "";
+
+            sendPacket({
+                isSimpleController: true,
+                type: "command",
+                raw,
+            });
+        });
+
+        start.addEventListener("click", () => {
+            sendPacket({
+                isSimpleController: true,
+                type: "start",
+            });
+        });
+
+        stop.addEventListener("click", () => {
+            sendPacket({
+                isSimpleController: true,
+                type: "stop",
+            });
+        });
+
+        kill.addEventListener("click", () => {
+            sendPacket({
+                isSimpleController: true,
+                type: "kill",
+            });
+        });
+
+        connectWS();
     </script>
 </div>

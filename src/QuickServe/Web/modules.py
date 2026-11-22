@@ -361,11 +361,7 @@ def instance_delete_path(uuid: str):
         return {"error": "Path doesn't exist!"}, 400
 
     if file.is_dir():
-        if os.listdir(file):
-            logger.warning(f"Delete folder failed: uuid={uuid} path={file} not empty")
-            return {"error": "Folder is not empty!"}, 400
-
-        os.rmdir(file)
+        shutil.rmtree(file)
     else:
         os.remove(file)
 

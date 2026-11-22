@@ -192,7 +192,9 @@ class SimpleBackup:
         :return: None
         """
         instance_working_dir = instance.working_directory().resolve()
-        backups_dir = (instance.working_directory() / self._options.backup_dir).resolve()
+        backups_dir = (
+            instance.working_directory() / self._options.backup_dir
+        ).resolve()
 
         if not backups_dir.is_relative_to(instance_working_dir):
             logger.error(
@@ -297,7 +299,9 @@ class SimpleBackup:
         """
 
         instance_working_dir = instance.working_directory()
-        instance_backup_dir = (instance_working_dir / self._options.backup_dir).resolve()
+        instance_backup_dir = (
+            instance_working_dir / self._options.backup_dir
+        ).resolve()
         if not instance_backup_dir.is_relative_to(instance_working_dir.resolve()):
             logger.error(
                 "Backup directory cannot be outside of instance working directory, aborting submission!"

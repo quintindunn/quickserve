@@ -1,0 +1,116 @@
+
+.user-management {
+    min-height: 100%;
+    padding: 2rem;
+}
+
+.user-management > .hero {
+    color: var(--text-h);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.user-management > .hero h1 {
+    font-size: 2.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+div.user-table {
+    background-color: var(--accent-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    margin: 0 auto;
+    padding: 0.5rem;
+    width: min(100%, 45rem);
+    overflow-x: auto;
+}
+
+div.user-table > table.user-table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+}
+
+table.user-table thead {
+    color: var(--text-h);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+table.user-table th,
+table.user-table td {
+    padding: 1rem 1.25rem;
+}
+
+table.user-table thead tr {
+    border-bottom: 1px solid var(--min-text);
+}
+
+table.user-table tbody tr {
+    color: var(--text);
+    transition: background-color 150ms ease;
+}
+
+table.user-table tbody tr:not(:last-child) {
+    border-bottom: 1px solid var(--min-text);
+}
+
+table.user-table tbody tr:hover {
+    background-color: var(--background);
+}
+
+table.user-table td:first-child {
+    font-weight: 500;
+}
+
+table.user-table td:last-child {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+table.user-table button {
+    background-color: var(--background);
+    color: var(--text);
+    border: 1px solid var(--min-text);
+    border-radius: 0.4rem;
+    padding: 0.45rem 0.75rem;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition:
+        background-color 150ms ease,
+        border-color 150ms ease,
+        color 150ms ease;
+}
+
+table.user-table button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+table.user-table button:last-child:hover {
+    border: 1px solid rgba(255, 0, 0, 0.45);
+    color: rgba(255, 0, 0, 0.3);
+}
+
+@media (max-width: 550px) {
+    .user-management {
+        padding: 1rem 0.5rem;
+    }
+
+    .user-management > .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    table.user-table th,
+    table.user-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    table.user-table button {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
