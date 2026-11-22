@@ -194,10 +194,10 @@ body {
 }
 
 .settings-admin > svg {
-    width: 1.9rem;
-    height: 1.9rem;
+    width: 1.8rem;
+    height: 1.8rem;
     top: 0.05rem;
-    padding: 0.05rem;
+    padding: 0.1rem;
     background-color: var(--accent-10-opacity);
     border: var(--accent-border);
     border-radius: 50%;
