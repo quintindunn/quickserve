@@ -14,7 +14,7 @@ import asyncio
 from QuickServe.Common.search import Search
 from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
 
-QS_VERSION = "0.0.2"
+QS_VERSION = "0.1.0"
 
 
 def start_websocket(ws_server):
