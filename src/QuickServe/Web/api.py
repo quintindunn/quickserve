@@ -11,6 +11,7 @@ from flask_login import current_user
 
 from QuickServe.Application.instances import InstanceManager
 from QuickServe.Common.search import Search
+from QuickServe.Database.users import UserModel
 from QuickServe.FileSystem.plugins import ModuleCatalog
 
 api = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -48,3 +49,15 @@ def get_websocket_token() -> ResponseReturnValue:
     return jsonify({
         "token": token
     })
+
+@api.route("/delete-user", methods=["POST"])
+def delete_user() -> ResponseReturnValue:
+    target = request.json.get("target", None)
+    row: UserModel = UserModel.select().where(UserModel.username == target).first()
+    if target is None or row is None:
+        return jsonify({
+            "error": "bad request"
+        }), 400
+
+    UserModel.delete_by_id(row.id)
+    return "", 200

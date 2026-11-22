@@ -23,9 +23,13 @@
                         <tr>
                             <td>{{ user.username }}</td>
                             <td>
-                                <button onclick='setPopup("Change Password", [minButton("Cancel", () => {}), submitButton("Change", () => {})])'
+                                <button onclick='setPopup("Change Password", [minButton("Cancel", () => {}), submitButton("Change", () => {
+                                    onChangePassword(this, {{ user.username | tojson }})
+                                })])'
                                         class="change-password">Change Password</button>
-                                <button onclick='setPopup("Delete User", [minButton("Cancel", () => {}), deleteButton("Delete", () => {})])'
+                                <button onclick='setPopup("Delete User (This cannot be undone!)", [minButton("Cancel", () => {}), deleteButton("Delete", () => {
+                                    onDeleteUser(this, {{ user.username | tojson }})
+                                })])'
                                         class="delete-user">Delete</button>
                             </td>
                         </tr>
@@ -40,7 +44,18 @@
         }
 
         function onDeleteUser(btn, username) {
-            console.log(username);
+            const url = {{ url_for("api.delete_user") | tojson }};
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    target: username
+                })
+            }).then(() => {
+                window.location.reload();
+            });
         }
     </script>
 {% endblock content %}
