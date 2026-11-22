@@ -58,6 +58,7 @@ def create_app(
     :param websocket_server: The QuickServe websocket server
     :param search_engine: The TFIDF search engine
     :return: The configured Flask application.
+    :param token_manager: The QuickServe websocket token manager.
     """
 
     root_dir = Path(__file__).resolve().parent
@@ -100,6 +101,7 @@ def create_app(
         websocket_server=websocket_server, config=config, token_manager=token_manager
     )
     app.extensions["quickserve.search"] = search_engine
+    app.extensions["quickserve.websocket_token_manager"] = token_manager
 
     @app.context_processor
     def global_context():

@@ -1,4 +1,3 @@
-import socket
 from typing import Callable, TYPE_CHECKING
 
 from flask_login import current_user
@@ -12,11 +11,6 @@ if TYPE_CHECKING:
     from QuickServe.Driver.networking.websocket import WebsocketServer
     from QuickServe.FileSystem.config import Config
     from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
-
-with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-    s.connect(("8.8.8.8", 80))
-    local_ip = s.getsockname()[0]
-
 
 def simple_controller_builder(
     module_name: str,
@@ -32,7 +26,6 @@ def simple_controller_builder(
 
         template = current_app.jinja_env.from_string(resource)
 
-        websocket_host = websocket_server.host
         token = ""
         if hasattr(current_app, "login_manager"):
             user_id = current_user.get_id()
@@ -40,11 +33,8 @@ def simple_controller_builder(
 
             token = token_manager.generate_token(user=user)
 
-        if websocket_host == "0.0.0.0":
-            websocket_host = local_ip
         context = {
             "module_name": module_name,
-            "websocket_host": websocket_host,
             "websocket_port": websocket_server.port,
             "websocket_token": token,
             "terminal_buffer": config.web.simple_controller_terminal_buffer,

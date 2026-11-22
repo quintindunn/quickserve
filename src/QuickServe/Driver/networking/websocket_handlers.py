@@ -73,7 +73,10 @@ async def instance_handler(
 
         if not hasattr(module, "on_message"):
             break
-        module.on_message(message, instance)  # noqa
+        try:
+            module.on_message(message, instance)  # noqa
+        except Exception as e:
+            logger.error(e)
         logger.debug(
             f"New message from {connection.remote_address} - {message[:32]}{'...' if len(message) > 32 else ''}"
         )
