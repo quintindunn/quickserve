@@ -23,9 +23,7 @@
                         <tr>
                             <td>{{ user.username }}</td>
                             <td>
-                                <button onclick='setPopup("Change Password", [minButton("Cancel", () => {}), submitButton("Change", () => {
-                                    onChangePassword(this, {{ user.username | tojson }})
-                                })])'
+                                <button onclick='onChangePassword(this, {{ user.username | tojson }})'
                                         class="change-password">Change Password</button>
                                 <button onclick='setPopup("Delete User (This cannot be undone!)", [minButton("Cancel", () => {}), deleteButton("Delete", () => {
                                     onDeleteUser(this, {{ user.username | tojson }})
@@ -40,7 +38,69 @@
     </div>
     <script>
         function onChangePassword(btn, username) {
-            console.log(username);
+            setPopup("Change Password", [
+                minButton("Cancel", () => {}),
+                submitButton("Change", () => {
+                    const inputs = popup_container.getInputs();
+
+                    if (!inputs.password || !inputs.confirm_password) {
+                        popup_container.setError("Please fill in all fields.");
+                        return false;
+                    }
+
+                    if (inputs.password.length < 8 || inputs.password.length > 32) {
+                        popup_container.setError("Password must be between 8 and 32 characters.");
+                        return false;
+                    }
+
+                    if (inputs.password !== inputs.confirm_password) {
+                        popup_container.setError("Passwords do not match.");
+                        return false;
+                    }
+
+                    popup_container.setError("");
+
+                    fetch({{ url_for("api.change_password") | tojson }}, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                target: username,
+                                password1: inputs.password,
+                                password2: inputs.confirm_password
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                popup_container.setError(
+                                    data.message || "Failed to change password."
+                                );
+                                return;
+                            }
+
+                            popup_container.dataset.shown = "false";
+                            location.reload();
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            popup_container.setError("An error occurred while changing the password.");
+                        });
+
+                    return false;
+                })
+            ], [{
+                name: "password",
+                type: "password",
+                placeholder: "New password",
+                required: true
+            }, {
+                name: "confirm_password",
+                type: "password",
+                placeholder: "Confirm new password",
+                required: true
+            }]);
         }
 
         function onDeleteUser(btn, username) {
