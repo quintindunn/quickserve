@@ -4,7 +4,7 @@ Configuration management for FileSystem.
 Author: Quintin Dunn
 Date: 09/09/2026
 """
-
+import secrets
 from pathlib import Path
 from tomllib import loads
 from typing import Any, IO, get_args, get_type_hints
@@ -292,6 +292,9 @@ class Config:
             )
 
             instance = model()
+            if name == "web":
+                instance: WebModel
+                instance.secret_key = secrets.token_urlsafe(64)
             data[name] = instance.model_dump(mode="python")
 
         data = self._toml_safe(data)
