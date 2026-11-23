@@ -1,5 +1,12 @@
-from QuickServeModuleLibrary.forms.datatypes import String, Number
+from QuickServeModuleLibrary.forms.datatypes import String, Number, SubmitButton
 from QuickServeModuleLibrary.forms.forms import QSForm
+
+
+class BackupForm(QSForm):
+    def __init__(self, action_name: str, instance_uuid: str):
+        super().__init__(action_name, instance_uuid)
+
+    backupNow = SubmitButton(inner_text="Backup Now")
 
 
 class ServerConfiguration(QSForm):

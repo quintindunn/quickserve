@@ -1,0 +1,11 @@
+{% extends "core/module.html" %}
+{% block modulebody %}
+    <div class="backup-controls">
+        <form class="qs-form" action="{{ action("backup-instance") }}" method="POST">
+            <label>Backup Now<button type="submit" id="backupNow" name="backupNow">Backup Now</button></label>
+            <label><input type="hidden" id="instance-uuid" name="instance-uuid" value="{{ context.instance_uuid }}"></label>
+        </form>
+    </div>
+    <div>{{ simple_filesystem(root=context.param_backup_dir) }}</div>
+
+{% endblock %}

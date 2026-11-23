@@ -34,7 +34,7 @@ from .forms import (
     WhitelistPlayer,
     WhitelistRemove,
     KickPlayer,
-    ServerConfiguration,
+    ServerConfiguration, BackupForm,
 )
 
 if TYPE_CHECKING:
@@ -50,7 +50,7 @@ logger = logging.getLogger("minecraft-vanilla")
 
 class Module:
     NAME: str = "Minecraft-Vanilla"
-    VERSION: str = "0.0.3"
+    VERSION: str = "0.0.4"
     QUICKSERVE_VERSION: str = "0.1.0"
     AUTHORS: list[dict] = [
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
@@ -97,12 +97,16 @@ class Module:
         )
 
     def pre_backup(self, instance: "BaseInstance"):
-        self.execute_command(
-            instance=instance, args=["say", "Backing", "up", "server..."]
-        )
+        proc = self.simple_controller_process_manager.get_process(instance)
+        if proc and proc.is_alive():
+            self.execute_command(
+                instance=instance, args=["say", "Backing", "up", "server..."]
+            )
 
     def post_backup(self, instance: "BaseInstance", file_path: Path):
-        self.execute_command(instance=instance, args=["say", "Backup", "complete!"])
+        proc = self.simple_controller_process_manager.get_process(instance)
+        if proc and proc.is_alive():
+            self.execute_command(instance=instance, args=["say", "Backup", "complete!"])
 
     @staticmethod
     def get_configuration(instance: "BaseInstance"):
@@ -528,3 +532,29 @@ class Module:
             json.dump(configuration, f)
 
         return "start", 302, instance
+
+    @page(instance_specific=True, page_name="Backups")
+    def backups(self, instance: "BaseInstance", *args, **kwargs):
+        backups_path_relative = self.backup.backup_dir()
+        backups_path_absolute = instance.working_directory() / backups_path_relative
+        backups_path_absolute.mkdir(exist_ok=True)
+
+        backup_form = BackupForm("backup-instance", instance_uuid=str(instance.uuid))
+
+        context = {
+            "backup_dir": str(backups_path_relative),
+            "backup_form": backup_form.compile(with_submit=False)
+        }
+        asset = self.module.get_resource_path("backups.html")
+
+        with open(asset, "r") as f:
+            return f.read(), context
+
+
+    @action(action_name="backup-instance")
+    def backup_instance(self, instances: "InstanceManager", *args, **kwargs):
+        form = BackupForm.response_from_request(kwargs)
+        instance = instances.from_uuid(form.instance_uuid.response)
+        self.backup.single_submit_instance(instance=instance, ignore_is_alive=True)
+
+        return "Backups", 302, instance
