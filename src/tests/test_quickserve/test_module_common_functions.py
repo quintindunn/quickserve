@@ -221,7 +221,9 @@ class TestSimpleFilesystemBuilder(unittest.TestCase):
                 "<div>file</div>",
             ],
         ) as mock_get_resource:
-            filesystem = simple_filesystem_builder("mymodule")
+            registry_mock = MagicMock()
+            registry_mock.registered_controller_roots_salt = b'\x972\xba\x04zp\xdc\x18\xb5V!\xceYu\x91\x0e\x1ag\x85\xee\x884\x89j'
+            filesystem = simple_filesystem_builder(registry_mock, "mymodule")
 
         mock_get_resource.assert_any_call(
             "simple_filesystem_folder_viewer.html", mode="r"
