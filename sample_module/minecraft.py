@@ -34,7 +34,8 @@ from .forms import (
     WhitelistPlayer,
     WhitelistRemove,
     KickPlayer,
-    ServerConfiguration, BackupForm,
+    ServerConfiguration,
+    BackupForm,
 )
 
 if TYPE_CHECKING:
@@ -542,13 +543,12 @@ class Module:
 
         context = {
             "backup_dir": str(backups_path_relative),
-            "backup_form": backup_form.compile(with_submit=False)
+            "backup_form": backup_form.compile(with_submit=False),
         }
         asset = self.module.get_resource_path("backups.html")
 
         with open(asset, "r") as f:
             return f.read(), context
-
 
     @action(action_name="backup-instance")
     def backup_instance(self, instances: "InstanceManager", *args, **kwargs):

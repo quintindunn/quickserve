@@ -504,10 +504,7 @@ def instance_create_folder(uuid: str):
 
     instance = _get_instance(uuid)
     folder_path = _get_path(
-        instance,
-        f"{cwd.lstrip('/')}/{folder_name}",
-        must_exist=False,
-        fs_root=root
+        instance, f"{cwd.lstrip('/')}/{folder_name}", must_exist=False, fs_root=root
     )
 
     if folder_path is None:
@@ -547,7 +544,10 @@ def instance_upload_file(uuid: str):
 
     assert file and file.filename
     path = _get_path(
-        instance, str(path / secure_filename(file.filename)), must_exist=False, fs_root=root
+        instance,
+        str(path / secure_filename(file.filename)),
+        must_exist=False,
+        fs_root=root,
     )
 
     if path is None:

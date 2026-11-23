@@ -188,11 +188,12 @@ class SimpleBackup:
         if self._post_backup_fn:
             self._post_backup_fn(instance, final_zip_location)
 
-    def single_submit_instance(self, instance: "BaseInstance", ignore_is_alive: bool = True):
+    def single_submit_instance(
+        self, instance: "BaseInstance", ignore_is_alive: bool = True
+    ):
         if instance.uuid not in self.backup_dir_sizes:
             self.load_saved_backups(instance=instance)
         self.backup_instance(instance=instance, ignore_is_alive=ignore_is_alive)
-
 
     def remove_old_backups(self, instance: "BaseInstance"):
         """

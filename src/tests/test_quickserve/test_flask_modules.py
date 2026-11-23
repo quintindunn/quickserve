@@ -184,7 +184,11 @@ class TestModuleBlueprint(TestCase):
 
         response = self.client.post(
             self.url + "savefile/",
-            json={"filepath": "test.txt", "content": content, "hashed_root": "hashed_root"},
+            json={
+                "filepath": "test.txt",
+                "content": content,
+                "hashed_root": "hashed_root",
+            },
         )
 
         self.assertEqual(response.status_code, 200)
@@ -214,7 +218,11 @@ class TestModuleBlueprint(TestCase):
 
         response = self.client.post(
             self.url + "savefile/",
-            json={"filepath": "../outside.txt", "content": content, "hashed_root": "hashed_root"},
+            json={
+                "filepath": "../outside.txt",
+                "content": content,
+                "hashed_root": "hashed_root",
+            },
         )
 
         self.assertEqual(response.status_code, 400)
@@ -274,7 +282,11 @@ class TestModuleBlueprint(TestCase):
 
         response = self.client.post(
             self.url + "deletepath/",
-            json={"filepath": "test", "hashed_root": "hashed_root", "hashed_root": "hashed_root"},
+            json={
+                "filepath": "test",
+                "hashed_root": "hashed_root",
+                "hashed_root": "hashed_root",
+            },
         )
 
         self.assertEqual(response.status_code, 200)
@@ -304,7 +316,12 @@ class TestModuleBlueprint(TestCase):
 
         response = self.client.post(
             self.url + "renamefile/",
-            json={"cwd": "/", "src": "old.txt", "dst": "new.txt", "hashed_root": "hashed_root"},
+            json={
+                "cwd": "/",
+                "src": "old.txt",
+                "dst": "new.txt",
+                "hashed_root": "hashed_root",
+            },
         )
 
         self.assertEqual(response.status_code, 200)
@@ -323,7 +340,12 @@ class TestModuleBlueprint(TestCase):
 
         response = self.client.post(
             self.url + "renamefile/",
-            json={"cwd": "/", "src": "old.txt", "dst": "new.txt", "hashed_root": "hashed_root"},
+            json={
+                "cwd": "/",
+                "src": "old.txt",
+                "dst": "new.txt",
+                "hashed_root": "hashed_root",
+            },
         )
 
         self.assertEqual(response.status_code, 400)
@@ -338,7 +360,12 @@ class TestModuleBlueprint(TestCase):
 
         response = self.client.post(
             self.url + "renamefile/",
-            json={"cwd": "/", "src": "old.txt", "dst": "../new.txt", "hashed_root": "hashed_root"},
+            json={
+                "cwd": "/",
+                "src": "old.txt",
+                "dst": "../new.txt",
+                "hashed_root": "hashed_root",
+            },
         )
 
         self.assertEqual(response.status_code, 400)
@@ -350,7 +377,12 @@ class TestModuleBlueprint(TestCase):
 
         response = self.client.post(
             self.url + "renamefile/",
-            json={"cwd": "/", "src": "missing.txt", "dst": "new.txt", "hashed_root": "hashed_root"},
+            json={
+                "cwd": "/",
+                "src": "missing.txt",
+                "dst": "new.txt",
+                "hashed_root": "hashed_root",
+            },
         )
 
         self.assertEqual(response.status_code, 400)

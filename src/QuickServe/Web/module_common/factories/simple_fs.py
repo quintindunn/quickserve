@@ -13,6 +13,7 @@ from flask import current_app, request
 from QuickServe.Common.file_signatures import SIGNATURES
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from QuickServe.Web import Registry
 
@@ -111,6 +112,7 @@ def _redirect(url: str) -> Markup:
         </script>
     """)
 
+
 def sort_name(file_path: Path):
     return file_path.name.lower()
 
@@ -167,7 +169,9 @@ sorting_methods = {
 }
 
 
-def simple_filesystem_builder(registry: "Registry", module_name: str) -> Callable[[], str]:
+def simple_filesystem_builder(
+    registry: "Registry", module_name: str
+) -> Callable[[], str]:
     resource_folder: str = str(
         get_resource("simple_filesystem_folder_viewer.html", mode="r")
     )
@@ -179,11 +183,11 @@ def simple_filesystem_builder(registry: "Registry", module_name: str) -> Callabl
         return dt.strftime("%m/%d/%Y %I:%M:%S%p")
 
     def render_folder(
-            root: str,
-            instance: "BaseInstance",
-            hashed_root: str,
-            sort_function: Callable[[Path], bool | int | str],
-            reverse_sorting: bool
+        root: str,
+        instance: "BaseInstance",
+        hashed_root: str,
+        sort_function: Callable[[Path], bool | int | str],
+        reverse_sorting: bool,
     ):
         directory = request.args.get("directory") or ""
         working_dir = instance.working_directory() / root.lstrip("/") / directory
@@ -239,7 +243,7 @@ def simple_filesystem_builder(registry: "Registry", module_name: str) -> Callabl
             "parent_folder": Path(directory).parent,
             "root_directory": root_dir if root_dir != "./." else "./",
             "instance": instance,
-            "hashed_root": hashed_root
+            "hashed_root": hashed_root,
         }
 
         template = current_app.jinja_env.from_string(resource_folder)
@@ -299,9 +303,7 @@ def simple_filesystem_builder(registry: "Registry", module_name: str) -> Callabl
         """
 
         hashed_root = hmac.new(
-            registry.registered_controller_roots_salt,
-            root.encode(),
-            hashlib.sha256
+            registry.registered_controller_roots_salt, root.encode(), hashlib.sha256
         ).hexdigest()
 
         registry.registered_controller_roots[hashed_root] = root
@@ -311,14 +313,19 @@ def simple_filesystem_builder(registry: "Registry", module_name: str) -> Callabl
         if sort_by not in sorting_methods:
             raise ValueError("Invalid sorting method")
 
-
         instance: "BaseInstance" = getattr(request, "instance")
 
         file = request.args.get("file")
 
         sort_fn, reverse_sort = sorting_methods[sort_by]
         if file is None:
-            return render_folder(root=root, instance=instance, hashed_root=hashed_root, sort_function=sort_fn, reverse_sorting=reverse_sort)
+            return render_folder(
+                root=root,
+                instance=instance,
+                hashed_root=hashed_root,
+                sort_function=sort_fn,
+                reverse_sorting=reverse_sort,
+            )
         else:
             return render_file(root=root, instance=instance, hashed_root=hashed_root)
 
