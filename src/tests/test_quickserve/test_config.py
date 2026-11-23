@@ -67,14 +67,14 @@ class TestConfig(unittest.TestCase):
         Tests loading the config, makes sure it keeps values from the loaded config.
         """
 
-        Config(workspace=self.workspace)
+        cfg = Config(workspace=self.workspace)
         self.assertTrue(self.workspace.get_path("config.toml").exists())
 
         with open(self.workspace.get_path("config.toml"), "r") as f:
             raw = f.read()
 
         raw = raw.replace(
-            "secret-key-change-in-production", "changed-secret-key-not-for-prod"
+            cfg.web.secret_key, "changed-secret-key-not-for-prod"
         )
         with open(self.workspace.get_path("config.toml"), "w") as f:
             f.write(raw)
@@ -98,13 +98,13 @@ class TestConfig(unittest.TestCase):
         Tests that an error is thrown if the config has an invalid type.
         """
 
-        Config(workspace=self.workspace)
+        cfg = Config(workspace=self.workspace)
         self.assertTrue(self.workspace.get_path("config.toml").exists())
 
         with open(self.workspace.get_path("config.toml"), "r") as f:
             raw = f.read()
 
-        raw = raw.replace('"secret-key-change-in-production"', "5")
+        raw = raw.replace(f'"{cfg.web.secret_key}"', "5")
         with open(self.workspace.get_path("config.toml"), "w") as f:
             f.write(raw)
 
