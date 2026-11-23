@@ -20,7 +20,7 @@ logger = logging.getLogger("QuickServerFS.Resolver")
 PathType = str | Path | os.PathLike[str]
 
 ROOT_PATH_TABLE: dict[str, Path] = {
-    "Windows": Path(os.path.expandvars("%PROGRAMDATA%")),
+    "Windows": Path(os.path.expandvars("%PROGRAMDATA%")) / "quickserve",
     "Darwin": Path("/opt/quickserve"),
     "Linux": Path("/opt/quickserve"),
 }
