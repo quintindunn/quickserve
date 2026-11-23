@@ -769,7 +769,8 @@
                             },
                             body: JSON.stringify({
                                 cwd: {{ context.root_directory | tojson }},
-                                filename: input.value
+                                filename: input.value,
+                                hashed_root: {{ context.hashed_root | tojson }}
                             })
                         });
 
@@ -831,7 +832,8 @@
                             },
                             body: JSON.stringify({
                                 cwd: {{ context.root_directory | tojson }},
-                                foldername: input.value
+                                foldername: input.value,
+                                hashed_root: {{ context.hashed_root | tojson }}
                             })
                         });
 
@@ -875,7 +877,7 @@
 
             function fs_edit(btn) {
                 const filepath = fs_btn_get_filepath(btn);
-                window.location = `?file=${filepath}`;
+                window.location = `?file=${filepath}&edit=`;
             }
 
             async function fs_delete(btn) {
@@ -894,7 +896,8 @@
                             "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
-                            filepath
+                            filepath,
+                            hashed_root: {{ context.hashed_root | tojson }}
                         })
                     });
 
@@ -949,7 +952,8 @@
                             body: JSON.stringify({
                                 cwd,
                                 src: filename,
-                                dst: new_name
+                                dst: new_name,
+                                hashed_root: {{ context.hashed_root | tojson }},
                             })
                         });
 
@@ -1026,7 +1030,8 @@
                             "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
-                            filepath
+                            filepath,
+                            hashed_root: {{ context.hashed_root | tojson }}
                         })
                     });
 
@@ -1088,6 +1093,7 @@
 
                 formData.append("file", file);
                 formData.append("root", {{ context.root_directory | tojson }});
+                formData.append("hashed_root", {{ context.hashed_root | tojson }})
 
                 try {
                     const response = await fetch(

@@ -114,7 +114,8 @@
                     },
                     body: JSON.stringify({
                         filepath: filepath,
-                        content: content
+                        content: content,
+                        hashed_root: {{ context.hashed_root | tojson }}
                     })
                 })
                 .then(response => {
@@ -144,6 +145,7 @@
                     },
                     body: JSON.stringify({
                         filepath: filepath,
+                        hashed_root: {{ context.hashed_root | tojson }},
                     })
                 })
                 .then(response => {
