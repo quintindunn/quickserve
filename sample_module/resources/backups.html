@@ -6,6 +6,6 @@
             <label><input type="hidden" id="instance-uuid" name="instance-uuid" value="{{ context.instance_uuid }}"></label>
         </form>
     </div>
-    <div>{{ simple_filesystem(root=context.param_backup_dir) }}</div>
+    <div>{{ simple_filesystem(root=context.param_backup_dir, sort_by="date_created_descending") }}</div>
 
 {% endblock %}
