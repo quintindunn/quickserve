@@ -12,6 +12,7 @@ import subprocess
 import sys
 import uuid
 import logging
+import zipfile
 
 from pathlib import Path
 
@@ -62,7 +63,10 @@ class RuntimeManager:
         if not (root / "bin").exists():
             return False
         try:
-            next((root / "bin").glob("java"))
+            if platform.system() == "Windows":
+                next((root / "bin").glob("java.exe"))
+            else:
+                next((root / "bin").glob("java"))
         except StopIteration:
             return False
 
@@ -157,6 +161,8 @@ class RuntimeManager:
         if operating_system == "mac":
             binary_link: str = request.json()[0]["binaries"][0]["installer"]["link"]
         elif operating_system == "linux":
+            binary_link: str = request.json()[0]["binaries"][0]["package"]["link"]
+        elif operating_system == "windows":
             binary_link: str = request.json()[0]["binaries"][0]["package"]["link"]
         else:
             raise NotImplementedError(f"Support for {operating_system} not implemented")
@@ -321,8 +327,6 @@ class RuntimeManager:
         self, tmp_location: Path, major_version: int, image_type: str
     ) -> None:
         """
-        NOT IMPLEMENTED
-
         Installs the JRE for windows to <QUICKSERVE_ROOT>/runtimes/jre/x-x/
         :param tmp_location: The location of the .pkg file from Adoptium
         :param major_version: The major version of the JRE
@@ -330,7 +334,27 @@ class RuntimeManager:
         :return: None
         """
 
-        raise NotImplementedError("JRE Installer for windows not yet supported")
+        unpacked_location = self.workspace.get_path(f"tmp/{uuid.uuid4()}")
+        with zipfile.ZipFile(tmp_location, "r") as zip_file:
+            zip_file.extractall(unpacked_location)
+
+        binary_folder = unpacked_location / os.listdir(unpacked_location)[0]
+
+        jre_root = self._get_jre_root(
+            major_version=major_version, image_type=image_type
+        )
+        if jre_root.exists():
+            logger.info("Found pre-existing installation, uninstalling.")
+            shutil.rmtree(jre_root)
+            os.rmdir(jre_root)
+
+        logger.info(f"Copying environment")
+        shutil.copytree(binary_folder, jre_root)
+
+        logger.info("Cleaning up.")
+        shutil.rmtree(binary_folder)
+        shutil.rmtree(unpacked_location)
+        os.remove(tmp_location)
 
     def get_java_executable(
         self, major_version: int, image_type: str, install_missing: bool = True
@@ -358,9 +382,7 @@ class RuntimeManager:
         if operating_system == "Darwin":
             return root / "bin" / "java"
         elif operating_system == "Windows":
-            raise NotImplementedError(
-                f"Getting executable for {operating_system} is not supported yet."
-            )
+            return root / "bin" / "java.exe"
         elif operating_system == "Linux":
             return root / "bin" / "java"
         else:
