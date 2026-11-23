@@ -118,6 +118,9 @@ class SimpleBackup:
 
         self._options = options
 
+    def backup_dir(self):
+        return self._options.backup_dir
+
     def backup_instance(self, instance: "BaseInstance", ignore_is_alive=True) -> None:
         """
         Performs a backup on an instance.
@@ -184,6 +187,13 @@ class SimpleBackup:
 
         if self._post_backup_fn:
             self._post_backup_fn(instance, final_zip_location)
+
+    def single_submit_instance(
+        self, instance: "BaseInstance", ignore_is_alive: bool = True
+    ):
+        if instance.uuid not in self.backup_dir_sizes:
+            self.load_saved_backups(instance=instance)
+        self.backup_instance(instance=instance, ignore_is_alive=ignore_is_alive)
 
     def remove_old_backups(self, instance: "BaseInstance"):
         """
@@ -309,8 +319,10 @@ class SimpleBackup:
             return
 
         self.instances[instance.uuid] = instance
+        self.load_saved_backups(instance=instance)
         self._initialize_recurring_job(instance=instance)
 
+    def load_saved_backups(self, instance: "BaseInstance"):
         self.backup_dir_sizes[instance.uuid] = 0
 
         instance_backup_dir = instance.working_directory() / self._options.backup_dir

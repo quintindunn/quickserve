@@ -1,4 +1,6 @@
 import datetime
+import hashlib
+import hmac
 import os
 from pathlib import Path
 from typing import Callable
@@ -9,6 +11,11 @@ from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.Web.module_common.resources import get_resource
 from flask import current_app, request
 from QuickServe.Common.file_signatures import SIGNATURES
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from QuickServe.Web import Registry
 
 max_signature_length = max([len(s) // 2 for s in SIGNATURES])
 max_file_size = 102400
@@ -106,7 +113,65 @@ def _redirect(url: str) -> Markup:
     """)
 
 
-def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
+def sort_name(file_path: Path):
+    return file_path.name.lower()
+
+
+def sort_size(file_path: Path):
+    return file_path.stat().st_size
+
+
+def sort_type(file_path: Path):
+    return file_path.is_dir()
+
+
+def sort_extension(file_path: Path):
+    return file_path.suffix.lower()
+
+
+def sort_date_created(file_path: Path):
+    return file_path.stat().st_ctime
+
+
+def sort_date_modified(file_path: Path):
+    return file_path.stat().st_mtime
+
+
+def sort_date_accessed(file_path: Path):
+    return file_path.stat().st_atime
+
+
+def sort_directories_first(file_path: Path):
+    return not file_path.is_dir()
+
+
+def sort_files_first(file_path: Path):
+    return file_path.is_dir()
+
+
+sorting_methods = {
+    "name_ascending": (sort_name, False),
+    "name_descending": (sort_name, True),
+    "size_ascending": (sort_size, False),
+    "size_descending": (sort_size, True),
+    "type_ascending": (sort_type, False),
+    "type_descending": (sort_type, True),
+    "extension_ascending": (sort_extension, False),
+    "extension_descending": (sort_extension, True),
+    "date_created_ascending": (sort_date_created, False),
+    "date_created_descending": (sort_date_created, True),
+    "date_modified_ascending": (sort_date_modified, False),
+    "date_modified_descending": (sort_date_modified, True),
+    "date_accessed_ascending": (sort_date_accessed, False),
+    "date_accessed_descending": (sort_date_accessed, True),
+    "directories_first": (sort_directories_first, False),
+    "files_first": (sort_files_first, False),
+}
+
+
+def simple_filesystem_builder(
+    registry: "Registry", module_name: str
+) -> Callable[[], str]:
     resource_folder: str = str(
         get_resource("simple_filesystem_folder_viewer.html", mode="r")
     )
@@ -117,7 +182,13 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
     def format_date(dt: datetime.datetime):
         return dt.strftime("%m/%d/%Y %I:%M:%S%p")
 
-    def render_folder(root: str, instance: "BaseInstance"):
+    def render_folder(
+        root: str,
+        instance: "BaseInstance",
+        hashed_root: str,
+        sort_function: Callable[[Path], bool | int | str],
+        reverse_sorting: bool,
+    ):
         directory = request.args.get("directory") or ""
         working_dir = instance.working_directory() / root.lstrip("/") / directory
 
@@ -130,18 +201,23 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
             listed_files = []
 
             for file in os.listdir(working_dir):
-                if os.path.isfile(working_dir / file):
-                    listed_files.append(file)
+                file_path = working_dir / file
+
+                if os.path.isfile(file_path):
+                    listed_files.append(file_path)
                 else:
-                    listed_folders.append(file)
+                    listed_folders.append(file_path)
 
             listed_folders.extend(listed_files)
+
+            listed_folders.sort(key=sort_function, reverse=reverse_sorting)
         else:
             listed_folders = []
 
         files = []
-        for file in listed_folders:
-            file_path = working_dir / file
+        for file_path in listed_folders:
+            file = file_path.name
+
             files.append(
                 {
                     "filename": file,
@@ -164,14 +240,16 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
         context = {
             "module_name": module_name,
             "files": files,
-            "parent_folder": (Path(directory)).parent,
+            "parent_folder": Path(directory).parent,
             "root_directory": root_dir if root_dir != "./." else "./",
             "instance": instance,
+            "hashed_root": hashed_root,
         }
+
         template = current_app.jinja_env.from_string(resource_folder)
         return Markup(template.render(context=context))
 
-    def render_file(root: str, instance: "BaseInstance"):
+    def render_file(root: str, instance: "BaseInstance", hashed_root: str):
         file = instance.working_directory() / root.lstrip("/") / request.args["file"]
 
         if not is_child(
@@ -191,22 +269,64 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
             "content": file_contents,
             "readOnly": request.args.get("edit") is None,
             "instance": instance,
+            "hashed_root": hashed_root,
             "filepath": request.args["file"],
             "parent": ("./" + str(Path(request.args["file"]).parent)),
         }
         template = current_app.jinja_env.from_string(resource_file)
         return Markup(template.render(context=context))
 
-    def simple_filesystem(root: str = "/"):
+    def simple_filesystem(root: str = "/", sort_by: str = "name_ascending"):
+        """
+        Creates an easy-to-use file system.
+        :param root: The root directory of the filesystem
+        :param sort_by: Sorting method.
+
+        Available sorting methods:
+        - name_ascending
+        - name_descending
+        - size_ascending
+        - size_descending
+        - type_ascending
+        - type_descending
+        - extension_ascending
+        - extension_descending
+        - date_created_ascending
+        - date_created_descending
+        - date_modified_ascending
+        - date_modified_descending
+        - date_accessed_ascending
+        - date_accessed_descending
+        - directories_first
+        - files_first
+        :return:
+        """
+
+        hashed_root = hmac.new(
+            registry.registered_controller_roots_salt, root.encode(), hashlib.sha256
+        ).hexdigest()
+
+        registry.registered_controller_roots[hashed_root] = root
+
         assert hasattr(request, "instance")
+
+        if sort_by not in sorting_methods:
+            raise ValueError("Invalid sorting method")
 
         instance: "BaseInstance" = getattr(request, "instance")
 
         file = request.args.get("file")
 
+        sort_fn, reverse_sort = sorting_methods[sort_by]
         if file is None:
-            return render_folder(root=root, instance=instance)
+            return render_folder(
+                root=root,
+                instance=instance,
+                hashed_root=hashed_root,
+                sort_function=sort_fn,
+                reverse_sorting=reverse_sort,
+            )
         else:
-            return render_file(root=root, instance=instance)
+            return render_file(root=root, instance=instance, hashed_root=hashed_root)
 
     return simple_filesystem
