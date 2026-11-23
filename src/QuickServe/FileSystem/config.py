@@ -49,7 +49,7 @@ class DriverModel(ConfigModel):
 class DatabaseModel(ConfigModel):
     """Configuration model for the database."""
 
-    file_path: str = "/opt/quickserve/database.db"
+    file_path: str = "NIL"
 
 
 class Config:
@@ -292,6 +292,8 @@ class Config:
             )
 
             instance = model()
+            if name == "database":
+                instance.file_path = str(self.workspace.get_path("database.db"))
             data[name] = instance.model_dump(mode="python")
 
         data = self._toml_safe(data)
