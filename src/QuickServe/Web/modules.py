@@ -36,7 +36,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from QuickServe.Application.instances import InstanceManager
-    from QuickServeModuleLibrary.decorators import Page, RegisteredPage
+    from QuickServeModuleLibrary.decorators import Page
+    from QuickServe.Web import Registry
+
 
 modules = Blueprint("modules", __name__, url_prefix="/module/")
 instances = Blueprint("instances", __name__, url_prefix="/instance/")
@@ -261,19 +263,19 @@ def action(module_name: str, method: str) -> ResponseReturnValue:
     return redirect(url, code=code)
 
 
-def _get_working_dir(instance: BaseInstance) -> Path:
-    fs_root = getattr(instance.base_module.module, "FS_ROOT", "")
+def _get_working_dir(instance: BaseInstance, fs_root: str) -> Path:
     return (instance.working_directory() / fs_root).resolve()
 
 
 def _get_path(
     instance: BaseInstance,
     filepath: str,
+    fs_root: str,
     *,
     must_exist: bool = True,
     must_be_file: bool | None = None,
 ) -> Path | None:
-    working_dir = _get_working_dir(instance)
+    working_dir = _get_working_dir(instance, fs_root=fs_root)
     path = (working_dir / filepath.lstrip("/")).resolve()
 
     if not path.is_relative_to(working_dir):
@@ -303,14 +305,18 @@ def instance_save_file(uuid: str):
     data = request.get_json()
     filepath = data.get("filepath")
     content = data.get("content")
+    hashed_root = data.get("hashed_root")
 
     if not filepath:
         return {"error": "Missing filepath"}, 400
     if not content:
         return {"error": "Missing content"}, 400
 
+    registry: "Registry" = current_app.extensions["quickserve.template_registry"]
+    root = registry.registered_controller_roots[hashed_root]
+
     instance = _get_instance(uuid)
-    file = _get_path(instance, str(filepath), must_be_file=True)
+    file = _get_path(instance, str(filepath), must_be_file=True, fs_root=root)
 
     if file is None:
         logger.warning(f"Save file failed: uuid={uuid} filepath={filepath}")
@@ -328,12 +334,16 @@ def instance_save_file(uuid: str):
 def instance_download_file(uuid: str):
     data = request.get_json()
     filepath = data.get("filepath")
+    hashed_root = data.get("hashed_root")
 
     if not filepath:
         return {"error": "Missing filepath"}, 400
 
+    registry: "Registry" = current_app.extensions["quickserve.template_registry"]
+    root = registry.registered_controller_roots[hashed_root]
+
     instance = _get_instance(uuid)
-    file = _get_path(instance, str(filepath), must_be_file=True)
+    file = _get_path(instance, str(filepath), must_be_file=True, fs_root=root)
 
     if file is None:
         logger.warning(f"Download file failed: uuid={uuid} filepath={filepath}")
@@ -348,18 +358,23 @@ def instance_download_file(uuid: str):
 def instance_delete_path(uuid: str):
     data = request.get_json()
     filepath = data.get("filepath")
+    hashed_root = data.get("hashed_root")
+
+    registry: "Registry" = current_app.extensions["quickserve.template_registry"]
+    root = registry.registered_controller_roots[hashed_root]
 
     if not filepath:
         return {"error": "Missing filepath"}, 400
 
     instance = _get_instance(uuid)
-    working_dir = _get_working_dir(instance)
-    file = _get_path(instance, str(filepath))
+    working_dir = _get_working_dir(instance=instance, fs_root=root)
+    file = _get_path(instance, str(filepath), fs_root=root)
 
     if file is None or file == working_dir:
         logger.warning(f"Delete path failed: uuid={uuid} filepath={filepath}")
         return {"error": "Path doesn't exist!"}, 400
 
+    assert file is not None
     if file.is_dir():
         shutil.rmtree(file)
     else:
@@ -376,6 +391,7 @@ def instance_rename_file(uuid: str):
     cwd = data.get("cwd")
     src = data.get("src")
     dst = data.get("dst")
+    hashed_root = data.get("hashed_root")
 
     if not cwd:
         return {"error": "Missing current working directory"}, 400
@@ -383,6 +399,9 @@ def instance_rename_file(uuid: str):
         return {"error": "Missing source file"}, 400
     if not dst:
         return {"error": "Missing destination file"}, 400
+
+    registry: "Registry" = current_app.extensions["quickserve.template_registry"]
+    root = registry.registered_controller_roots[hashed_root]
 
     src = src.lstrip("/")
 
@@ -397,11 +416,13 @@ def instance_rename_file(uuid: str):
         instance,
         f"{cwd.lstrip('/')}/{src}",
         must_be_file=True,
+        fs_root=root,
     )
     dst_file = _get_path(
         instance,
         f"{cwd.lstrip('/')}/{dst}",
         must_exist=False,
+        fs_root=root,
     )
 
     if src_file is None:
@@ -430,6 +451,7 @@ def instance_create_file(uuid: str):
     data = request.get_json()
     cwd = data.get("cwd")
     file_name = data.get("filename")
+    hashed_root = data.get("hashed_root")
 
     if not cwd:
         return {"error": "Missing current working directory"}, 400
@@ -437,12 +459,15 @@ def instance_create_file(uuid: str):
         return {"error": "Missing file name"}, 400
     if "/" in file_name or "\\" in file_name:
         return {"error": "Invalid filename"}, 400
+    registry: "Registry" = current_app.extensions["quickserve.template_registry"]
+    root = registry.registered_controller_roots[hashed_root]
 
     instance = _get_instance(uuid)
     file_path = _get_path(
         instance,
         f"{cwd.lstrip('/')}/{file_name}",
         must_exist=False,
+        fs_root=root,
     )
 
     if file_path is None:
@@ -467,17 +492,22 @@ def instance_create_folder(uuid: str):
     data = request.get_json()
     cwd = data.get("cwd")
     folder_name = data.get("foldername")
+    hashed_root = data.get("hashed_root")
 
     if not cwd:
         return {"error": "Missing current working directory"}, 400
     if not folder_name:
         return {"error": "Missing folder name"}, 400
 
+    registry: "Registry" = current_app.extensions["quickserve.template_registry"]
+    root = registry.registered_controller_roots[hashed_root]
+
     instance = _get_instance(uuid)
     folder_path = _get_path(
         instance,
         f"{cwd.lstrip('/')}/{folder_name}",
         must_exist=False,
+        fs_root=root
     )
 
     if folder_path is None:
@@ -501,16 +531,23 @@ def instance_create_folder(uuid: str):
 def instance_upload_file(uuid: str):
     file = request.files["file"]
     root = request.form.get("root")
+    hashed_root = request.form.get("hashed_root")
+
     if not root:
         return {"error": "Missing root"}, 400
     if not file:
         return {"error": "Missing file"}, 400
+    if not hashed_root:
+        return {"error": "Missing hashed root"}, 400
     instance = _get_instance(uuid)
-
     path = Path(root)
 
+    registry: "Registry" = current_app.extensions["quickserve.template_registry"]
+    root = registry.registered_controller_roots[hashed_root]
+
+    assert file and file.filename
     path = _get_path(
-        instance, str(path / secure_filename(file.filename)), must_exist=False
+        instance, str(path / secure_filename(file.filename)), must_exist=False, fs_root=root
     )
 
     if path is None:

@@ -56,7 +56,6 @@ class Module:
         {"name": "Quintin Dunn", "github": "https://github.com/quintindunn"}
     ]
     DESCRIPTION: str = "Create a Minecraft Java Edition Vanilla Server!"
-    FS_ROOT: str = "server"
     SUPPORTED_OPERATING_SYSTEMS: list[str] = ["Darwin", "Linux"]
 
     module: "BaseModule"

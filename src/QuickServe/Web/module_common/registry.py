@@ -4,8 +4,9 @@ Registration of common module functions
 Author: Quintin Dunn
 Date: 09/27/2026
 """
-
+import os
 import typing
+from pathlib import Path
 from typing import Callable
 
 from QuickServe.Driver.networking.token_manager import WebsocketTokenManager
@@ -43,6 +44,9 @@ class Registry:
         self.config = config
         self.token_manager = token_manager
 
+        self.registered_controller_roots_salt = os.urandom(12)
+        self.registered_controller_roots: dict[str, str] = dict()
+
         self.register(
             "simple_controller",
             lambda module_name, _=None: simple_controller_builder(
@@ -52,7 +56,7 @@ class Registry:
         self.register(
             "simple_filesystem",
             lambda module_name, _=None: simple_filesystem_builder(
-                module_name=module_name
+                self, module_name=module_name
             ),
         )
         self.register("action", action_builder)

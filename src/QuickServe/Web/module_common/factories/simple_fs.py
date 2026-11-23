@@ -1,4 +1,6 @@
 import datetime
+import hashlib
+import hmac
 import os
 from pathlib import Path
 from typing import Callable
@@ -9,6 +11,10 @@ from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServe.Web.module_common.resources import get_resource
 from flask import current_app, request
 from QuickServe.Common.file_signatures import SIGNATURES
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from QuickServe.Web import Registry
 
 max_signature_length = max([len(s) // 2 for s in SIGNATURES])
 max_file_size = 102400
@@ -161,7 +167,7 @@ sorting_methods = {
 }
 
 
-def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
+def simple_filesystem_builder(registry: "Registry", module_name: str) -> Callable[[], str]:
     resource_folder: str = str(
         get_resource("simple_filesystem_folder_viewer.html", mode="r")
     )
@@ -175,6 +181,7 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
     def render_folder(
             root: str,
             instance: "BaseInstance",
+            hashed_root: str,
             sort_function: Callable[[Path], bool | int | str],
             reverse_sorting: bool
     ):
@@ -232,12 +239,13 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
             "parent_folder": Path(directory).parent,
             "root_directory": root_dir if root_dir != "./." else "./",
             "instance": instance,
+            "hashed_root": hashed_root
         }
 
         template = current_app.jinja_env.from_string(resource_folder)
         return Markup(template.render(context=context))
 
-    def render_file(root: str, instance: "BaseInstance"):
+    def render_file(root: str, instance: "BaseInstance", hashed_root: str):
         file = instance.working_directory() / root.lstrip("/") / request.args["file"]
 
         if not is_child(
@@ -257,6 +265,7 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
             "content": file_contents,
             "readOnly": request.args.get("edit") is None,
             "instance": instance,
+            "hashed_root": hashed_root,
             "filepath": request.args["file"],
             "parent": ("./" + str(Path(request.args["file"]).parent)),
         }
@@ -289,6 +298,14 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
         :return:
         """
 
+        hashed_root = hmac.new(
+            registry.registered_controller_roots_salt,
+            root.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        registry.registered_controller_roots[hashed_root] = root
+
         assert hasattr(request, "instance")
 
         if sort_by not in sorting_methods:
@@ -301,8 +318,8 @@ def simple_filesystem_builder(module_name: str) -> Callable[[], str]:
 
         sort_fn, reverse_sort = sorting_methods[sort_by]
         if file is None:
-            return render_folder(root=root, instance=instance, sort_function=sort_fn, reverse_sorting=reverse_sort)
+            return render_folder(root=root, instance=instance, hashed_root=hashed_root, sort_function=sort_fn, reverse_sorting=reverse_sort)
         else:
-            return render_file(root=root, instance=instance)
+            return render_file(root=root, instance=instance, hashed_root=hashed_root)
 
     return simple_filesystem
