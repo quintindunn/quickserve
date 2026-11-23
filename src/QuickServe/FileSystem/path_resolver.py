@@ -20,7 +20,7 @@ logger = logging.getLogger("QuickServerFS.Resolver")
 PathType = str | Path | os.PathLike[str]
 
 ROOT_PATH_TABLE: dict[str, Path] = {
-    "Windows": Path.home() / ".quickserve",
+    "Windows": Path("%programdata%/quickserve"),
     "Darwin": Path("/opt/quickserve"),
     "Linux": Path("/opt/quickserve"),
 }
@@ -36,8 +36,6 @@ def _get_root() -> Path:
     system = platform.system()
     if system not in ("Windows", "Darwin", "Linux"):
         raise NotImplementedError(f"OS {platform.system()} is not supported!")
-    elif system == "Windows":
-        raise NotImplementedError(f"Windows is currently not supported!")
 
     root_dir = ROOT_PATH_TABLE[platform.system()]
     logger.info(f"Root directory: {root_dir}")
