@@ -98,7 +98,9 @@ class Module:
 
     @staticmethod
     def get_ports(instance: "BaseInstance") -> list[int]:
-        server_properties_location = instance.working_directory() / "server" / "server.properties"
+        server_properties_location = (
+            instance.working_directory() / "server" / "server.properties"
+        )
         if not server_properties_location.exists():
             return []
         parser = PropertiesParser(server_properties_location.resolve())

@@ -19,6 +19,7 @@ class Entry:
     def get(self):
         return self.value
 
+
 class PropertiesParser:
     def __init__(self, filepath: Path | str):
         self.filepath: Path = Path(filepath)
@@ -28,7 +29,7 @@ class PropertiesParser:
         self._parse()
 
     def _parse(self):
-        with open(self.filepath, 'r') as f:
+        with open(self.filepath, "r") as f:
             for line in f:
                 line = line.rstrip("\r\n")
 
@@ -55,10 +56,10 @@ class PropertiesParser:
                 line += f"{' ' if entry.key else ''}#{entry.comment}"
             output.append(line)
 
-        return '\n'.join(output)
+        return "\n".join(output)
 
     def update(self):
-        with open(self.filepath, 'w') as f:
+        with open(self.filepath, "w") as f:
             f.write(self.reconstruct())
 
     def __getitem__(self, item: str):

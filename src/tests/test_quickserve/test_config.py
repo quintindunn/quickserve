@@ -73,9 +73,7 @@ class TestConfig(unittest.TestCase):
         with open(self.workspace.get_path("config.toml"), "r") as f:
             raw = f.read()
 
-        raw = raw.replace(
-            cfg.web.secret_key, "changed-secret-key-not-for-prod"
-        )
+        raw = raw.replace(cfg.web.secret_key, "changed-secret-key-not-for-prod")
         with open(self.workspace.get_path("config.toml"), "w") as f:
             f.write(raw)
 
