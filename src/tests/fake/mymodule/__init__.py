@@ -48,6 +48,9 @@ class Module:
         with open(asset, "r") as f:
             return f.read()
 
+    def get_ports(self) -> list[int]:
+        return []
+
     def optional_page(self):
         asset = self.module.get_resource_path("optional_page.html")
         with open(asset, "r") as f:

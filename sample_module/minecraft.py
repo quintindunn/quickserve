@@ -37,6 +37,7 @@ from .forms import (
     ServerConfiguration,
     BackupForm,
 )
+from .properties_parser import PropertiesParser
 
 if TYPE_CHECKING:
     from QuickServe.FileSystem.modules import BaseModule
@@ -94,6 +95,23 @@ class Module:
             max_stored_backups=250,
             max_total_backup_size=20 * 1024 * 1024 * 1024,
         )
+
+    @staticmethod
+    def get_ports(instance: "BaseInstance") -> list[int]:
+        server_properties_location = instance.working_directory() / "server" / "server.properties"
+        if not server_properties_location.exists():
+            return []
+        parser = PropertiesParser(server_properties_location.resolve())
+
+        try:
+            value = parser["server-port"].value
+            if value == "":
+                return []
+            elif not value.isnumeric():
+                return []
+            return [int(value)]
+        except KeyError:
+            return []
 
     def pre_backup(self, instance: "BaseInstance"):
         proc = self.simple_controller_process_manager.get_process(instance)

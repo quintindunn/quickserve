@@ -7,6 +7,7 @@ Date: 09/14/2026
 
 from __future__ import annotations
 
+import logging
 from enum import STRICT
 from typing import TYPE_CHECKING, Any, Generator
 from uuid import UUID, uuid4
@@ -17,6 +18,9 @@ from QuickServe.Driver.instance.base_instance import BaseInstance
 if TYPE_CHECKING:
     from QuickServe.FileSystem.path_resolver import Workspace
     from QuickServe.FileSystem.plugins import ModuleCatalog
+
+
+logger = logging.getLogger(__name__)
 
 
 class InstanceManager:
@@ -44,9 +48,19 @@ class InstanceManager:
         self._instances: dict[str, BaseInstance] = {}
 
         for instance in self.load_all():
-            print("Checking")
             if hasattr(instance.base_module.module, "QS_INTERNAL_ON_QUICKSERVE_LOAD"):
                 instance.base_module.module.QS_INTERNAL_ON_QUICKSERVE_LOAD(instance)
+
+                ports = instance.base_module.module.get_ports(instance=instance)
+                if not isinstance(ports, list):
+                    logger.error("Module %s's get_port method did not return a list! %s %s", instance.module_name, type(ports), str(ports))
+                    raise ValueError("Module.get_port must return a list of integer ports.")
+
+                for port in ports:
+                    if not isinstance(port, int):
+                        logger.error("Module %s's get_port method did not return a list of integers %s %s", instance.module_name,
+                                     type(port), port)
+                        raise ValueError("Module.get_port must return a list of integer ports.")
 
     def new_instance(self, module_name: str, instance_name: str) -> BaseInstance:
         """
