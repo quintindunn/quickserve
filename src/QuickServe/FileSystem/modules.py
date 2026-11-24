@@ -89,6 +89,7 @@ class BaseModule:
             "VERSION": "Missing module version",
             "QUICKSERVE_VERSION": "Missing QuickServe version",
             "SUPPORTED_OPERATING_SYSTEMS": "Missing supported operating systems list",
+            "get_port": "Missing get port method."
         }
         self.raise_if_attr_not_exist(
             "Module",

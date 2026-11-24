@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from uuid import UUID
 from typing import Any, Protocol, TypeAlias, TYPE_CHECKING
 
+from QuickServe.Driver.instance.base_instance import BaseInstance
 from QuickServeModuleLibrary.decorators import RegisteredPage, RegisteredAction
 
 if TYPE_CHECKING:
@@ -39,6 +40,8 @@ class Module(Protocol):
     def about(self, *args: Any, **kwargs: Any) -> PageResult: ...
 
     def create(self, *args: Any, **kwargs: Any) -> PageResult: ...
+
+    def get_port(self, instance: "BaseInstance") -> list[int]: ...
 
 
 class WebSettings(Protocol):
