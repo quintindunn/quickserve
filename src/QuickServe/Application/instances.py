@@ -51,7 +51,7 @@ class InstanceManager:
             if hasattr(instance.base_module.module, "QS_INTERNAL_ON_QUICKSERVE_LOAD"):
                 instance.base_module.module.QS_INTERNAL_ON_QUICKSERVE_LOAD(instance)
 
-                ports = instance.base_module.module.get_port(instance=instance)
+                ports = instance.base_module.module.get_ports(instance=instance)
                 if not isinstance(ports, list):
                     logger.error("Module %s's get_port method did not return a list! %s %s", instance.module_name, type(ports), str(ports))
                     raise ValueError("Module.get_port must return a list of integer ports.")
